@@ -52,5 +52,8 @@ responses using inline mock data or `jest.mock`. Do not block screen implementat
 waiting for real endpoints. The real API call shape must match the mock so it can be
 swapped in later with no screen-level changes.
 
+## PR Description Format
+The PR body **must** include `Closes #<issue_number>` (e.g. `Closes #42`) so the issue is automatically closed when the PR is merged.
+
 ## Commit Message Format
 A single plain sentence describing what was done. No `feat:` or conventional commit prefixes.
