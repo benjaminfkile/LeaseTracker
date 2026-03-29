@@ -20,6 +20,40 @@ and Google Play Store.
 
 ---
 
+## Sequencing Guide
+
+> ⚠️ **Before starting any mobile work:** Complete `lease-tracker-api` **Phases 1–4** first (infrastructure, migrations, validation, auth, user endpoints). The login screen and token hydration require a live Amazon Cognito User Pool and a working `/api/users/me` endpoint.
+
+Mobile phases are designed to be worked **in order**. Most screens can be built against mocked API responses and swapped for real calls once the corresponding API phase is deployed to `dev`.
+
+| Phase | Name | API Dependency | Can Mock Until? |
+|-------|------|---------------|------------------|
+| **1** | Dependencies & Project Setup | None | — |
+| **2** | Project Structure & Design System | None | — |
+| **3** | Auth Flow (Cognito) | Cognito pool live + API Phase 4 | ❌ Needs real Cognito |
+| **4** | Navigation Structure | None | Yes |
+| **5** | API Layer | API Phase 4 types | Yes — mock all calls |
+| **6** | Dashboard Screen | API Phase 5 (leases + summary) | Yes |
+| **7** | Lease Management Screens | API Phase 5 | Yes |
+| **8** | Odometer Reading Screens | API Phase 6 (readings) | Yes |
+| **9** | Pace & Analytics Screens | API Phase 12 (analytics) | Yes |
+| **10** | Saved Trips Screens | API Phase 7 (trips) | Yes |
+| **11** | Push Notifications | API Phase 11 (notifications) | Partial |
+| **12** | Subscriptions (IAP) | API Phase 10 (subscriptions) | Sandbox only |
+| **13** | Ads (Free Tier) | Mobile Phase 12 complete | Test ad IDs only |
+| **14** | Standout & Advanced Features | Varies — see each task | Partial |
+| **15** | Settings Screen | Mobile Phases 3, 11, 12 | Yes |
+| **16** | App Store Preparation | All phases complete | ❌ Cannot skip |
+| **17** | Testing | Run alongside every phase | — |
+
+### Parallel development strategy
+- Build **mobile Phases 1–5** while the API finishes Phases 1–4. No real endpoints needed yet.
+- Build **mobile Phases 6–8** while the API is working through Phases 5–7. Use mocked responses.
+- Replace mocks with real API calls as each API phase is merged to `dev`.
+- **Phase 17 (testing)** is not a final step — write tests as each phase is completed.
+
+---
+
 ## Phase 1 — Dependencies & Project Setup
 
 - [ ] **1.1 Install React Navigation**
