@@ -7,6 +7,7 @@ import {
   forgotPassword,
   confirmForgotPassword,
   refreshSession,
+  resendConfirmationCode,
   getStoredTokens,
   storeTokens,
   clearTokens,
@@ -57,6 +58,7 @@ export interface AuthActions {
   logout: () => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   confirmEmail: (email: string, code: string) => Promise<void>;
+  resendCode: (email: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   confirmReset: (email: string, code: string, newPassword: string) => Promise<void>;
   refreshTokens: () => Promise<void>;
@@ -111,6 +113,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await confirmSignUp(email, code);
+      set({ isLoading: false });
+    } catch (err) {
+      set({ isLoading: false, error: err instanceof Error ? err.message : String(err) });
+      throw err;
+    }
+  },
+
+  resendCode: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      await resendConfirmationCode(email);
       set({ isLoading: false });
     } catch (err) {
       set({ isLoading: false, error: err instanceof Error ? err.message : String(err) });
