@@ -30,13 +30,20 @@ jobs:
             const queueData = JSON.parse(fs.readFileSync('.github/issue-queue.json', 'utf8'));
             const queue = queueData.queue;
 
-            // Fetch all open issues in the repo (up to 300)
-            const { data: openIssues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 300,
-            });
+            // Fetch all open issues in the repo (paginated, sorted oldest-first)
+            let openIssues = [];
+            for (let page = 1; ; page++) {
+              const { data } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+                page,
+                direction: 'asc',
+              });
+              openIssues = openIssues.concat(data);
+              if (data.length < 100) break;
+            }
 
             const openNumbers = new Set(openIssues.map(i => i.number));
             const issueMap = Object.fromEntries(openIssues.map(i => [i.number, i]));
