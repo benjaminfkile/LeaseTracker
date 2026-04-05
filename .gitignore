@@ -78,3 +78,8 @@ yarn-error.log
 # https://console.firebase.google.com
 android/app/google-services.json
 ios/LeaseTracker/GoogleService-Info.plist
+
+# Environment variables — copy from .env.example and fill in real values
+.env
+.env.development
+.env.production
