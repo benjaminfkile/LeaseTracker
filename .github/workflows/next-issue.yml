@@ -82,13 +82,16 @@ jobs:
               console.log(`Assigned manual task #${next.number} to benjaminfkile`);
             } else {
               // Code task — assign to Copilot bot via GraphQL (REST API silently fails for bots)
-              const COPILOT_BOT_ID = 'BOT_kgDOC9w8XQ';
+              // Resolve the bot's node ID dynamically so we're never dependent on a hardcoded value
+              const { user } = await github.graphql(`
+                query { user(login: "Copilot") { id } }
+              `);
               await github.graphql(`
                 mutation($issueId: ID!, $assigneeIds: [ID!]!) {
                   addAssigneesToAssignable(input: { assignableId: $issueId, assigneeIds: $assigneeIds }) {
                     assignable { ... on Issue { number } }
                   }
                 }
-              `, { issueId: next.node_id, assigneeIds: [COPILOT_BOT_ID] });
+              `, { issueId: next.node_id, assigneeIds: [user.id] });
               console.log(`Assigned #${next.number} to Copilot`);
             }
