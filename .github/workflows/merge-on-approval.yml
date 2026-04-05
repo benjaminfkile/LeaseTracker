@@ -19,7 +19,7 @@ jobs:
       - name: Promote draft if needed, then merge
         id: merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           PR=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
