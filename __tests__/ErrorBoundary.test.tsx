@@ -173,6 +173,54 @@ describe('ErrorBoundary', () => {
       });
       expect(container).toBeDefined();
     });
+
+    it('clears the error and renders children successfully after reset when children no longer throw', async () => {
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+
+      // Use a wrapper component whose prop can be changed after mount
+      function ToggleError({
+        shouldThrow,
+      }: {
+        shouldThrow: boolean;
+      }): React.ReactElement {
+        if (shouldThrow) {
+          throw new Error('Recoverable error');
+        }
+        return (
+          <ReactNative.Text testID="recovered-text">
+            {'Recovered'}
+          </ReactNative.Text>
+        );
+      }
+
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(
+          <ErrorBoundary>
+            <ToggleError shouldThrow={true} />
+          </ErrorBoundary>,
+        );
+      });
+
+      // Confirm error fallback is shown
+      const resetButton = renderer!.root.findByProps({
+        testID: 'error-boundary-reset',
+      });
+
+      // Update the tree so ToggleError no longer throws, then press reset
+      await ReactTestRenderer.act(() => {
+        renderer!.update(
+          <ErrorBoundary>
+            <ToggleError shouldThrow={false} />
+          </ErrorBoundary>,
+        );
+        resetButton.props.onPress();
+      });
+
+      // After reset with no-throw children, the recovered text should render
+      const recovered = renderer!.root.findByProps({ testID: 'recovered-text' });
+      expect(recovered).toBeDefined();
+      expect(recovered.props.children).toBe('Recovered');
+    });
   });
 
   describe('custom fallback', () => {
