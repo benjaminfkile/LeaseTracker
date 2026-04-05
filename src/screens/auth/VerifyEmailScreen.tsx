@@ -97,21 +97,16 @@ export function VerifyEmailScreen({ navigation, route }: Props): React.ReactElem
 
   const handleKeyPress = useCallback(
     (key: string, index: number) => {
-      if (key === 'Backspace' && index > 0) {
+      if (key === 'Backspace' && !digits[index] && index > 0) {
         setDigits(prev => {
-          if (!prev[index]) {
-            const newDigits = [...prev];
-            newDigits[index - 1] = '';
-            setTimeout(() => {
-              inputRefs.current[index - 1]?.focus();
-            }, 0);
-            return newDigits;
-          }
-          return prev;
+          const newDigits = [...prev];
+          newDigits[index - 1] = '';
+          return newDigits;
         });
+        inputRefs.current[index - 1]?.focus();
       }
     },
-    [],
+    [digits],
   );
 
   const handleVerify = useCallback(async () => {
