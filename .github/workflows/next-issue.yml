@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - dev
+      - main
 
 jobs:
   next-issue:
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout (to read issue-queue.json)
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: main
 
       - name: Advance to next open issue
         uses: actions/github-script@v7
