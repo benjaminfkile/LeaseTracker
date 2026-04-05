@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@react-native-async-storage/async-storage": "^3.0.2",
     "@react-native/new-app-screen": "0.84.1",
     "@react-navigation/bottom-tabs": "^7.15.9",
@@ -19,9 +20,11 @@
     "amazon-cognito-identity-js": "^6.3.16",
     "axios": "^1.14.0",
     "react": "19.2.3",
+    "react-hook-form": "^7.72.1",
     "react-native": "0.84.1",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.24.0",
+    "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
