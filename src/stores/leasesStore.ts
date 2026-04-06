@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import type { Lease } from '../types/api';
 
-export type { Lease } from '../types/api';
-
 type LeasesState = {
   leases: Lease[];
   overPaceCount: number;
