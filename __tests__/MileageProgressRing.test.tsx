@@ -49,59 +49,59 @@ describe('MileageProgressRing', () => {
     expect(ring).toBeDefined();
   });
 
-  it('renders the percentage text', async () => {
+  it('renders miles remaining text', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <MileageProgressRing totalMiles={36000} usedMiles={9000} />,
       );
     });
-    const percentEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-percent' });
-    expect(percentEl.props.children).toBe('25%');
+    const remainingEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-remaining' });
+    expect(remainingEl.props.children).toBe('27,000');
   });
 
-  it('renders 0% when no miles used', async () => {
+  it('renders 36,000 remaining when no miles used', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <MileageProgressRing totalMiles={36000} usedMiles={0} />,
       );
     });
-    const percentEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-percent' });
-    expect(percentEl.props.children).toBe('0%');
+    const remainingEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-remaining' });
+    expect(remainingEl.props.children).toBe('36,000');
   });
 
-  it('renders 100% and clamps when used exceeds total', async () => {
+  it('renders 0 remaining and clamps when used exceeds total', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <MileageProgressRing totalMiles={36000} usedMiles={40000} />,
       );
     });
-    const percentEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-percent' });
-    expect(percentEl.props.children).toBe('100%');
+    const remainingEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-remaining' });
+    expect(remainingEl.props.children).toBe('0');
   });
 
-  it('renders 0% when totalMiles is 0', async () => {
+  it('renders 0 remaining when totalMiles is 0', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <MileageProgressRing totalMiles={0} usedMiles={0} />,
       );
     });
-    const percentEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-percent' });
-    expect(percentEl.props.children).toBe('0%');
+    const remainingEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-remaining' });
+    expect(remainingEl.props.children).toBe('0');
   });
 
-  it('renders the miles used / total text', async () => {
+  it('renders "mi left" label', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <MileageProgressRing totalMiles={36000} usedMiles={12000} />,
       );
     });
-    const usedEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-used' });
-    expect(usedEl.props.children).toBe('12,000 / 36,000 mi');
+    const labelEl = renderer!.root.findByProps({ testID: 'mileage-progress-ring-label' });
+    expect(labelEl.props.children).toBe('mi left');
   });
 
   it('accepts custom size prop', async () => {
@@ -110,5 +110,16 @@ describe('MileageProgressRing', () => {
         <MileageProgressRing totalMiles={36000} usedMiles={12000} size={160} />,
       );
     });
+  });
+
+  it('renders track and fill arcs', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <MileageProgressRing totalMiles={36000} usedMiles={12000} />,
+      );
+    });
+    expect(renderer!.root.findByProps({ testID: 'mileage-progress-ring-track' })).toBeDefined();
+    expect(renderer!.root.findByProps({ testID: 'mileage-progress-ring-fill' })).toBeDefined();
   });
 });
