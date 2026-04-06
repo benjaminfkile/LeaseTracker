@@ -17,6 +17,7 @@ export type ButtonProps = {
   isLoading?: boolean;
   disabled?: boolean;
   leftIcon?: React.ReactNode;
+  testID?: string;
 };
 
 export function Button({
@@ -26,6 +27,7 @@ export function Button({
   isLoading = false,
   disabled = false,
   leftIcon,
+  testID,
 }: ButtonProps): React.ReactElement {
   const theme = useTheme();
 
@@ -58,6 +60,7 @@ export function Button({
       activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: isLoading }}
+      testID={testID}
     >
       {isLoading ? (
         <ActivityIndicator
