@@ -11,6 +11,19 @@ jest.mock('../src/screens/settings/AlertSettingsScreen', () => {
   };
 });
 
+jest.mock('../src/screens/settings/SubscriptionScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    SubscriptionScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'subscription-screen' },
+        MockReact.createElement(Text, { testID: 'subscription-title' }, 'Go Premium'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
