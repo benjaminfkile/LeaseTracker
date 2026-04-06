@@ -24,9 +24,17 @@ export type AppTabParamList = {
   Settings: undefined;
 };
 
+export type LeaseStackParamList = {
+  LeaseList: undefined;
+  AddLease: undefined;
+  EditLease: { leaseId: string };
+  TurnInChecklist: { leaseId: string };
+};
+
 export type AppStackParamList = Record<string, undefined>;
 
 export type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
 export type AppNavigationProp = NativeStackNavigationProp<AppStackParamList>;
 export type AppTabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 export type HomeStackNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+export type LeaseStackNavigationProp = NativeStackNavigationProp<LeaseStackParamList>;
