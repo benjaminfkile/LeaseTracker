@@ -42,14 +42,13 @@ export function MileageProgressRing({
   });
 
   const progressColor =
-    targetProgress > 0.9
+    targetProgress > 0.95
       ? theme.colors.error
-      : targetProgress > 0.75
+      : targetProgress >= 0.8
         ? theme.colors.warning
-        : theme.colors.primary;
+        : theme.colors.success;
 
-  const percentUsed =
-    totalMiles > 0 ? Math.round((clampedUsed / totalMiles) * 100) : 0;
+  const milesRemaining = Math.max(0, totalMiles - clampedUsed);
 
   return (
     <View style={styles.wrapper} testID="mileage-progress-ring">
@@ -84,16 +83,16 @@ export function MileageProgressRing({
       </Svg>
       <View style={[styles.center, { width: size, height: size }]} pointerEvents="none">
         <Text
-          style={[styles.percentText, { color: theme.colors.textPrimary }]}
-          testID="mileage-progress-ring-percent"
+          style={[styles.remainingText, { color: theme.colors.textPrimary }]}
+          testID="mileage-progress-ring-remaining"
         >
-          {`${percentUsed}%`}
+          {milesRemaining.toLocaleString()}
         </Text>
         <Text
           style={[styles.subText, { color: theme.colors.textSecondary }]}
-          testID="mileage-progress-ring-used"
+          testID="mileage-progress-ring-label"
         >
-          {`${clampedUsed.toLocaleString()} / ${totalMiles.toLocaleString()} mi`}
+          mi left
         </Text>
       </View>
     </View>
@@ -110,7 +109,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
   },
-  percentText: {
+  remainingText: {
     fontSize: 32,
     fontWeight: '700',
   },
