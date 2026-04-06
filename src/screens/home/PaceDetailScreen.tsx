@@ -230,6 +230,7 @@ export function PaceDetailScreen(): React.ReactElement {
           <MonthlyMileageChart
             entries={entries}
             mode={mode}
+            monthlyAllowance={lease?.monthlyMiles}
             testID="monthly-mileage-chart"
           />
         </View>

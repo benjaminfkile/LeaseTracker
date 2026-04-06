@@ -87,6 +87,55 @@ describe('MonthlyMileageChart', () => {
     const chart = renderer!.root.findByProps({ testID: 'monthly-mileage-chart' });
     expect(chart).toBeDefined();
   });
+
+  it('does not render legend when monthlyAllowance is not provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <MonthlyMileageChart entries={entries} mode="full-lease" />,
+      );
+    });
+    const legends = renderer!.root.findAllByProps({ testID: 'monthly-chart-legend' });
+    expect(legends).toHaveLength(0);
+  });
+
+  it('renders legend with Monthly Allowance item when monthlyAllowance is provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <MonthlyMileageChart entries={entries} mode="full-lease" monthlyAllowance={1000} />,
+      );
+    });
+    const legend = renderer!.root.findByProps({ testID: 'monthly-chart-legend' });
+    expect(legend).toBeDefined();
+    const allowanceLegend = renderer!.root.findByProps({ testID: 'monthly-allowance-legend-item' });
+    expect(allowanceLegend).toBeDefined();
+  });
+
+  it('passes showReferenceLine1 and referenceLine1Position to BarChart when monthlyAllowance is provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <MonthlyMileageChart entries={entries} mode="full-lease" monthlyAllowance={1200} />,
+      );
+    });
+    const barChart = renderer!.root.findByType('BarChart' as never);
+    expect(barChart.props.showReferenceLine1).toBe(true);
+    expect(barChart.props.referenceLine1Position).toBe(1200);
+  });
+
+  it('does not show threshold reference line when monthlyAllowance is 0', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <MonthlyMileageChart entries={entries} mode="full-lease" monthlyAllowance={0} />,
+      );
+    });
+    const barChart = renderer!.root.findByType('BarChart' as never);
+    expect(barChart.props.showReferenceLine1).toBe(false);
+    const legends = renderer!.root.findAllByProps({ testID: 'monthly-chart-legend' });
+    expect(legends).toHaveLength(0);
+  });
 });
 
 describe('computeMonthlyBars', () => {
