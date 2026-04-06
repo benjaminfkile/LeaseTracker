@@ -85,4 +85,44 @@ describe('StatCard', () => {
     const unitEls = renderer!.root.findAllByProps({ testID: 'stat-count-unit' });
     expect(unitEls).toHaveLength(0);
   });
+
+  it('renders the subtext when provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <StatCard
+          label="Overage"
+          value="$0.25"
+          subtext="per mile"
+          testID="stat-overage"
+        />,
+      );
+    });
+    const subtextEl = renderer!.root.findByProps({ testID: 'stat-overage-subtext' });
+    expect(subtextEl.props.children).toBe('per mile');
+  });
+
+  it('does not render a subtext element when subtext is not provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <StatCard label="Days Left" value={42} testID="stat-days" />,
+      );
+    });
+    const subtextEls = renderer!.root.findAllByProps({ testID: 'stat-days-subtext' });
+    expect(subtextEls).toHaveLength(0);
+  });
+
+  it('applies the color prop to the value text', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <StatCard label="Days Left" value={42} color="#EF4444" testID="stat-color" />,
+      );
+    });
+    const valueEl = renderer!.root.findByProps({ testID: 'stat-color-value' });
+    expect(valueEl.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ color: '#EF4444' })]),
+    );
+  });
 });

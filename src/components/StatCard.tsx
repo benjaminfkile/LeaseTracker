@@ -6,6 +6,8 @@ export type StatCardProps = {
   label: string;
   value: string | number;
   unit?: string;
+  subtext?: string;
+  color?: string;
   testID?: string;
 };
 
@@ -13,6 +15,8 @@ export function StatCard({
   label,
   value,
   unit,
+  subtext,
+  color,
   testID = 'stat-card',
 }: StatCardProps): React.ReactElement {
   const theme = useTheme();
@@ -20,7 +24,7 @@ export function StatCard({
   return (
     <View style={styles.container} testID={testID}>
       <Text
-        style={[styles.value, { color: theme.colors.textPrimary }]}
+        style={[styles.value, { color: color ?? theme.colors.textPrimary }]}
         testID={`${testID}-value`}
         numberOfLines={1}
         adjustsFontSizeToFit
@@ -42,6 +46,15 @@ export function StatCard({
       >
         {label}
       </Text>
+      {subtext != null && (
+        <Text
+          style={[styles.subtext, { color: theme.colors.textSecondary }]}
+          testID={`${testID}-subtext`}
+          numberOfLines={2}
+        >
+          {subtext}
+        </Text>
+      )}
     </View>
   );
 }
@@ -54,6 +67,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   label: {
+    fontSize: 11,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  subtext: {
     fontSize: 11,
     marginTop: 2,
     textAlign: 'center',
