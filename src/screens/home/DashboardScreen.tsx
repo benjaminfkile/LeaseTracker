@@ -71,7 +71,7 @@ export function DashboardScreen(): React.ReactElement {
 
   const paceStatus: PaceStatus =
     summary?.isOverPace === true
-      ? summary.projectedMiles / summary.totalMiles > 1.1
+      ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
         ? 'over-pace'
         : 'slightly-over'
       : 'on-track';

@@ -26,11 +26,13 @@ export function PaceStatusBadge({
 
   return (
     <View
-      style={[styles.badge, { backgroundColor: `${color}20`, borderColor: color }]}
+      style={[styles.badge, { borderColor: color }]}
       testID="pace-status-badge"
       accessibilityRole="text"
       accessibilityLabel={`Pace status: ${label}`}
     >
+      {/* Tinted background that works with any color format */}
+      <View style={[StyleSheet.absoluteFill, styles.badgeBg, { backgroundColor: color }]} />
       <Text style={[styles.icon, { color }]} testID="pace-status-badge-icon">
         {icon}
       </Text>
@@ -51,8 +53,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     flexDirection: 'row',
+    overflow: 'hidden',
     paddingHorizontal: 16,
     paddingVertical: 6,
+  },
+  badgeBg: {
+    borderRadius: 20,
+    opacity: 0.12,
   },
   icon: {
     fontSize: 14,
