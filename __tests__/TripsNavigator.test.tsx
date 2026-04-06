@@ -1,3 +1,42 @@
+jest.mock('../src/screens/trips/TripListScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    TripListScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'trip-list-screen' },
+        MockReact.createElement(Text, { testID: 'trip-list-title' }, 'Saved Trips'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/trips/AddTripScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AddTripScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'add-trip-screen' },
+        MockReact.createElement(Text, { testID: 'add-trip-title' }, 'Add Trip'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/trips/EditTripScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    EditTripScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'edit-trip-screen' },
+        MockReact.createElement(Text, { testID: 'edit-trip-title' }, 'Edit Trip'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
