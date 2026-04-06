@@ -6,9 +6,20 @@ import React, { useCallback, useEffect } from 'react';
 import { Linking, StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BootSplash from 'react-native-bootsplash';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores/authStore';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      retry: 1,
+    },
+  },
+});
 
 const INVITE_URL_PATTERN = /^leasetracker:\/\/invite\/(.+)$/;
 
@@ -50,12 +61,14 @@ function App() {
   }, [handleDeepLink]);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ErrorBoundary>
-        <RootNavigator />
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <ErrorBoundary>
+          <RootNavigator />
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
 

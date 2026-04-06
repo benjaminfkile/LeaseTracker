@@ -49,6 +49,16 @@ jest.mock('react-native-bootsplash', () => ({
   default: { hide: jest.fn().mockResolvedValue(undefined) },
 }));
 
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return {
+    ...actual,
+    QueryClientProvider: jest.fn(({ children }: { children: React.ReactNode }) =>
+      children,
+    ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { Linking } from 'react-native';
@@ -179,5 +189,20 @@ describe('App', () => {
     expect(() =>
       urlHandler({ url: 'leasetracker://lease/lease-xyz' }),
     ).not.toThrow();
+  });
+
+  it('wraps the app in QueryClientProvider with correct QueryClient options', async () => {
+    const { QueryClientProvider, QueryClient } = require('@tanstack/react-query');
+    (QueryClientProvider as jest.Mock).mockClear();
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(QueryClientProvider).toHaveBeenCalled();
+    const clientProp = (QueryClientProvider as jest.Mock).mock.calls[0][0].client;
+    expect(clientProp).toBeInstanceOf(QueryClient);
+    const defaultOptions = clientProp.getDefaultOptions();
+    expect(defaultOptions.queries?.staleTime).toBe(60_000);
+    expect(defaultOptions.queries?.gcTime).toBe(5 * 60_000);
+    expect(defaultOptions.queries?.retry).toBe(1);
   });
 });
