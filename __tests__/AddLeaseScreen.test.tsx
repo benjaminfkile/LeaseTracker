@@ -35,28 +35,49 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
+  useQuery: jest.fn(),
   useQueryClient: jest.fn(() => ({ invalidateQueries: jest.fn() })),
 }));
 
 jest.mock('../src/api/leaseApi', () => ({
   createLease: jest.fn(),
+  getLeases: jest.fn(),
+}));
+
+jest.mock('../src/api/subscriptionApi', () => ({
+  getStatus: jest.fn(),
 }));
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AddLeaseScreen } from '../src/screens/leases/AddLeaseScreen';
 
 const mockUseMutation = useMutation as jest.Mock;
+const mockUseQuery = useQuery as jest.Mock;
 
 function setupMocks({
   isPending = false,
   mutate = jest.fn(),
+  isPremium = false,
+  leaseCount = 0,
 }: {
   isPending?: boolean;
   mutate?: jest.Mock;
+  isPremium?: boolean;
+  leaseCount?: number;
 } = {}) {
   mockUseMutation.mockReturnValue({ mutate, isPending });
+  mockUseQuery.mockImplementation(({ queryKey }: { queryKey: string[] }) => {
+    const key = queryKey[0];
+    if (key === 'subscription-status') {
+      return { data: { isPremium, tier: isPremium ? 'premium' : 'free', expiresAt: null } };
+    }
+    if (key === 'leases') {
+      return { data: Array.from({ length: leaseCount }, (_, i) => ({ id: `lease-${i}` })) };
+    }
+    return { data: undefined, isLoading: false };
+  });
 }
 
 /** Fills all required step 1 fields in the given renderer. */
@@ -553,6 +574,58 @@ describe('AddLeaseScreen', () => {
 
       // Verify mutate has not been called yet (form not submitted)
       expect(mutate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Premium gate for 3rd+ lease', () => {
+    it('shows the form when user has fewer than 2 leases and is not premium', async () => {
+      setupMocks({ isPremium: false, leaseCount: 1 });
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<AddLeaseScreen />);
+      });
+      const step1 = renderer!.root.findByProps({ testID: 'step-1-container' });
+      expect(step1).toBeDefined();
+    });
+
+    it('shows the form when user has 2 leases and is premium', async () => {
+      setupMocks({ isPremium: true, leaseCount: 2 });
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<AddLeaseScreen />);
+      });
+      const step1 = renderer!.root.findByProps({ testID: 'step-1-container' });
+      expect(step1).toBeDefined();
+    });
+
+    it('shows the premium gate when user has 2 leases and is not premium', async () => {
+      setupMocks({ isPremium: false, leaseCount: 2 });
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<AddLeaseScreen />);
+      });
+      const locked = renderer!.root.findByProps({ testID: 'premium-gate-locked' });
+      expect(locked).toBeDefined();
+    });
+
+    it('shows the premium gate when user has 3 leases and is not premium', async () => {
+      setupMocks({ isPremium: false, leaseCount: 3 });
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<AddLeaseScreen />);
+      });
+      const locked = renderer!.root.findByProps({ testID: 'premium-gate-locked' });
+      expect(locked).toBeDefined();
+    });
+
+    it('does not show the form step when gated', async () => {
+      setupMocks({ isPremium: false, leaseCount: 2 });
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<AddLeaseScreen />);
+      });
+      const step1 = renderer!.root.findAllByProps({ testID: 'step-1-container' }, { deep: false });
+      expect(step1).toHaveLength(0);
     });
   });
 });

@@ -435,8 +435,21 @@ describe('LeaseDetailScreen', () => {
     expect(row).toBeDefined();
   });
 
-  it('shows "Only you" when there are no shared members', async () => {
-    setupQueryMocks({ members: [] });
+  it('shows the premium lock for sharing when not premium', async () => {
+    setupQueryMocks({ subscription: { ...mockSubscription, isPremium: false } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
+    });
+    const locked = renderer!.root.findByProps({ testID: 'shared-with-locked' });
+    expect(locked).toBeDefined();
+  });
+
+  it('shows "Only you" when there are no shared members and user is premium', async () => {
+    setupQueryMocks({
+      members: [],
+      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+    });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -445,8 +458,11 @@ describe('LeaseDetailScreen', () => {
     expect(onlyYou).toBeDefined();
   });
 
-  it('renders member avatars when members are present', async () => {
-    setupQueryMocks({ members: [mockMember] });
+  it('renders member avatars when members are present and user is premium', async () => {
+    setupQueryMocks({
+      members: [mockMember],
+      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+    });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -457,14 +473,17 @@ describe('LeaseDetailScreen', () => {
     expect(avatar).toBeDefined();
   });
 
-  it('shows overflow indicator when more than 3 members', async () => {
+  it('shows overflow indicator when more than 3 members and user is premium', async () => {
     const extraMembers: LeaseMember[] = [
       { ...mockMember, id: 'm1', email: 'a@x.com' },
       { ...mockMember, id: 'm2', email: 'b@x.com' },
       { ...mockMember, id: 'm3', email: 'c@x.com' },
       { ...mockMember, id: 'm4', email: 'd@x.com' },
     ];
-    setupQueryMocks({ members: extraMembers });
+    setupQueryMocks({
+      members: extraMembers,
+      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+    });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);

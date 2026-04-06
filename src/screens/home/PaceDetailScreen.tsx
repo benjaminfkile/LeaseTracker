@@ -16,6 +16,7 @@ import { getStatus } from '../../api/subscriptionApi';
 import { BannerAdView } from '../../components/BannerAdView';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { MonthlyMileageChart } from '../../components/MonthlyMileageChart';
+import { PremiumGate } from '../../components/PremiumGate';
 import { ProjectionChart } from '../../components/ProjectionChart';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
@@ -76,6 +77,15 @@ export function PaceDetailScreen(): React.ReactElement {
 
   const isPremium = subscription?.isPremium ?? false;
   const isLoading = leaseLoading || summaryLoading || historyLoading;
+
+  const handleUpgrade = () => {
+    const parent = navigation.getParent();
+    if (parent != null) {
+      (parent.navigate as unknown as (screen: string, params: object) => void)('Settings', {
+        screen: 'Subscription',
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -197,43 +207,49 @@ export function PaceDetailScreen(): React.ReactElement {
         testID="pace-detail-scroll"
       >
         {/* Projection chart — expected vs actual miles */}
-        <View
-          style={[
-            styles.sectionContainer,
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          ]}
-          testID="pace-detail-projection-section"
+        <PremiumGate
+          isPremium={isPremium}
+          onUpgrade={handleUpgrade}
+          description="Unlock detailed charts and projections with Premium."
         >
-          <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>
-            {'Expected vs Actual Miles'}
-          </Text>
-          <ProjectionChart
-            entries={entries}
-            mode={mode}
-            lease={lease}
-            summary={summary}
-            testID="projection-chart"
-          />
-        </View>
+          <View
+            style={[
+              styles.sectionContainer,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            testID="pace-detail-projection-section"
+          >
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>
+              {'Expected vs Actual Miles'}
+            </Text>
+            <ProjectionChart
+              entries={entries}
+              mode={mode}
+              lease={lease}
+              summary={summary}
+              testID="projection-chart"
+            />
+          </View>
 
-        {/* Monthly mileage bar chart */}
-        <View
-          style={[
-            styles.sectionContainer,
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          ]}
-          testID="pace-detail-monthly-section"
-        >
-          <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>
-            {'Miles per Month'}
-          </Text>
-          <MonthlyMileageChart
-            entries={entries}
-            mode={mode}
-            monthlyAllowance={lease?.monthlyMiles}
-            testID="monthly-mileage-chart"
-          />
-        </View>
+          {/* Monthly mileage bar chart */}
+          <View
+            style={[
+              styles.sectionContainer,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            testID="pace-detail-monthly-section"
+          >
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>
+              {'Miles per Month'}
+            </Text>
+            <MonthlyMileageChart
+              entries={entries}
+              mode={mode}
+              monthlyAllowance={lease?.monthlyMiles}
+              testID="monthly-mileage-chart"
+            />
+          </View>
+        </PremiumGate>
 
         {/* Detailed stats table */}
         <View

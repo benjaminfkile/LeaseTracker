@@ -17,12 +17,14 @@ import { useNavigation } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { createLease } from '../../api/leaseApi';
+import { createLease, getLeases } from '../../api/leaseApi';
+import { getStatus } from '../../api/subscriptionApi';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
+import { PremiumGate } from '../../components/PremiumGate';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useTheme } from '../../theme';
 import type { LeaseStackNavigationProp } from '../../navigation/types';
@@ -380,6 +382,28 @@ export function AddLeaseScreen(): React.ReactElement {
   const navigation = useNavigation<LeaseStackNavigationProp>();
   const queryClient = useQueryClient();
 
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription-status'],
+    queryFn: getStatus,
+  });
+
+  const { data: leases } = useQuery({
+    queryKey: ['leases'],
+    queryFn: getLeases,
+  });
+
+  const isPremium = subscription?.isPremium ?? false;
+  const leaseCount = leases?.length ?? 0;
+
+  const handleUpgrade = () => {
+    const parent = navigation.getParent();
+    if (parent != null) {
+      (parent.navigate as unknown as (screen: string, params: object) => void)('Settings', {
+        screen: 'Subscription',
+      });
+    }
+  };
+
   const [currentStep, setCurrentStep] = useState(1);
   const [dateOrderError, setDateOrderError] = useState<string | null>(null);
 
@@ -507,6 +531,16 @@ export function AddLeaseScreen(): React.ReactElement {
         onBackPress={handleBack}
       />
 
+      {!isPremium && leaseCount >= 2 ? (
+        <PremiumGate
+          isPremium={false}
+          onUpgrade={handleUpgrade}
+          description="You've used your 2 free leases. Upgrade to Premium for unlimited leases."
+        >
+          {null}
+        </PremiumGate>
+      ) : (
+        <>
       <StepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
       <KeyboardAvoidingView
@@ -1144,6 +1178,8 @@ export function AddLeaseScreen(): React.ReactElement {
           </View>
         </View>
       </KeyboardAvoidingView>
+        </>
+      )}
     </SafeAreaView>
   );
 }
