@@ -2,11 +2,13 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../theme';
-import type { MileageHistoryEntry } from '../types/api';
+import type { Lease, LeaseSummary, MileageHistoryEntry } from '../types/api';
 
 type ProjectionChartProps = {
   entries: MileageHistoryEntry[];
   mode: 'full-lease' | 'this-year';
+  lease?: Lease;
+  summary?: LeaseSummary;
   testID?: string;
 };
 
@@ -26,9 +28,31 @@ function formatMonthLabel(dateStr: string): string {
   return `${d.toLocaleString('default', { month: 'short' })} '${String(d.getFullYear()).slice(2)}`;
 }
 
+type ChartDataPoint = {
+  value: number;
+  label: string;
+  dataPointText: string;
+};
+
+function buildActualData(filtered: MileageHistoryEntry[], hasProjection: boolean): ChartDataPoint[] {
+  return filtered.map((e, i) => {
+    let label = '';
+    if (i === 0) {
+      label = 'Start';
+    } else if (hasProjection && i === filtered.length - 1) {
+      label = 'Today';
+    } else if (i % Math.ceil(filtered.length / 4) === 0) {
+      label = formatMonthLabel(e.date);
+    }
+    return { value: e.mileage, label, dataPointText: '' };
+  });
+}
+
 export function ProjectionChart({
   entries,
   mode,
+  lease,
+  summary,
   testID,
 }: ProjectionChartProps): React.ReactElement {
   const theme = useTheme();
@@ -47,24 +71,38 @@ export function ProjectionChart({
     );
   }
 
-  const actualData = filtered.map((e, i) => ({
-    value: e.mileage,
-    label: i % Math.ceil(filtered.length / 4) === 0 ? formatMonthLabel(e.date) : '',
+  const hasProjection = lease != null && summary != null;
+  const projectionColor = summary?.isOverPace === true ? theme.colors.error : theme.colors.success;
+
+  const actualData = buildActualData(filtered, hasProjection);
+  const expectedData: ChartDataPoint[] = filtered.map(e => ({
+    value: e.projectedMileage,
+    label: '',
     dataPointText: '',
   }));
 
-  const expectedData = filtered.map(e => ({
-    value: e.projectedMileage,
-    dataPointText: '',
-  }));
+  let projectedData: ChartDataPoint[] | undefined;
+  if (hasProjection) {
+    const lastMileage = filtered[filtered.length - 1].mileage;
+    // Extend actual and expected to the lease-end "End" marker
+    actualData.push({ value: lastMileage, label: 'End', dataPointText: '' });
+    expectedData.push({ value: summary!.totalMiles, label: '', dataPointText: '' });
+    // Projected series: mirrors actual for historical points, then diverges to projected end
+    projectedData = [
+      ...filtered.map(e => ({ value: e.mileage, label: '', dataPointText: '' })),
+      { value: summary!.projectedMiles, label: '', dataPointText: '' },
+    ];
+  }
 
   return (
     <View style={styles.container} testID={testID ?? 'projection-chart'}>
       <LineChart
         data={actualData}
         data2={expectedData}
+        data3={projectedData}
         color1={theme.colors.primary}
         color2={theme.colors.warning}
+        color3={projectionColor}
         thickness={2}
         hideDataPoints
         areaChart
@@ -99,6 +137,14 @@ export function ProjectionChart({
             {'Expected'}
           </Text>
         </View>
+        {hasProjection && (
+          <View style={styles.legendItem} testID="projection-legend-item">
+            <View style={[styles.legendDot, { backgroundColor: projectionColor }]} />
+            <Text style={[styles.legendLabel, { color: theme.colors.textSecondary }]}>
+              {'Projected'}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
