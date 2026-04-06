@@ -71,7 +71,7 @@ export function ProjectionChart({
     );
   }
 
-  const hasProjection = lease != null && summary != null;
+  const hasProjection = lease != null && summary != null && filtered.length > 0;
   const projectionColor = summary?.isOverPace === true ? theme.colors.error : theme.colors.success;
 
   const actualData = buildActualData(filtered, hasProjection);
@@ -82,15 +82,16 @@ export function ProjectionChart({
   }));
 
   let projectedData: ChartDataPoint[] | undefined;
-  if (hasProjection) {
+  if (hasProjection && summary != null) {
+    const { totalMiles, projectedMiles } = summary;
     const lastMileage = filtered[filtered.length - 1].mileage;
     // Extend actual and expected to the lease-end "End" marker
     actualData.push({ value: lastMileage, label: 'End', dataPointText: '' });
-    expectedData.push({ value: summary!.totalMiles, label: '', dataPointText: '' });
-    // Projected series: mirrors actual for historical points, then diverges to projected end
+    expectedData.push({ value: totalMiles, label: '', dataPointText: '' });
+    // Projected series: reuse actual values for historical points, then diverges to projected end
     projectedData = [
-      ...filtered.map(e => ({ value: e.mileage, label: '', dataPointText: '' })),
-      { value: summary!.projectedMiles, label: '', dataPointText: '' },
+      ...actualData.slice(0, filtered.length).map(p => ({ ...p, label: '' })),
+      { value: projectedMiles, label: '', dataPointText: '' },
     ];
   }
 
