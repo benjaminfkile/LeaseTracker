@@ -108,3 +108,16 @@ export type CreateLeaseInput = {
 };
 
 export type UpdateLeaseInput = Partial<CreateLeaseInput>;
+
+export type PaginationParams = {
+  page?: number;
+  limit?: number;
+};
+
+export type CreateReadingInput = {
+  mileage: number;
+  readingDate: string;
+  note?: string;
+};
+
+export type UpdateReadingInput = Partial<CreateReadingInput>;
