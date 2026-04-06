@@ -49,7 +49,7 @@ export function LeaseListScreen(): React.ReactElement {
       testID="lease-list-add-button"
     >
       <Text style={[styles.addButtonText, { color: theme.colors.primary }]}>
-        {'+'}
+        +
       </Text>
     </TouchableOpacity>
   );

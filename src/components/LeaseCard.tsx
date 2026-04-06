@@ -25,9 +25,8 @@ export function LeaseCard({
   const theme = useTheme();
   const swipeableRef = useRef<Swipeable>(null);
 
-  const vehicleLabel = lease.vehicleTrim
-    ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel} ${lease.vehicleTrim}`
-    : `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
+  const baseLabel = `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
+  const vehicleLabel = lease.vehicleTrim ? `${baseLabel} ${lease.vehicleTrim}` : baseLabel;
 
   const renderRightActions = () => (
     <TouchableOpacity
@@ -41,7 +40,7 @@ export function LeaseCard({
       testID="lease-card-archive-action"
     >
       <Text style={[styles.archiveText, { color: theme.colors.surface }]}>
-        {'Archive'}
+        Archive
       </Text>
     </TouchableOpacity>
   );
