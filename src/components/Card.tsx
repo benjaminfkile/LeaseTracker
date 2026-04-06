@@ -11,9 +11,10 @@ import { useTheme } from '../theme';
 export type CardProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 };
 
-export function Card({ children, style }: CardProps): React.ReactElement {
+export function Card({ children, style, testID }: CardProps): React.ReactElement {
   const theme = useTheme();
 
   return (
@@ -24,6 +25,7 @@ export function Card({ children, style }: CardProps): React.ReactElement {
         Platform.OS === 'android' ? styles.elevationAndroid : styles.shadowIos,
         style,
       ]}
+      testID={testID}
     >
       {children}
     </View>
