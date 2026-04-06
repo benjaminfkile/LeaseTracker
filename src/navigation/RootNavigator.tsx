@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import type { AppTabParamList } from './types';
+import { navigationRef } from './navigationRef';
 
 export const linking: LinkingOptions<AppTabParamList> = {
   prefixes: ['leasetracker://'],
@@ -38,7 +39,7 @@ export function RootNavigator(): React.ReactElement {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

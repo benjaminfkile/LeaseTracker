@@ -12,6 +12,7 @@ import { NotificationPermissionModal } from './src/components/NotificationPermis
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores/authStore';
 import { useNotificationPermission } from './src/hooks/useNotificationPermission';
+import { useForegroundNotification } from './src/hooks/useForegroundNotification';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const hydrateFromStorage = useAuthStore(state => state.hydrateFromStorage);
   const { shouldShowModal, handlePermission } = useNotificationPermission();
+  useForegroundNotification();
 
   useEffect(() => {
     hydrateFromStorage().finally(() => {
