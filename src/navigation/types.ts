@@ -37,6 +37,14 @@ export type TripsStackParamList = {
   EditTrip: { tripId: string };
 };
 
+export type SettingsStackParamList = {
+  Settings: undefined;
+  Account: undefined;
+  Subscription: undefined;
+  AlertSettings: undefined;
+  About: undefined;
+};
+
 export type AppStackParamList = Record<string, undefined>;
 
 export type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
@@ -45,3 +53,4 @@ export type AppTabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 export type HomeStackNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 export type LeaseStackNavigationProp = NativeStackNavigationProp<LeaseStackParamList>;
 export type TripsStackNavigationProp = NativeStackNavigationProp<TripsStackParamList>;
+export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
