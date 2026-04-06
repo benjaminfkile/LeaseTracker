@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { HomeScreen } from '../screens/home/HomeScreen';
+import { HomeNavigator } from './HomeNavigator';
 import { LeasesScreen } from '../screens/leases/LeasesScreen';
 import { TripsScreen } from '../screens/trips/TripsScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
@@ -17,7 +17,7 @@ export function AppNavigator(): React.ReactElement {
     <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeNavigator}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="view-dashboard" size={size} color={color} />
