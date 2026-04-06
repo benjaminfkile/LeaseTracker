@@ -11,6 +11,7 @@ export type OdometerInputProps = {
   value: string;
   onChange: (value: string) => void;
   errorMessage?: string;
+  previousReading?: number;
   testID?: string;
 };
 
@@ -18,6 +19,7 @@ export function OdometerInput({
   value,
   onChange,
   errorMessage,
+  previousReading,
   testID,
 }: OdometerInputProps): React.ReactElement {
   const theme = useTheme();
@@ -52,6 +54,16 @@ export function OdometerInput({
         />
         <Text style={[styles.unit, { color: theme.colors.textSecondary }]}>mi</Text>
       </View>
+      {previousReading != null && (
+        <Text
+          style={[styles.previousReading, { color: theme.colors.textSecondary }]}
+          testID="odometer-previous-reading"
+        >
+          {'Previous: '}
+          {previousReading.toLocaleString()}
+          {' mi'}
+        </Text>
+      )}
       {errorMessage != null && (
         <Text
           style={[styles.errorMessage, { color: theme.colors.error }]}
@@ -68,6 +80,11 @@ const styles = StyleSheet.create({
   errorMessage: {
     fontSize: 12,
     marginTop: 4,
+  },
+  previousReading: {
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
   },
   inputContainer: {
     alignItems: 'center',
