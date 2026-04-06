@@ -23,6 +23,7 @@ export type TripCardProps = {
   completed?: boolean;
   remainingMiles?: number;
   onMarkComplete?: () => void;
+  onPress?: () => void;
   testID?: string;
 };
 
@@ -31,6 +32,7 @@ export function TripCard({
   completed = false,
   remainingMiles,
   onMarkComplete,
+  onPress,
   testID,
 }: TripCardProps): React.ReactElement {
   const theme = useTheme();
@@ -41,17 +43,16 @@ export function TripCard({
       ? `Uses ${trip.distance.toLocaleString()} of your ${remainingMiles.toLocaleString()} remaining miles`
       : `\u2212${trip.distance.toLocaleString()} mi from budget`;
 
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.surface,
-          borderBottomColor: theme.colors.border,
-        },
-      ]}
-      testID={testID ?? `trip-card-${trip.id}`}
-    >
+  const cardStyle = [
+    styles.card,
+    {
+      backgroundColor: theme.colors.surface,
+      borderBottomColor: theme.colors.border,
+    },
+  ];
+
+  const content = (
+    <>
       <View style={styles.cardLeft}>
         <Text
           style={[
@@ -108,6 +109,29 @@ export function TripCard({
           </Text>
         )}
       </View>
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={cardStyle}
+        testID={testID ?? `trip-card-${trip.id}`}
+        onPress={onPress}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View
+      style={cardStyle}
+      testID={testID ?? `trip-card-${trip.id}`}
+    >
+      {content}
     </View>
   );
 }

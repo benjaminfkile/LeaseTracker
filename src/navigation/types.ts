@@ -35,7 +35,7 @@ export type LeaseStackParamList = {
 export type TripsStackParamList = {
   TripList: undefined;
   AddTrip: undefined;
-  EditTrip: { tripId: string };
+  EditTrip: { tripId: string; leaseId: string };
 };
 
 export type SettingsStackParamList = {
