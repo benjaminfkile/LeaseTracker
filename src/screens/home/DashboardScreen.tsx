@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -23,12 +23,14 @@ import { QuickAddFAB } from '../../components/QuickAddFAB';
 import { StatCard } from '../../components/StatCard';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp } from '../../navigation/types';
+import { useLeasesStore } from '../../stores/leasesStore';
 
 export function DashboardScreen(): React.ReactElement {
   const theme = useTheme();
   const navigation = useNavigation<HomeStackNavigationProp>();
 
-  const [selectedLeaseId, setSelectedLeaseId] = useState<string | null>(null);
+  const activeLeaseId = useLeasesStore(state => state.activeLeaseId);
+  const setActiveLeaseId = useLeasesStore(state => state.setActiveLeaseId);
 
   const {
     data: leases,
@@ -40,24 +42,27 @@ export function DashboardScreen(): React.ReactElement {
   });
 
   useEffect(() => {
-    if (leases && leases.length > 0 && selectedLeaseId == null) {
-      setSelectedLeaseId(leases[0].id);
+    if (leases && leases.length > 0) {
+      const isValid = leases.some(l => l.id === activeLeaseId);
+      if (!isValid) {
+        setActiveLeaseId(leases[0].id);
+      }
     }
-  }, [leases, selectedLeaseId]);
+  }, [leases, activeLeaseId, setActiveLeaseId]);
 
   const {
     data: summary,
     isLoading: summaryLoading,
   } = useQuery({
-    queryKey: ['lease-summary', selectedLeaseId],
-    queryFn: () => getLeaseSummary(selectedLeaseId as string),
-    enabled: selectedLeaseId != null,
+    queryKey: ['lease-summary', activeLeaseId],
+    queryFn: () => getLeaseSummary(activeLeaseId as string),
+    enabled: activeLeaseId != null,
   });
 
   const { data: tripsData } = useQuery({
-    queryKey: ['trips', selectedLeaseId],
-    queryFn: () => getTrips(selectedLeaseId as string),
-    enabled: selectedLeaseId != null,
+    queryKey: ['trips', activeLeaseId],
+    queryFn: () => getTrips(activeLeaseId as string),
+    enabled: activeLeaseId != null,
   });
 
   const { data: subscription } = useQuery({
@@ -66,7 +71,7 @@ export function DashboardScreen(): React.ReactElement {
   });
 
   const isPremium = subscription?.isPremium ?? false;
-  const selectedLease = leases?.find(l => l.id === selectedLeaseId);
+  const selectedLease = leases?.find(l => l.id === activeLeaseId);
   const activeTrips = tripsData?.active ?? [];
   const reservedMiles = activeTrips.reduce((sum, t) => sum + t.distance, 0);
 
@@ -154,11 +159,11 @@ export function DashboardScreen(): React.ReactElement {
         </Text>
 
         {/* Active lease selector — only if 2+ leases */}
-        {leases.length >= 2 && selectedLeaseId != null && (
+        {leases.length >= 2 && activeLeaseId != null && (
           <LeaseSelectorPills
             leases={leases}
-            selectedId={selectedLeaseId}
-            onSelect={setSelectedLeaseId}
+            selectedId={activeLeaseId}
+            onSelect={setActiveLeaseId}
           />
         )}
 
@@ -260,8 +265,8 @@ export function DashboardScreen(): React.ReactElement {
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
             onPress={() => {
-              if (selectedLeaseId != null) {
-                navigation.navigate('AddReading', { leaseId: selectedLeaseId });
+              if (activeLeaseId != null) {
+                navigation.navigate('AddReading', { leaseId: activeLeaseId });
               }
             }}
             accessibilityRole="button"
@@ -280,8 +285,8 @@ export function DashboardScreen(): React.ReactElement {
               { borderColor: theme.colors.primary },
             ]}
             onPress={() => {
-              if (selectedLeaseId != null) {
-                navigation.navigate('PaceDetail', { leaseId: selectedLeaseId });
+              if (activeLeaseId != null) {
+                navigation.navigate('PaceDetail', { leaseId: activeLeaseId });
               }
             }}
             accessibilityRole="button"
@@ -316,9 +321,9 @@ export function DashboardScreen(): React.ReactElement {
       {/* Floating action button — navigate to AddReading for active lease */}
       <QuickAddFAB
         onPress={() => {
-          navigation.navigate('AddReading', { leaseId: selectedLeaseId as string });
+          navigation.navigate('AddReading', { leaseId: activeLeaseId as string });
         }}
-        disabled={selectedLeaseId == null}
+        disabled={activeLeaseId == null}
       />
 
       {/* Banner ad — free tier only */}
