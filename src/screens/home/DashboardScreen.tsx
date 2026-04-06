@@ -19,6 +19,7 @@ import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
 import { MileageProgressRing } from '../../components/MileageProgressRing';
 import { PaceStatusBadge } from '../../components/PaceStatusBadge';
 import type { PaceStatus } from '../../components/PaceStatusBadge';
+import { QuickAddFAB } from '../../components/QuickAddFAB';
 import { StatCard } from '../../components/StatCard';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp } from '../../navigation/types';
@@ -312,6 +313,14 @@ export function DashboardScreen(): React.ReactElement {
         </View>
       </ScrollView>
 
+      {/* Floating action button — navigate to AddReading for active lease */}
+      <QuickAddFAB
+        onPress={() => {
+          navigation.navigate('AddReading', { leaseId: selectedLeaseId as string });
+        }}
+        disabled={selectedLeaseId == null}
+      />
+
       {/* Banner ad — free tier only */}
       {!isPremium && <BannerAdView />}
     </SafeAreaView>
@@ -405,7 +414,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   scrollContent: {
-    paddingBottom: 16,
+    paddingBottom: 96,
   },
   statDivider: {
     height: '70%',

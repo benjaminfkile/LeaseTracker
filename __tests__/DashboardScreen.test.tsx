@@ -440,4 +440,43 @@ describe('DashboardScreen', () => {
     const value = renderer!.root.findByProps({ testID: 'dashboard-reserved-value' });
     expect(value.props.children).toBe('250 mi');
   });
+
+  it('renders the QuickAddFAB when lease data is available', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const fab = renderer!.root.findByProps({ testID: 'quick-add-fab' });
+    expect(fab).toBeDefined();
+  });
+
+  it('does not render the QuickAddFAB in the empty state', async () => {
+    setupQueryMocks({ leases: [] });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const fabs = renderer!.root.findAllByProps({ testID: 'quick-add-fab' });
+    expect(fabs).toHaveLength(0);
+  });
+
+  it('does not render the QuickAddFAB in the loading state', async () => {
+    setupQueryMocks({ leasesLoading: true, leases: [] });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const fabs = renderer!.root.findAllByProps({ testID: 'quick-add-fab' });
+    expect(fabs).toHaveLength(0);
+  });
+
+  it('does not render the QuickAddFAB in the error state', async () => {
+    setupQueryMocks({ leasesError: new Error('Network error'), leases: [] });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const fabs = renderer!.root.findAllByProps({ testID: 'quick-add-fab' });
+    expect(fabs).toHaveLength(0);
+  });
 });
