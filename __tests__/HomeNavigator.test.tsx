@@ -50,6 +50,19 @@ jest.mock('../src/screens/home/AddReadingScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/PaceDetailScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    PaceDetailScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'pace-detail-screen' },
+        MockReact.createElement(Text, { testID: 'pace-detail-title' }, 'Pace Detail'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
