@@ -128,7 +128,7 @@ export type CreateTripInput = {
   note?: string;
 };
 
-export type UpdateTripInput = Partial<CreateTripInput>;
+export type UpdateTripInput = Partial<CreateTripInput> & { completed?: boolean };
 
 export type UpdateAlertConfigInput = Partial<
   Pick<

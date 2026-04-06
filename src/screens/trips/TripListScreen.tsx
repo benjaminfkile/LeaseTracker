@@ -7,96 +7,21 @@ import {
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BannerAdView } from '../../components/BannerAdView';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
 import { QuickAddFAB } from '../../components/QuickAddFAB';
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { getTrips } from '../../api/tripsApi';
+import { TripCard } from '../../components/TripCard';
+import { getLeaseSummary } from '../../api/leaseApi';
+import { getTrips, updateTrip } from '../../api/tripsApi';
 import { getStatus } from '../../api/subscriptionApi';
 import { useLeasesStore } from '../../stores/leasesStore';
 import { useTheme } from '../../theme';
 import type { SavedTrip } from '../../types/api';
 import type { TripsStackNavigationProp } from '../../navigation/types';
-
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-function formatTripDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
-}
-
-type TripCardProps = {
-  trip: SavedTrip;
-  completed?: boolean;
-};
-
-function TripCard({ trip, completed = false }: TripCardProps): React.ReactElement {
-  const theme = useTheme();
-  const name = trip.note?.trim() ? trip.note.trim() : 'Trip';
-
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.surface,
-          borderBottomColor: theme.colors.border,
-        },
-      ]}
-      testID={`trip-card-${trip.id}`}
-    >
-      <View style={styles.cardLeft}>
-        <Text
-          style={[
-            styles.tripName,
-            { color: completed ? theme.colors.textSecondary : theme.colors.textPrimary },
-          ]}
-          testID={`trip-name-${trip.id}`}
-          numberOfLines={1}
-        >
-          {name}
-        </Text>
-        <Text
-          style={[styles.tripDate, { color: theme.colors.textSecondary }]}
-          testID={`trip-date-${trip.id}`}
-        >
-          {formatTripDate(trip.tripDate)}
-        </Text>
-        <Text
-          style={[styles.tripImpact, { color: theme.colors.textSecondary }]}
-          testID={`trip-impact-${trip.id}`}
-        >
-          {`−${trip.distance.toLocaleString()} mi from budget`}
-        </Text>
-      </View>
-      <View style={styles.cardRight}>
-        <Text
-          style={[
-            styles.tripDistance,
-            { color: completed ? theme.colors.textSecondary : theme.colors.textPrimary },
-          ]}
-          testID={`trip-distance-${trip.id}`}
-        >
-          {`${trip.distance.toLocaleString()} mi`}
-        </Text>
-        {completed && (
-          <Text
-            style={[styles.checkmark, { color: theme.colors.success }]}
-            testID={`trip-checkmark-${trip.id}`}
-          >
-            {'✓'}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-}
 
 type TripSection = {
   title: string;
@@ -110,6 +35,7 @@ export function TripListScreen(): React.ReactElement {
   const leases = useLeasesStore(state => state.leases);
   const activeLeaseId = useLeasesStore(state => state.activeLeaseId);
   const setActiveLeaseId = useLeasesStore(state => state.setActiveLeaseId);
+  const queryClient = useQueryClient();
 
   const defaultLeaseId = activeLeaseId ?? leases[0]?.id ?? '';
   const [selectedLeaseId, setSelectedLeaseId] = useState<string>(defaultLeaseId);
@@ -126,9 +52,23 @@ export function TripListScreen(): React.ReactElement {
     enabled: selectedLeaseId !== '',
   });
 
+  const { data: summaryData } = useQuery({
+    queryKey: ['lease-summary', selectedLeaseId],
+    queryFn: () => getLeaseSummary(selectedLeaseId),
+    enabled: selectedLeaseId !== '',
+  });
+
   const { data: subscriptionData } = useQuery({
     queryKey: ['subscription-status'],
     queryFn: getStatus,
+  });
+
+  const { mutate: markComplete } = useMutation({
+    mutationFn: (tripId: string) =>
+      updateTrip(selectedLeaseId, tripId, { completed: true }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['trips', selectedLeaseId] });
+    },
   });
 
   const isPremium = subscriptionData?.isPremium ?? false;
@@ -203,12 +143,17 @@ export function TripListScreen(): React.ReactElement {
               testID="trip-list-section-list"
               sections={sections}
               keyExtractor={item => item.id}
-              renderItem={({ item, section }) => (
-                <TripCard
-                  trip={item}
-                  completed={(section as TripSection).sectionKey === 'completed'}
-                />
-              )}
+              renderItem={({ item, section }) => {
+                const isCompleted = (section as TripSection).sectionKey === 'completed';
+                return (
+                  <TripCard
+                    trip={item}
+                    completed={isCompleted}
+                    remainingMiles={summaryData?.milesRemaining}
+                    onMarkComplete={isCompleted ? undefined : () => markComplete(item.id)}
+                  />
+                );
+              }}
               renderSectionHeader={({ section }) => (
                 <View
                   style={[
@@ -242,26 +187,6 @@ export function TripListScreen(): React.ReactElement {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  cardLeft: {
-    flex: 1,
-    marginRight: 12,
-  },
-  cardRight: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  checkmark: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 4,
-  },
   container: {
     flex: 1,
   },
@@ -280,21 +205,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-  },
-  tripDate: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  tripDistance: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  tripImpact: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  tripName: {
-    fontSize: 15,
-    fontWeight: '500',
   },
 });

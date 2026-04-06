@@ -7,10 +7,17 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
+  useMutation: jest.fn(),
+  useQueryClient: jest.fn(),
 }));
 
 jest.mock('../src/api/tripsApi', () => ({
   getTrips: jest.fn(),
+  updateTrip: jest.fn(),
+}));
+
+jest.mock('../src/api/leaseApi', () => ({
+  getLeaseSummary: jest.fn(),
 }));
 
 jest.mock('../src/api/subscriptionApi', () => ({
@@ -33,12 +40,14 @@ jest.mock('react-native-config', () => ({ ADMOB_BANNER_UNIT_ID: 'test-ad-unit' }
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLeasesStore } from '../src/stores/leasesStore';
 import { TripListScreen } from '../src/screens/trips/TripListScreen';
-import type { SavedTrip, Lease } from '../src/types/api';
+import type { SavedTrip, Lease, LeaseSummary } from '../src/types/api';
 
 const mockUseQuery = useQuery as jest.Mock;
+const mockUseMutation = useMutation as jest.Mock;
+const mockUseQueryClient = useQueryClient as jest.Mock;
 const mockUseLeasesStore = useLeasesStore as unknown as jest.Mock;
 
 const mockLease1: Lease = {
@@ -103,6 +112,19 @@ const mockCompletedTrip: SavedTrip = {
   updatedAt: '2026-03-01T00:00:00Z',
 };
 
+const mockSummary: LeaseSummary = {
+  leaseId: 'lease-1',
+  vehicleLabel: '2023 Toyota Camry',
+  startDate: '2023-01-01',
+  endDate: '2026-01-01',
+  totalMiles: 36000,
+  milesUsed: 12000,
+  milesRemaining: 24000,
+  daysRemaining: 200,
+  projectedMiles: 35000,
+  isOverPace: false,
+};
+
 function setupStoreMock({
   leases = [mockLease1],
   activeLeaseId = 'lease-1',
@@ -125,22 +147,29 @@ function setupQueryMocks({
   isLoading = false,
   error = null,
   isPremium = false,
+  summary = mockSummary as LeaseSummary | null,
 }: {
   active?: SavedTrip[];
   completed?: SavedTrip[];
   isLoading?: boolean;
   error?: Error | null;
   isPremium?: boolean;
+  summary?: LeaseSummary | null;
 } = {}) {
   mockUseQuery.mockImplementation(({ queryKey }: { queryKey: string[] }) => {
     if (queryKey[0] === 'trips') {
       return { data: { active, completed }, isLoading, error, refetch: jest.fn() };
+    }
+    if (queryKey[0] === 'lease-summary') {
+      return { data: summary ?? undefined };
     }
     if (queryKey[0] === 'subscription-status') {
       return { data: { isPremium, tier: isPremium ? 'premium' : 'free', expiresAt: null, platform: null } };
     }
     return { data: undefined, isLoading: false, error: null, refetch: jest.fn() };
   });
+  mockUseMutation.mockReturnValue({ mutate: jest.fn() });
+  mockUseQueryClient.mockReturnValue({ invalidateQueries: jest.fn() });
 }
 
 describe('TripListScreen', () => {
@@ -303,7 +332,7 @@ describe('TripListScreen', () => {
       renderer = ReactTestRenderer.create(<TripListScreen />);
     });
     const impact = renderer!.root.findByProps({ testID: 'trip-impact-trip-1' });
-    expect(impact.props.children).toBe('−250 mi from budget');
+    expect(impact.props.children).toBe('Uses 250 of your 24,000 remaining miles');
   });
 
   it('renders a green checkmark for completed trips', async () => {
@@ -408,5 +437,34 @@ describe('TripListScreen', () => {
     });
     const distance = renderer!.root.findByProps({ testID: 'trip-distance-trip-big' });
     expect(distance.props.children).toBe('1,500 mi');
+  });
+
+  it('renders Mark Complete button for active trips', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<TripListScreen />);
+    });
+    const button = renderer!.root.findByProps({ testID: 'trip-mark-complete-trip-1' });
+    expect(button).toBeDefined();
+  });
+
+  it('does not render Mark Complete button for completed trips', async () => {
+    setupQueryMocks({ active: [], completed: [mockCompletedTrip] });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<TripListScreen />);
+    });
+    const buttons = renderer!.root.findAllByProps({ testID: 'trip-mark-complete-trip-3' });
+    expect(buttons).toHaveLength(0);
+  });
+
+  it('renders impact text with fallback format when summary is not available', async () => {
+    setupQueryMocks({ summary: null });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<TripListScreen />);
+    });
+    const impact = renderer!.root.findByProps({ testID: 'trip-impact-trip-1' });
+    expect(impact.props.children).toBe('−250 mi from budget');
   });
 });
