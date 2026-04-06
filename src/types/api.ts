@@ -129,3 +129,13 @@ export type CreateTripInput = {
 };
 
 export type UpdateTripInput = Partial<CreateTripInput>;
+
+export type UpdateAlertConfigInput = Partial<
+  Pick<
+    AlertConfig,
+    | 'overPaceThresholdPercent'
+    | 'projectedOverageThresholdMiles'
+    | 'notifyEmail'
+    | 'notifyPush'
+  >
+>;
