@@ -2,6 +2,19 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 jest.mock('../src/stores/leasesStore');
 
+jest.mock('../src/screens/home/DashboardScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    DashboardScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'dashboard-screen' },
+        MockReact.createElement(Text, { testID: 'dashboard-title' }, 'Dashboard'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
