@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { HomeNavigator } from './HomeNavigator';
 import { LeaseNavigator } from './LeaseNavigator';
 import { TripsNavigator } from './TripsNavigator';
-import { SettingsScreen } from '../screens/settings/SettingsScreen';
+import { SettingsNavigator } from './SettingsNavigator';
 import { useLeasesStore } from '../stores/leasesStore';
 import type { AppTabParamList } from './types';
 
@@ -45,7 +45,7 @@ export function AppNavigator(): React.ReactElement {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsNavigator}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="cog" size={size} color={color} />
