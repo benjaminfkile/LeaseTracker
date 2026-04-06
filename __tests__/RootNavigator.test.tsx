@@ -43,7 +43,7 @@ jest.mock('../src/navigation/AppNavigator', () => ({
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import * as ReactNative from 'react-native';
-import { RootNavigator } from '../src/navigation/RootNavigator';
+import { RootNavigator, linking } from '../src/navigation/RootNavigator';
 import { useAuthStore } from '../src/stores/authStore';
 
 type AuthStoreState = {
@@ -141,5 +141,21 @@ describe('RootNavigator', () => {
       renderer = ReactTestRenderer.create(<RootNavigator />);
     });
     expect(() => renderer!.root.findByProps({ testID: 'login-title' })).toThrow();
+  });
+});
+
+describe('linking config', () => {
+  it('uses the leasetracker:// scheme as prefix', () => {
+    expect(linking.prefixes).toContain('leasetracker://');
+  });
+
+  it('maps invite/:leaseId to the LeaseList screen', () => {
+    const leasesScreens = (linking.config?.screens as any).Leases?.screens;
+    expect(leasesScreens?.LeaseList).toBe('invite/:leaseId');
+  });
+
+  it('maps lease/:leaseId to the LeaseDetail screen', () => {
+    const homeScreens = (linking.config?.screens as any).Home?.screens;
+    expect(homeScreens?.LeaseDetail).toBe('lease/:leaseId');
   });
 });

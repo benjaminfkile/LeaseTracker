@@ -1,9 +1,29 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import type { LinkingOptions } from '@react-navigation/native';
 import { useAuthStore } from '../stores/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
+import type { AppTabParamList } from './types';
+
+export const linking: LinkingOptions<AppTabParamList> = {
+  prefixes: ['leasetracker://'],
+  config: {
+    screens: {
+      Leases: {
+        screens: {
+          LeaseList: 'invite/:leaseId',
+        },
+      },
+      Home: {
+        screens: {
+          LeaseDetail: 'lease/:leaseId',
+        },
+      },
+    },
+  },
+};
 
 export function RootNavigator(): React.ReactElement {
   const isLoading = useAuthStore(state => state.isLoading);
@@ -18,7 +38,7 @@ export function RootNavigator(): React.ReactElement {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

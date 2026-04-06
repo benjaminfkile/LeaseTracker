@@ -51,6 +51,7 @@ jest.mock('react-native-bootsplash', () => ({
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import { Linking } from 'react-native';
 import App from '../App';
 import { useAuthStore } from '../src/stores/authStore';
 import BootSplash from 'react-native-bootsplash';
@@ -58,6 +59,10 @@ import BootSplash from 'react-native-bootsplash';
 const mockBootSplashHide = BootSplash.hide as jest.Mock;
 
 const mockHydrateFromStorage = jest.fn().mockResolvedValue(undefined);
+
+let mockRemove: jest.Mock;
+let mockAddEventListener: jest.SpyInstance;
+let mockGetInitialURL: jest.SpyInstance;
 
 function setupAuthStoreMock() {
   const state = {
@@ -85,7 +90,19 @@ describe('App', () => {
   beforeEach(() => {
     mockHydrateFromStorage.mockReset().mockResolvedValue(undefined);
     mockBootSplashHide.mockReset().mockResolvedValue(undefined);
+    mockRemove = jest.fn();
+    mockAddEventListener = jest
+      .spyOn(Linking, 'addEventListener')
+      .mockReturnValue({ remove: mockRemove } as any);
+    mockGetInitialURL = jest
+      .spyOn(Linking, 'getInitialURL')
+      .mockResolvedValue(null);
     setupAuthStoreMock();
+  });
+
+  afterEach(() => {
+    mockAddEventListener.mockRestore();
+    mockGetInitialURL.mockRestore();
   });
 
   it('renders correctly', async () => {
@@ -106,5 +123,61 @@ describe('App', () => {
       ReactTestRenderer.create(<App />);
     });
     expect(mockBootSplashHide).toHaveBeenCalledWith({ fade: true });
+  });
+
+  it('registers a Linking event listener on mount', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockAddEventListener).toHaveBeenCalledWith('url', expect.any(Function));
+  });
+
+  it('calls Linking.getInitialURL on mount', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockGetInitialURL).toHaveBeenCalled();
+  });
+
+  it('removes the Linking listener on unmount', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+    });
+    await ReactTestRenderer.act(async () => {
+      renderer!.unmount();
+    });
+    expect(mockRemove).toHaveBeenCalled();
+  });
+
+  it('handles an invite deep link from getInitialURL', async () => {
+    mockGetInitialURL.mockResolvedValue('leasetracker://invite/lease-abc');
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockGetInitialURL).toHaveBeenCalled();
+  });
+
+  it('handles a lease deep link from getInitialURL without error', async () => {
+    mockGetInitialURL.mockResolvedValue('leasetracker://lease/lease-xyz');
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockGetInitialURL).toHaveBeenCalled();
+  });
+
+  it('invokes the registered url handler when a deep link event fires', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    const urlHandler = mockAddEventListener.mock.calls[0][1] as (event: {
+      url: string;
+    }) => void;
+    expect(() =>
+      urlHandler({ url: 'leasetracker://invite/lease-abc' }),
+    ).not.toThrow();
+    expect(() =>
+      urlHandler({ url: 'leasetracker://lease/lease-xyz' }),
+    ).not.toThrow();
   });
 });
