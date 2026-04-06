@@ -54,6 +54,19 @@ jest.mock('../src/screens/home/AddReadingScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/PaceDetailScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    PaceDetailScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'pace-detail-screen' },
+        MockReact.createElement(Text, { testID: 'pace-detail-title' }, 'Pace Detail'),
+      ),
+  };
+});
+
 jest.mock('../src/screens/leases/LeaseListScreen', () => {
   const MockReact = require('react');
   const { View, Text } = require('react-native');
