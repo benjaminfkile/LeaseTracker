@@ -11,6 +11,19 @@ jest.mock('../src/screens/home/DashboardScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/LeaseDetailScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LeaseDetailScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'lease-detail-screen' },
+        MockReact.createElement(Text, { testID: 'lease-detail-title' }, 'Lease Detail'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
