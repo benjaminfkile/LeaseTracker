@@ -37,6 +37,19 @@ jest.mock('../src/screens/home/OdometerLogScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/AddReadingScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AddReadingScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'add-reading-screen' },
+        MockReact.createElement(Text, { testID: 'add-reading-title' }, 'Add Reading'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
