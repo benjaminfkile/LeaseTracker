@@ -139,3 +139,5 @@ export type UpdateAlertConfigInput = Partial<
     | 'notifyPush'
   >
 >;
+
+export type UpdateUserInput = Partial<Pick<User, 'firstName' | 'lastName'>>;

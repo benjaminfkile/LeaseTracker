@@ -1,0 +1,146 @@
+jest.mock('react-native-config', () => ({
+  API_BASE_URL: 'https://api.test.com',
+}));
+
+jest.mock('../src/api/client', () => {
+  class ApiError extends Error {
+    readonly statusCode: number | null;
+    readonly details?: unknown;
+    constructor(message: string, statusCode: number | null, details?: unknown) {
+      super(message);
+      this.name = 'ApiError';
+      this.statusCode = statusCode;
+      this.details = details;
+    }
+  }
+
+  const mock = {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    default: mock,
+    ApiError,
+    normalizeError: jest.fn((error: unknown) => {
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+      return new ApiError(message, null);
+    }),
+  };
+});
+
+import client, { ApiError, normalizeError } from '../src/api/client';
+import { getMe, updateMe, savePushToken, deleteAccount } from '../src/api/userApi';
+import type { User, UpdateUserInput } from '../src/types/api';
+
+const mockUser: User = {
+  id: 'user-1',
+  email: 'test@example.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-06-01T00:00:00Z',
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+// ─── getMe ───────────────────────────────────────────────────────────────────
+
+describe('getMe', () => {
+  it('returns the authenticated user on success', async () => {
+    (client.get as jest.Mock).mockResolvedValue({ data: mockUser });
+
+    const result = await getMe();
+
+    expect(client.get).toHaveBeenCalledWith('/me');
+    expect(result).toEqual(mockUser);
+  });
+
+  it('throws a normalized ApiError on failure', async () => {
+    const error = new Error('Unauthorized');
+    (client.get as jest.Mock).mockRejectedValue(error);
+
+    await expect(getMe()).rejects.toBeInstanceOf(ApiError);
+    expect(normalizeError).toHaveBeenCalledWith(error);
+  });
+});
+
+// ─── updateMe ────────────────────────────────────────────────────────────────
+
+describe('updateMe', () => {
+  const patch: UpdateUserInput = { firstName: 'Jane' };
+  const updatedUser: User = { ...mockUser, firstName: 'Jane' };
+
+  it('returns the updated user on success', async () => {
+    (client.put as jest.Mock).mockResolvedValue({ data: updatedUser });
+
+    const result = await updateMe(patch);
+
+    expect(client.put).toHaveBeenCalledWith('/me', patch);
+    expect(result).toEqual(updatedUser);
+  });
+
+  it('accepts an empty patch object', async () => {
+    (client.put as jest.Mock).mockResolvedValue({ data: mockUser });
+
+    const result = await updateMe({});
+
+    expect(client.put).toHaveBeenCalledWith('/me', {});
+    expect(result).toEqual(mockUser);
+  });
+
+  it('throws a normalized ApiError on failure', async () => {
+    const error = new Error('Validation Error');
+    (client.put as jest.Mock).mockRejectedValue(error);
+
+    await expect(updateMe(patch)).rejects.toBeInstanceOf(ApiError);
+    expect(normalizeError).toHaveBeenCalledWith(error);
+  });
+});
+
+// ─── savePushToken ────────────────────────────────────────────────────────────
+
+describe('savePushToken', () => {
+  it('resolves without a value on success', async () => {
+    (client.post as jest.Mock).mockResolvedValue({ data: undefined });
+
+    const result = await savePushToken('fcm-token-abc');
+
+    expect(client.post).toHaveBeenCalledWith('/me/push-token', { token: 'fcm-token-abc' });
+    expect(result).toBeUndefined();
+  });
+
+  it('throws a normalized ApiError on failure', async () => {
+    const error = new Error('Server Error');
+    (client.post as jest.Mock).mockRejectedValue(error);
+
+    await expect(savePushToken('fcm-token-abc')).rejects.toBeInstanceOf(ApiError);
+    expect(normalizeError).toHaveBeenCalledWith(error);
+  });
+});
+
+// ─── deleteAccount ────────────────────────────────────────────────────────────
+
+describe('deleteAccount', () => {
+  it('resolves without a value on success', async () => {
+    (client.delete as jest.Mock).mockResolvedValue({ data: undefined });
+
+    const result = await deleteAccount();
+
+    expect(client.delete).toHaveBeenCalledWith('/me');
+    expect(result).toBeUndefined();
+  });
+
+  it('throws a normalized ApiError on failure', async () => {
+    const error = new Error('Forbidden');
+    (client.delete as jest.Mock).mockRejectedValue(error);
+
+    await expect(deleteAccount()).rejects.toBeInstanceOf(ApiError);
+    expect(normalizeError).toHaveBeenCalledWith(error);
+  });
+});
