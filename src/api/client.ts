@@ -3,6 +3,41 @@ import Config from 'react-native-config';
 import * as authService from '../auth/authService';
 import { useAuthStore } from '../stores/authStore';
 
+export interface NormalizedError {
+  message: string;
+  statusCode: number | null;
+  details?: unknown;
+}
+
+export class ApiError extends Error implements NormalizedError {
+  readonly statusCode: number | null;
+  readonly details?: unknown;
+
+  constructor(message: string, statusCode: number | null, details?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.details = details;
+  }
+}
+
+export function normalizeError(error: unknown): ApiError {
+  if (error instanceof AxiosError) {
+    const data: unknown = error.response?.data;
+    const dataObj = data !== null && typeof data === 'object' ? (data as Record<string, unknown>) : null;
+    const message =
+      typeof dataObj?.message === 'string'
+        ? dataObj.message
+        : error.message || 'An unexpected error occurred';
+    const statusCode = error.response?.status ?? null;
+    return new ApiError(message, statusCode, data);
+  }
+  if (error instanceof Error) {
+    return new ApiError(error.message, null);
+  }
+  return new ApiError('An unexpected error occurred', null);
+}
+
 interface RetryableRequest extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
@@ -47,7 +82,7 @@ client.interceptors.response.use(
     const originalRequest = error.config as RetryableRequest | undefined;
 
     if (!originalRequest || error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
+      return Promise.reject(normalizeError(error));
     }
 
     if (isRefreshing) {
@@ -69,9 +104,9 @@ client.interceptors.response.use(
 
     if (!tokens?.refreshToken) {
       isRefreshing = false;
-      processQueue(error, null);
+      processQueue(normalizeError(error), null);
       await useAuthStore.getState().logout();
-      return Promise.reject(error);
+      return Promise.reject(normalizeError(error));
     }
 
     try {
@@ -83,9 +118,9 @@ client.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${newTokens.idToken}`;
       return client(originalRequest);
     } catch (refreshError) {
-      processQueue(refreshError, null);
+      processQueue(normalizeError(refreshError), null);
       await useAuthStore.getState().logout();
-      return Promise.reject(refreshError);
+      return Promise.reject(normalizeError(refreshError));
     } finally {
       isRefreshing = false;
     }
