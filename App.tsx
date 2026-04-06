@@ -8,8 +8,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BootSplash from 'react-native-bootsplash';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { NotificationPermissionModal } from './src/components/NotificationPermissionModal';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores/authStore';
+import { useNotificationPermission } from './src/hooks/useNotificationPermission';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +28,7 @@ const INVITE_URL_PATTERN = /^leasetracker:\/\/invite\/(.+)$/;
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const hydrateFromStorage = useAuthStore(state => state.hydrateFromStorage);
+  const { shouldShowModal, handlePermission } = useNotificationPermission();
 
   useEffect(() => {
     hydrateFromStorage().finally(() => {
@@ -66,6 +69,11 @@ function App() {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <ErrorBoundary>
           <RootNavigator />
+          <NotificationPermissionModal
+            visible={shouldShowModal}
+            onAllow={() => handlePermission(true)}
+            onDeny={() => handlePermission(false)}
+          />
         </ErrorBoundary>
       </SafeAreaProvider>
     </QueryClientProvider>

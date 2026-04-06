@@ -38,6 +38,17 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   removeItem: jest.fn(),
 }));
 
+jest.mock('../src/hooks/useNotificationPermission', () => ({
+  useNotificationPermission: () => ({
+    shouldShowModal: false,
+    handlePermission: jest.fn(),
+  }),
+}));
+
+jest.mock('../src/components/NotificationPermissionModal', () => ({
+  NotificationPermissionModal: () => null,
+}));
+
 jest.mock('../src/navigation/RootNavigator', () => ({
   RootNavigator: () => null,
 }));
