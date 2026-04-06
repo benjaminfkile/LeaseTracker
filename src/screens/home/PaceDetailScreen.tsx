@@ -210,6 +210,8 @@ export function PaceDetailScreen(): React.ReactElement {
           <ProjectionChart
             entries={entries}
             mode={mode}
+            lease={lease}
+            summary={summary}
             testID="projection-chart"
           />
         </View>
