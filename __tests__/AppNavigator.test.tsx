@@ -41,6 +41,32 @@ jest.mock('../src/screens/leases/AddLeaseScreen', () => {
   };
 });
 
+jest.mock('../src/screens/leases/EditLeaseScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    EditLeaseScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'edit-lease-screen' },
+        MockReact.createElement(Text, { testID: 'edit-lease-title' }, 'Edit Lease'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/leases/TurnInChecklistScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    TurnInChecklistScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'turn-in-checklist-screen' },
+        MockReact.createElement(Text, { testID: 'turn-in-checklist-title' }, 'Turn-In Checklist'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
