@@ -151,6 +151,12 @@ export function TripListScreen(): React.ReactElement {
                     completed={isCompleted}
                     remainingMiles={summaryData?.milesRemaining}
                     onMarkComplete={isCompleted ? undefined : () => markComplete(item.id)}
+                    onPress={() =>
+                      navigation.navigate('EditTrip', {
+                        tripId: item.id,
+                        leaseId: selectedLeaseId,
+                      })
+                    }
                   />
                 );
               }}
