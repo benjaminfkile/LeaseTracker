@@ -7,4 +7,7 @@ export type AuthStackParamList = {
   VerifyEmail: { email: string };
 };
 
+export type AppStackParamList = Record<string, undefined>;
+
 export type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
+export type AppNavigationProp = NativeStackNavigationProp<AppStackParamList>;

@@ -36,14 +36,34 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 jest.mock('../src/stores/authStore');
 
+jest.mock('../src/navigation/AppNavigator', () => ({
+  AppNavigator: () => null,
+}));
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import * as ReactNative from 'react-native';
 import { RootNavigator } from '../src/navigation/RootNavigator';
 import { useAuthStore } from '../src/stores/authStore';
 
-function mockAuthStore() {
-  const state = {
+type AuthStoreState = {
+  login: jest.Mock;
+  logout: jest.Mock;
+  register: jest.Mock;
+  confirmEmail: jest.Mock;
+  forgotPassword: jest.Mock;
+  confirmReset: jest.Mock;
+  refreshTokens: jest.Mock;
+  hydrateFromStorage: jest.Mock;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  user: null;
+  tokens: null;
+  error: null;
+};
+
+function mockAuthStore(overrides: Partial<AuthStoreState> = {}) {
+  const state: AuthStoreState = {
     login: jest.fn(),
     logout: jest.fn(),
     register: jest.fn(),
@@ -57,9 +77,10 @@ function mockAuthStore() {
     user: null,
     tokens: null,
     error: null,
+    ...overrides,
   };
   (useAuthStore as unknown as jest.Mock).mockImplementation(
-    (selector: (s: typeof state) => unknown) => selector(state),
+    (selector: (s: AuthStoreState) => unknown) => selector(state),
   );
 }
 
@@ -83,12 +104,42 @@ describe('RootNavigator', () => {
     });
   });
 
-  it('renders LoginScreen as the initial screen', async () => {
+  it('renders LoginScreen as the initial screen when not authenticated', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<RootNavigator />);
     });
     const loginTitle = renderer!.root.findByProps({ testID: 'login-title' });
     expect(loginTitle).toBeDefined();
+  });
+
+  it('renders the splash indicator while isLoading is true', async () => {
+    mockAuthStore({ isLoading: true });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<RootNavigator />);
+    });
+    const splash = renderer!.root.findByProps({ testID: 'root-splash' });
+    expect(splash).toBeDefined();
+    const indicator = renderer!.root.findByProps({ testID: 'root-splash-indicator' });
+    expect(indicator).toBeDefined();
+  });
+
+  it('does not render NavigationContainer while isLoading is true', async () => {
+    mockAuthStore({ isLoading: true });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<RootNavigator />);
+    });
+    expect(() => renderer!.root.findByProps({ testID: 'login-title' })).toThrow();
+  });
+
+  it('renders AppNavigator when isAuthenticated is true', async () => {
+    mockAuthStore({ isAuthenticated: true });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<RootNavigator />);
+    });
+    expect(() => renderer!.root.findByProps({ testID: 'login-title' })).toThrow();
   });
 });
