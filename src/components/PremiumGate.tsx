@@ -6,9 +6,10 @@ type Props = {
   children: React.ReactNode;
   isPremium?: boolean;
   onUpgrade?: () => void;
+  description?: string;
 };
 
-export function PremiumGate({ children, isPremium, onUpgrade }: Props): React.ReactElement {
+export function PremiumGate({ children, isPremium, onUpgrade, description }: Props): React.ReactElement {
   const theme = useTheme();
 
   if (isPremium === false) {
@@ -25,17 +26,17 @@ export function PremiumGate({ children, isPremium, onUpgrade }: Props): React.Re
           {'Premium Feature'}
         </Text>
         <Text style={[styles.description, { color: theme.colors.textSecondary }]}>
-          {'Upgrade to unlock Buyback Analysis and all premium features.'}
+          {description ?? 'Unlock this feature and more with Premium.'}
         </Text>
         <TouchableOpacity
           style={[styles.upgradeButton, { backgroundColor: theme.colors.primary }]}
           onPress={onUpgrade}
           testID="premium-gate-upgrade-button"
           accessibilityRole="button"
-          accessibilityLabel="Upgrade to Premium"
+          accessibilityLabel="Unlock with Premium"
         >
           <Text style={[styles.upgradeButtonText, { color: theme.colors.surface }]}>
-            {'Upgrade to Premium'}
+            {'Unlock with Premium'}
           </Text>
         </TouchableOpacity>
       </View>

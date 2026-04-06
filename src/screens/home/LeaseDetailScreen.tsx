@@ -99,18 +99,18 @@ export function LeaseDetailScreen(): React.ReactElement {
     enabled: leaseId != null,
   });
 
-  const { data: members } = useQuery({
-    queryKey: ['lease-members', leaseId],
-    queryFn: () => getLeaseMembers(leaseId),
-    enabled: leaseId != null,
-  });
-
   const { data: subscription } = useQuery({
     queryKey: ['subscription-status'],
     queryFn: getStatus,
   });
 
   const isPremium = subscription?.isPremium ?? false;
+
+  const { data: members } = useQuery({
+    queryKey: ['lease-members', leaseId],
+    queryFn: () => getLeaseMembers(leaseId),
+    enabled: isPremium && leaseId != null,
+  });
 
   const latestReading = readings != null && readings.length > 0 ? readings[0] : null;
 
@@ -303,54 +303,88 @@ export function LeaseDetailScreen(): React.ReactElement {
         </TouchableOpacity>
 
         {/* Shared With row */}
-        <View
-          style={[
-            styles.listRow,
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          ]}
-          testID="shared-with-row"
-        >
-          <View style={styles.listRowContent}>
-            <Text style={[styles.listRowLabel, { color: theme.colors.textPrimary }]}>
-              {'Shared With'}
-            </Text>
-            {sharedMembers.length === 0 ? (
+        {isPremium ? (
+          <View
+            style={[
+              styles.listRow,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            testID="shared-with-row"
+          >
+            <View style={styles.listRowContent}>
+              <Text style={[styles.listRowLabel, { color: theme.colors.textPrimary }]}>
+                {'Shared With'}
+              </Text>
+              {sharedMembers.length === 0 ? (
+                <Text
+                  style={[styles.listRowValue, { color: theme.colors.textSecondary }]}
+                  testID="shared-with-only-you"
+                >
+                  {'Only you'}
+                </Text>
+              ) : (
+                <View style={styles.avatarsRow} testID="shared-with-avatars">
+                  {sharedMembers.slice(0, 3).map(member => (
+                    <View
+                      key={member.id}
+                      style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
+                      testID={`member-avatar-${member.id}`}
+                    >
+                      <Text style={[styles.avatarInitial, { color: theme.colors.surface }]}>
+                        {member.email.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                  ))}
+                  {sharedMembers.length > 3 && (
+                    <View
+                      style={[styles.avatar, { backgroundColor: theme.colors.border }]}
+                      testID="member-avatar-overflow"
+                    >
+                      <Text
+                        style={[styles.avatarInitial, { color: theme.colors.textPrimary }]}
+                      >
+                        {`+${sharedMembers.length - 3}`}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+            <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.listRow,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            onPress={() => {
+              const parent = navigation.getParent();
+              if (parent != null) {
+                (parent.navigate as unknown as (screen: string, params: object) => void)(
+                  'Settings',
+                  { screen: 'Subscription' },
+                );
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Unlock lease sharing with Premium"
+            testID="shared-with-row"
+          >
+            <View style={styles.listRowContent}>
+              <Text style={[styles.listRowLabel, { color: theme.colors.textPrimary }]}>
+                {'Shared With'}
+              </Text>
               <Text
                 style={[styles.listRowValue, { color: theme.colors.textSecondary }]}
-                testID="shared-with-only-you"
+                testID="shared-with-locked"
               >
-                {'Only you'}
+                {'🔒 Premium'}
               </Text>
-            ) : (
-              <View style={styles.avatarsRow} testID="shared-with-avatars">
-                {sharedMembers.slice(0, 3).map(member => (
-                  <View
-                    key={member.id}
-                    style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
-                    testID={`member-avatar-${member.id}`}
-                  >
-                    <Text style={[styles.avatarInitial, { color: theme.colors.surface }]}>
-                      {member.email.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                ))}
-                {sharedMembers.length > 3 && (
-                  <View
-                    style={[styles.avatar, { backgroundColor: theme.colors.border }]}
-                    testID="member-avatar-overflow"
-                  >
-                    <Text
-                      style={[styles.avatarInitial, { color: theme.colors.textPrimary }]}
-                    >
-                      {`+${sharedMembers.length - 3}`}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-          <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
-        </View>
+            </View>
+            <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Lease Info collapsible panel */}
         <View

@@ -257,7 +257,10 @@ describe('PaceDetailScreen', () => {
     expect(thisYearBtn).toBeDefined();
   });
 
-  it('renders the projection chart section', async () => {
+  it('renders the projection chart section when premium', async () => {
+    setupQueryMocks({
+      subscription: { isPremium: true, tier: 'premium', expiresAt: null, platform: 'ios', productId: 'premium_monthly' },
+    });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<PaceDetailScreen />);
@@ -266,13 +269,36 @@ describe('PaceDetailScreen', () => {
     expect(section).toBeDefined();
   });
 
-  it('renders the monthly mileage chart section', async () => {
+  it('renders the monthly mileage chart section when premium', async () => {
+    setupQueryMocks({
+      subscription: { isPremium: true, tier: 'premium', expiresAt: null, platform: 'ios', productId: 'premium_monthly' },
+    });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<PaceDetailScreen />);
     });
     const section = renderer!.root.findByProps({ testID: 'pace-detail-monthly-section' });
     expect(section).toBeDefined();
+  });
+
+  it('shows premium gate for charts when not premium', async () => {
+    setupQueryMocks({ subscription: { isPremium: false, tier: 'free', expiresAt: null, platform: null, productId: null } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const locked = renderer!.root.findByProps({ testID: 'premium-gate-locked' });
+    expect(locked).toBeDefined();
+  });
+
+  it('does not show charts when not premium', async () => {
+    setupQueryMocks({ subscription: { isPremium: false, tier: 'free', expiresAt: null, platform: null, productId: null } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const projSections = renderer!.root.findAllByProps({ testID: 'pace-detail-projection-section' }, { deep: false });
+    expect(projSections).toHaveLength(0);
   });
 
   it('renders the stats table', async () => {
