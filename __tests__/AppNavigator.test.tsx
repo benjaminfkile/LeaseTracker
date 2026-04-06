@@ -153,6 +153,19 @@ jest.mock('../src/screens/leases/TurnInChecklistScreen', () => {
   };
 });
 
+jest.mock('../src/screens/trips/TripListScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    TripListScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'trip-list-screen' },
+        MockReact.createElement(Text, { testID: 'trip-list-title' }, 'Saved Trips'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
