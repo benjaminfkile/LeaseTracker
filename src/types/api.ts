@@ -94,3 +94,17 @@ export type MileageHistory = {
   leaseId: string;
   entries: MileageHistoryEntry[];
 };
+
+export type CreateLeaseInput = {
+  vehicleYear: number;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleTrim?: string;
+  startDate: string;
+  endDate: string;
+  totalMiles: number;
+  startingMileage: number;
+  monthlyMiles: number;
+};
+
+export type UpdateLeaseInput = Partial<CreateLeaseInput>;
