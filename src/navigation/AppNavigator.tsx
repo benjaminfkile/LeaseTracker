@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { HomeNavigator } from './HomeNavigator';
 import { LeaseNavigator } from './LeaseNavigator';
-import { TripsScreen } from '../screens/trips/TripsScreen';
+import { TripsNavigator } from './TripsNavigator';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { useLeasesStore } from '../stores/leasesStore';
 import type { AppTabParamList } from './types';
@@ -36,7 +36,7 @@ export function AppNavigator(): React.ReactElement {
       />
       <Tab.Screen
         name="Trips"
-        component={TripsScreen}
+        component={TripsNavigator}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="map" size={size} color={color} />
