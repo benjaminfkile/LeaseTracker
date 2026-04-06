@@ -28,6 +28,19 @@ jest.mock('../src/screens/home/LeaseDetailScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/OdometerLogScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    OdometerLogScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'odometer-log-screen' },
+        MockReact.createElement(Text, { testID: 'odometer-log-title' }, 'Odometer Log'),
+      ),
+  };
+});
+
 jest.mock('../src/screens/leases/LeaseListScreen', () => {
   const MockReact = require('react');
   const { View, Text } = require('react-native');
