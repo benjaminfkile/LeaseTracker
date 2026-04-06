@@ -80,6 +80,23 @@ jest.mock('../src/screens/home/BuybackAnalysisScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/LeaseEndOptionsScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LeaseEndOptionsScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'lease-end-options-screen' },
+        MockReact.createElement(
+          Text,
+          { testID: 'lease-end-options-title' },
+          'Lease End Options',
+        ),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';
