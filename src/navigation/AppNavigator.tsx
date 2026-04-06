@@ -1,13 +1,57 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { AppStackParamList } from './types';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { HomeScreen } from '../screens/home/HomeScreen';
+import { LeasesScreen } from '../screens/leases/LeasesScreen';
+import { TripsScreen } from '../screens/trips/TripsScreen';
+import { SettingsScreen } from '../screens/settings/SettingsScreen';
+import { useLeasesStore } from '../stores/leasesStore';
+import type { AppTabParamList } from './types';
 
-const Stack = createNativeStackNavigator<AppStackParamList>();
+const Tab = createBottomTabNavigator<AppTabParamList>();
 
 export function AppNavigator(): React.ReactElement {
+  const overPaceCount = useLeasesStore(state => state.overPaceCount);
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* App screens will be added in subsequent phases */}
-    </Stack.Navigator>
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="view-dashboard" size={size} color={color} />
+          ),
+          tabBarBadge: overPaceCount > 0 ? overPaceCount : undefined,
+        }}
+      />
+      <Tab.Screen
+        name="Leases"
+        component={LeasesScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="car" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Trips"
+        component={TripsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="map" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="cog" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }
