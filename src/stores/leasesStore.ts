@@ -1,8 +1,5 @@
 import { create } from 'zustand';
-
-export type Lease = {
-  id: string;
-};
+import type { Lease } from '../types/api';
 
 type LeasesState = {
   leases: Lease[];
