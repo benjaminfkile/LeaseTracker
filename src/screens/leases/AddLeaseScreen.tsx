@@ -427,7 +427,7 @@ export function AddLeaseScreen(): React.ReactElement {
       const start = dayjs(startDate);
       const end = dayjs(endDate);
       if (end.isAfter(start)) {
-        const years = end.diff(start, 'day') / 365;
+        const years = end.diff(start, 'year', true);
         const milesPerYearNum = parseInt(milesPerYear, 10);
         if (!isNaN(milesPerYearNum) && milesPerYearNum > 0) {
           const calculated = Math.round(years * milesPerYearNum);
@@ -479,6 +479,9 @@ export function AddLeaseScreen(): React.ReactElement {
 
   const onSubmit = (data: AddLeaseFormData) => {
     const milesPerYearNum = parseInt(data.milesPerYear, 10);
+    // Fields not yet in CreateLeaseInput (displayName, vehicleColor, vin, licensePlate,
+    // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
+    // mpgEstimate, notes) are collected for future API support and shown in the review.
     submitLease({
       vehicleYear: parseInt(data.vehicleYear, 10),
       vehicleMake: data.vehicleMake,
@@ -711,7 +714,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChange={onChange}
                       errorMessage={
-                        errors.endDate?.message ?? (dateOrderError ?? undefined)
+                        errors.endDate?.message ?? dateOrderError ?? undefined
                       }
                       minimumDate={
                         startDate
