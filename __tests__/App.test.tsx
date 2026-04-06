@@ -42,12 +42,69 @@ jest.mock('../src/navigation/RootNavigator', () => ({
   RootNavigator: () => null,
 }));
 
+jest.mock('../src/stores/authStore');
+
+jest.mock('react-native-bootsplash', () => ({
+  __esModule: true,
+  default: { hide: jest.fn().mockResolvedValue(undefined) },
+}));
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../App';
+import { useAuthStore } from '../src/stores/authStore';
+import BootSplash from 'react-native-bootsplash';
 
-test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
+const mockBootSplashHide = BootSplash.hide as jest.Mock;
+
+const mockHydrateFromStorage = jest.fn().mockResolvedValue(undefined);
+
+function setupAuthStoreMock() {
+  const state = {
+    login: jest.fn(),
+    logout: jest.fn(),
+    register: jest.fn(),
+    confirmEmail: jest.fn(),
+    forgotPassword: jest.fn(),
+    confirmReset: jest.fn(),
+    refreshTokens: jest.fn(),
+    hydrateFromStorage: mockHydrateFromStorage,
+    resendCode: jest.fn(),
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    tokens: null,
+    error: null,
+  };
+  (useAuthStore as unknown as jest.Mock).mockImplementation(
+    (selector: (s: typeof state) => unknown) => selector(state),
+  );
+}
+
+describe('App', () => {
+  beforeEach(() => {
+    mockHydrateFromStorage.mockReset().mockResolvedValue(undefined);
+    mockBootSplashHide.mockReset().mockResolvedValue(undefined);
+    setupAuthStoreMock();
+  });
+
+  it('renders correctly', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+  });
+
+  it('calls hydrateFromStorage on mount', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockHydrateFromStorage).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the bootsplash after hydration resolves', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+    expect(mockBootSplashHide).toHaveBeenCalledWith({ fade: true });
   });
 });
