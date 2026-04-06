@@ -121,3 +121,11 @@ export type CreateReadingInput = {
 };
 
 export type UpdateReadingInput = Partial<CreateReadingInput>;
+
+export type CreateTripInput = {
+  distance: number;
+  tripDate: string;
+  note?: string;
+};
+
+export type UpdateTripInput = Partial<CreateTripInput>;
