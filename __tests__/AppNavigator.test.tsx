@@ -43,7 +43,7 @@ describe('AppNavigator', () => {
     });
   });
 
-  it('renders HomeScreen as the initial tab', async () => {
+  it('renders DashboardScreen as the initial tab', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
@@ -52,8 +52,8 @@ describe('AppNavigator', () => {
         </NavigationContainer>,
       );
     });
-    const homeTitle = renderer!.root.findByProps({ testID: 'home-title' });
-    expect(homeTitle).toBeDefined();
+    const dashboardTitle = renderer!.root.findByProps({ testID: 'dashboard-title' });
+    expect(dashboardTitle).toBeDefined();
   });
 
   it('does not show a badge on Home tab when no leases are over pace', async () => {

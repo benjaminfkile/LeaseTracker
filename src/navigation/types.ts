@@ -8,6 +8,15 @@ export type AuthStackParamList = {
   VerifyEmail: { email: string };
 };
 
+export type HomeStackParamList = {
+  Dashboard: undefined;
+  LeaseDetail: { leaseId: string };
+  OdometerLog: { leaseId: string };
+  AddReading: { leaseId: string };
+  PaceDetail: { leaseId: string };
+  BuybackAnalysis: { leaseId: string };
+};
+
 export type AppTabParamList = {
   Home: undefined;
   Leases: undefined;
@@ -20,3 +29,4 @@ export type AppStackParamList = Record<string, undefined>;
 export type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
 export type AppNavigationProp = NativeStackNavigationProp<AppStackParamList>;
 export type AppTabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
+export type HomeStackNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
