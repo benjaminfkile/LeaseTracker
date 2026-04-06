@@ -249,7 +249,10 @@ export function AddTripScreen(): React.ReactElement {
       navigation.goBack();
     },
     onError: (err: Error) => {
-      Alert.alert('Error', err.message ?? 'Failed to save trip. Please try again.');
+      Alert.alert(
+        'Error',
+        err.message ?? 'Failed to save trip. Please check your connection and try again.',
+      );
     },
   });
 
