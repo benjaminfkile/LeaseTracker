@@ -1,3 +1,6 @@
+const mockGoBack = jest.fn();
+const mockInvalidateQueries = jest.fn().mockResolvedValue(undefined);
+
 jest.mock('react-native-safe-area-context', () => {
   const MockReact = require('react');
   const { View } = require('react-native');
@@ -14,16 +17,20 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ goBack: jest.fn() }),
+  useNavigation: () => ({ goBack: mockGoBack }),
 }));
 
 jest.mock('@tanstack/react-query', () => ({
-  useQueryClient: () => ({ invalidateQueries: jest.fn().mockResolvedValue(undefined) }),
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
 }));
 
 jest.mock('../src/api/subscriptionApi', () => ({
   verifyApplePurchase: jest.fn().mockResolvedValue({ isPremium: true }),
   verifyGooglePurchase: jest.fn().mockResolvedValue({ isPremium: true }),
+}));
+
+jest.mock('react-native-iap', () => ({
+  getAvailablePurchases: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('../src/theme', () => ({
@@ -44,7 +51,17 @@ jest.mock('../src/theme', () => ({
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import { Platform } from 'react-native';
 import { SubscriptionScreen } from '../src/screens/settings/SubscriptionScreen';
+import { verifyApplePurchase, verifyGooglePurchase } from '../src/api/subscriptionApi';
+import { getAvailablePurchases } from 'react-native-iap';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGoBack.mockClear();
+  mockInvalidateQueries.mockClear();
+  mockInvalidateQueries.mockResolvedValue(undefined);
+});
 
 describe('SubscriptionScreen', () => {
   it('renders without crashing', async () => {
@@ -140,5 +157,117 @@ describe('SubscriptionScreen', () => {
     expect(terms).toBeDefined();
     expect(privacy).toBeDefined();
     expect(billing).toBeDefined();
+  });
+
+  describe('handleRestorePurchases', () => {
+    it('shows error message when no purchases are found', async () => {
+      (getAvailablePurchases as jest.Mock).mockResolvedValue([]);
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<SubscriptionScreen />);
+      });
+      const restore = renderer!.root.findByProps({ testID: 'subscription-restore' });
+      await ReactTestRenderer.act(async () => {
+        restore.props.onPress();
+      });
+      const error = renderer!.root.findByProps({ testID: 'subscription-error' });
+      expect(error).toBeDefined();
+      expect(error.props.children).toBe('No previous purchases found.');
+    });
+
+    it('calls verifyApplePurchase with the most recent receipt on iOS', async () => {
+      const originalOS = Platform.OS;
+      Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+
+      const purchases = [
+        { transactionDate: 1000, transactionReceipt: 'receipt-old', productId: 'monthly', purchaseToken: '' },
+        { transactionDate: 2000, transactionReceipt: 'receipt-new', productId: 'yearly', purchaseToken: '' },
+      ];
+      (getAvailablePurchases as jest.Mock).mockResolvedValue(purchases);
+      (verifyApplePurchase as jest.Mock).mockResolvedValue({ isPremium: true });
+
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<SubscriptionScreen />);
+      });
+      const restore = renderer!.root.findByProps({ testID: 'subscription-restore' });
+      await ReactTestRenderer.act(async () => {
+        restore.props.onPress();
+      });
+
+      expect(verifyApplePurchase).toHaveBeenCalledWith('receipt-new');
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['subscription-status'] });
+      expect(mockGoBack).toHaveBeenCalled();
+
+      Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+    });
+
+    it('calls verifyGooglePurchase with the most recent purchase on Android', async () => {
+      const originalOS = Platform.OS;
+      Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+
+      const purchases = [
+        { transactionDate: 500, transactionReceipt: '', productId: 'monthly', purchaseToken: 'token-old' },
+        { transactionDate: 1500, transactionReceipt: '', productId: 'yearly', purchaseToken: 'token-new' },
+      ];
+      (getAvailablePurchases as jest.Mock).mockResolvedValue(purchases);
+      (verifyGooglePurchase as jest.Mock).mockResolvedValue({ isPremium: true });
+
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<SubscriptionScreen />);
+      });
+      const restore = renderer!.root.findByProps({ testID: 'subscription-restore' });
+      await ReactTestRenderer.act(async () => {
+        restore.props.onPress();
+      });
+
+      expect(verifyGooglePurchase).toHaveBeenCalledWith('yearly', 'token-new');
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['subscription-status'] });
+      expect(mockGoBack).toHaveBeenCalled();
+
+      Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+    });
+
+    it('shows error message when getAvailablePurchases throws', async () => {
+      (getAvailablePurchases as jest.Mock).mockRejectedValue(new Error('IAP error'));
+
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<SubscriptionScreen />);
+      });
+      const restore = renderer!.root.findByProps({ testID: 'subscription-restore' });
+      await ReactTestRenderer.act(async () => {
+        restore.props.onPress();
+      });
+
+      const error = renderer!.root.findByProps({ testID: 'subscription-error' });
+      expect(error).toBeDefined();
+      expect(error.props.children).toBe('Could not restore purchases. Please try again.');
+    });
+
+    it('shows error message when verifyApplePurchase throws on iOS', async () => {
+      const originalOS = Platform.OS;
+      Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+
+      (getAvailablePurchases as jest.Mock).mockResolvedValue([
+        { transactionDate: 1000, transactionReceipt: 'receipt', productId: 'monthly', purchaseToken: '' },
+      ]);
+      (verifyApplePurchase as jest.Mock).mockRejectedValue(new Error('Verification failed'));
+
+      let renderer: ReactTestRenderer.ReactTestRenderer;
+      await ReactTestRenderer.act(() => {
+        renderer = ReactTestRenderer.create(<SubscriptionScreen />);
+      });
+      const restore = renderer!.root.findByProps({ testID: 'subscription-restore' });
+      await ReactTestRenderer.act(async () => {
+        restore.props.onPress();
+      });
+
+      const error = renderer!.root.findByProps({ testID: 'subscription-error' });
+      expect(error.props.children).toBe('Could not restore purchases. Please try again.');
+
+      Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+    });
   });
 });
