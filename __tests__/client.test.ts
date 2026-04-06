@@ -27,7 +27,7 @@ jest.mock('../src/stores/authStore', () => {
 import axios, { AxiosError, AxiosHeaders } from 'axios';
 import * as authService from '../src/auth/authService';
 import { useAuthStore } from '../src/stores/authStore';
-import client from '../src/api/client';
+import client, { ApiError, normalizeError } from '../src/api/client';
 
 const mockTokens = {
   idToken: 'old-id-token',
@@ -286,5 +286,150 @@ describe('response interceptor', () => {
     await expect(promise2).rejects.toThrow('Token expired');
     expect(authService.refreshSession).toHaveBeenCalledTimes(1);
     expect(storeState.logout).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── normalizeError ─────────────────────────────────────────────────────────
+
+describe('normalizeError', () => {
+  it('returns an ApiError that is also an Error instance', () => {
+    const err = new AxiosError('Bad Request', 'ERR_BAD_RESPONSE');
+    const normalized = normalizeError(err);
+    expect(normalized).toBeInstanceOf(ApiError);
+    expect(normalized).toBeInstanceOf(Error);
+    expect(normalized.name).toBe('ApiError');
+  });
+
+  it('extracts statusCode from AxiosError response', () => {
+    const config = makeConfig();
+    const err = new AxiosError('Unprocessable', 'ERR_BAD_RESPONSE', config as never);
+    err.response = {
+      status: 422,
+      statusText: 'Unprocessable Entity',
+      data: { code: 'INVALID_INPUT' },
+      headers: {},
+      config: config as never,
+    };
+    const normalized = normalizeError(err);
+    expect(normalized.statusCode).toBe(422);
+    expect(normalized.details).toEqual({ code: 'INVALID_INPUT' });
+  });
+
+  it('uses message field from response data when it is a string', () => {
+    const config = makeConfig();
+    const err = new AxiosError('Request failed', 'ERR_BAD_RESPONSE', config as never);
+    err.response = {
+      status: 400,
+      statusText: 'Bad Request',
+      data: { message: 'Email is invalid', field: 'email' },
+      headers: {},
+      config: config as never,
+    };
+    const normalized = normalizeError(err);
+    expect(normalized.message).toBe('Email is invalid');
+    expect(normalized.details).toEqual({ message: 'Email is invalid', field: 'email' });
+  });
+
+  it('falls back to error.message when response data has no string message field', () => {
+    const config = makeConfig();
+    const err = new AxiosError('Server Error', 'ERR_BAD_RESPONSE', config as never);
+    err.response = {
+      status: 500,
+      statusText: 'Internal Server Error',
+      data: { code: 42 },
+      headers: {},
+      config: config as never,
+    };
+    const normalized = normalizeError(err);
+    expect(normalized.message).toBe('Server Error');
+  });
+
+  it('sets statusCode to null for a network AxiosError with no response', () => {
+    const err = new AxiosError('Network Error', 'ERR_NETWORK');
+    const normalized = normalizeError(err);
+    expect(normalized.statusCode).toBeNull();
+    expect(normalized.details).toBeUndefined();
+    expect(normalized.message).toBe('Network Error');
+  });
+
+  it('normalizes a plain Error with null statusCode and no details', () => {
+    const err = new Error('Something went wrong');
+    const normalized = normalizeError(err);
+    expect(normalized).toBeInstanceOf(ApiError);
+    expect(normalized.message).toBe('Something went wrong');
+    expect(normalized.statusCode).toBeNull();
+    expect(normalized.details).toBeUndefined();
+  });
+
+  it('normalizes an unknown non-Error value with a generic message', () => {
+    const normalized = normalizeError('unexpected string error');
+    expect(normalized).toBeInstanceOf(ApiError);
+    expect(normalized.message).toBe('An unexpected error occurred');
+    expect(normalized.statusCode).toBeNull();
+  });
+});
+
+// ─── Response interceptor — error normalization ──────────────────────────────
+
+describe('response interceptor — error normalization', () => {
+  it('rejects non-401 errors as ApiError with statusCode and message from response data', async () => {
+    const handler = getInterceptorHandler('response');
+    const config = makeConfig();
+    const err = new AxiosError('Request Failed', 'ERR_BAD_RESPONSE', config as never);
+    err.response = {
+      status: 500,
+      statusText: 'Internal Server Error',
+      data: { message: 'Internal server error' },
+      headers: {},
+      config: config as never,
+    };
+
+    let caughtError: unknown;
+    try {
+      await handler.rejected(err);
+    } catch (e) {
+      caughtError = e;
+    }
+
+    expect(caughtError).toBeInstanceOf(ApiError);
+    expect((caughtError as ApiError).statusCode).toBe(500);
+    expect((caughtError as ApiError).message).toBe('Internal server error');
+  });
+
+  it('rejects with ApiError after refresh failure', async () => {
+    const refreshError = new Error('Refresh failed');
+    (authService.refreshSession as jest.Mock).mockRejectedValue(refreshError);
+
+    const handler = getInterceptorHandler('response');
+    const config = makeConfig();
+    const err = make401Error(config);
+
+    let caughtError: unknown;
+    try {
+      await handler.rejected(err);
+    } catch (e) {
+      caughtError = e;
+    }
+
+    expect(caughtError).toBeInstanceOf(ApiError);
+    expect((caughtError as ApiError).message).toBe('Refresh failed');
+    expect((caughtError as ApiError).statusCode).toBeNull();
+  });
+
+  it('rejects with ApiError when no refresh token is available', async () => {
+    storeState.tokens = null;
+    const handler = getInterceptorHandler('response');
+    const config = makeConfig();
+    const err = make401Error(config);
+
+    let caughtError: unknown;
+    try {
+      await handler.rejected(err);
+    } catch (e) {
+      caughtError = e;
+    }
+
+    expect(caughtError).toBeInstanceOf(ApiError);
+    expect((caughtError as ApiError).statusCode).toBe(401);
   });
 });
