@@ -103,6 +103,14 @@ function setupMocks({
   });
 }
 
+function findTextInput(
+  renderer: ReactTestRenderer.ReactTestRenderer,
+  testID: string,
+): ReactTestRenderer.ReactTestInstance {
+  const wrapper = renderer.root.findByProps({ testID });
+  return wrapper.findByType('TextInput' as unknown as React.ElementType);
+}
+
 describe('EditTripScreen', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -290,21 +298,14 @@ describe('EditTripScreen', () => {
       renderer = ReactTestRenderer.create(<EditTripScreen />);
     });
 
-    // Fill trip name
-    const nameInput = renderer!.root.findByProps({ testID: 'trip-name-input' });
-    const nameTextInput = nameInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      nameTextInput.props.onChangeText('Updated trip');
+      findTextInput(renderer!, 'trip-name-input').props.onChangeText('Updated trip');
     });
 
-    // Fill distance
-    const distanceInput = renderer!.root.findByProps({ testID: 'distance-input' });
-    const distanceTextInput = distanceInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      distanceTextInput.props.onChangeText('300');
+      findTextInput(renderer!, 'distance-input').props.onChangeText('300');
     });
 
-    // Submit
     const saveBtn = renderer!.root.findByProps({ testID: 'save-trip-button' });
     await ReactTestRenderer.act(() => {
       saveBtn.props.onPress();
@@ -323,18 +324,12 @@ describe('EditTripScreen', () => {
       renderer = ReactTestRenderer.create(<EditTripScreen />);
     });
 
-    // Clear name
-    const nameInput = renderer!.root.findByProps({ testID: 'trip-name-input' });
-    const nameTextInput = nameInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      nameTextInput.props.onChangeText('');
+      findTextInput(renderer!, 'trip-name-input').props.onChangeText('');
     });
 
-    // Fill distance
-    const distanceInput = renderer!.root.findByProps({ testID: 'distance-input' });
-    const distanceTextInput = distanceInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      distanceTextInput.props.onChangeText('300');
+      findTextInput(renderer!, 'distance-input').props.onChangeText('300');
     });
 
     const saveBtn = renderer!.root.findByProps({ testID: 'save-trip-button' });
@@ -353,16 +348,12 @@ describe('EditTripScreen', () => {
       renderer = ReactTestRenderer.create(<EditTripScreen />);
     });
 
-    const nameInput = renderer!.root.findByProps({ testID: 'trip-name-input' });
-    const nameTextInput = nameInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      nameTextInput.props.onChangeText('My Trip');
+      findTextInput(renderer!, 'trip-name-input').props.onChangeText('My Trip');
     });
 
-    const distanceInput = renderer!.root.findByProps({ testID: 'distance-input' });
-    const distanceTextInput = distanceInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      distanceTextInput.props.onChangeText('0');
+      findTextInput(renderer!, 'distance-input').props.onChangeText('0');
     });
 
     const saveBtn = renderer!.root.findByProps({ testID: 'save-trip-button' });
@@ -379,10 +370,8 @@ describe('EditTripScreen', () => {
       renderer = ReactTestRenderer.create(<EditTripScreen />);
     });
 
-    const distanceInput = renderer!.root.findByProps({ testID: 'distance-input' });
-    const textInput = distanceInput.findByType('TextInput' as unknown as React.ElementType);
     await ReactTestRenderer.act(() => {
-      textInput.props.onChangeText('500');
+      findTextInput(renderer!, 'distance-input').props.onChangeText('500');
     });
 
     const previewText = renderer!.root.findByProps({ testID: 'trip-impact-preview-text' });

@@ -177,7 +177,7 @@ function TripImpactPreview({
     );
   }
 
-  // Add back the original distance (already counted) and subtract the new one
+  // Reverse the original trip's impact on remaining miles, then apply the new distance
   const milesAfter = milesRemaining + (originalDistance ?? 0) - enteredDistance;
 
   return (
