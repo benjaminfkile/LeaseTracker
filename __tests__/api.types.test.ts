@@ -158,6 +158,12 @@ describe('API types', () => {
         projectedOverageThresholdMiles: 500,
         notifyEmail: true,
         notifyPush: false,
+        approachingLimitEnabled: false,
+        approachingLimitPercent: 80,
+        overPaceEnabled: false,
+        leaseEndEnabled: false,
+        leaseEndDays: 30,
+        savedTripEnabled: false,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       };

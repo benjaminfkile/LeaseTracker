@@ -1,3 +1,16 @@
+jest.mock('../src/screens/settings/AlertSettingsScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AlertSettingsScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'alert-settings-screen' },
+        MockReact.createElement(Text, { testID: 'alert-settings-title' }, 'Alert Settings'),
+      ),
+  };
+});
+
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { NavigationContainer } from '@react-navigation/native';

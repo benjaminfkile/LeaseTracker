@@ -2,6 +2,19 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 jest.mock('../src/stores/leasesStore');
 
+jest.mock('../src/screens/settings/AlertSettingsScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AlertSettingsScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'alert-settings-screen' },
+        MockReact.createElement(Text, { testID: 'alert-settings-title' }, 'Alert Settings'),
+      ),
+  };
+});
+
 jest.mock('../src/screens/home/DashboardScreen', () => {
   const MockReact = require('react');
   const { View, Text } = require('react-native');
