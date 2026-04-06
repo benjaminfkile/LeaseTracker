@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
+import { getAvailablePurchases } from 'react-native-iap';
 import { verifyApplePurchase, verifyGooglePurchase } from '../../api/subscriptionApi';
 import { useTheme } from '../../theme';
 import type { SettingsStackNavigationProp } from '../../navigation/types';
@@ -69,9 +70,21 @@ export function SubscriptionScreen(): React.ReactElement {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      // TODO: Call platform-specific restore APIs (StoreKit restorePurchases on iOS,
-      // queryPurchases on Android) before invalidating the cache.
+      const purchases = await getAvailablePurchases();
+      if (purchases.length === 0) {
+        setErrorMessage('No previous purchases found.');
+        return;
+      }
+      const latest = purchases.reduce((a, b) =>
+        (b.transactionDate ?? 0) > (a.transactionDate ?? 0) ? b : a,
+      );
+      if (Platform.OS === 'ios') {
+        await verifyApplePurchase(latest.transactionReceipt);
+      } else {
+        await verifyGooglePurchase(latest.productId, latest.purchaseToken ?? '');
+      }
       await queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+      navigation.goBack();
     } catch (error) {
       console.error('Restore purchases failed:', error);
       setErrorMessage('Could not restore purchases. Please try again.');
