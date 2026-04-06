@@ -45,6 +45,10 @@ jest.mock('../src/hooks/useNotificationPermission', () => ({
   }),
 }));
 
+jest.mock('../src/hooks/useForegroundNotification', () => ({
+  useForegroundNotification: jest.fn(),
+}));
+
 jest.mock('../src/components/NotificationPermissionModal', () => ({
   NotificationPermissionModal: () => null,
 }));
