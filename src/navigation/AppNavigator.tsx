@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { HomeNavigator } from './HomeNavigator';
-import { LeasesScreen } from '../screens/leases/LeasesScreen';
+import { LeaseNavigator } from './LeaseNavigator';
 import { TripsScreen } from '../screens/trips/TripsScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { useLeasesStore } from '../stores/leasesStore';
@@ -27,7 +27,7 @@ export function AppNavigator(): React.ReactElement {
       />
       <Tab.Screen
         name="Leases"
-        component={LeasesScreen}
+        component={LeaseNavigator}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="car" size={size} color={color} />
