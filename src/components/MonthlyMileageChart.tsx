@@ -7,6 +7,7 @@ import type { MileageHistoryEntry } from '../types/api';
 type MonthlyMileageChartProps = {
   entries: MileageHistoryEntry[];
   mode: 'full-lease' | 'this-year';
+  monthlyAllowance?: number;
   testID?: string;
 };
 
@@ -69,6 +70,7 @@ export function computeMonthlyBars(
 export function MonthlyMileageChart({
   entries,
   mode,
+  monthlyAllowance,
   testID,
 }: MonthlyMileageChartProps): React.ReactElement {
   const theme = useTheme();
@@ -87,6 +89,8 @@ export function MonthlyMileageChart({
     );
   }
 
+  const showThreshold = monthlyAllowance != null && monthlyAllowance > 0;
+
   return (
     <View style={styles.container} testID={testID ?? 'monthly-mileage-chart'}>
       <BarChart
@@ -103,7 +107,35 @@ export function MonthlyMileageChart({
         width={300}
         height={180}
         noOfSections={4}
+        showReferenceLine1={showThreshold}
+        referenceLine1Position={monthlyAllowance}
+        referenceLine1Config={{
+          color: theme.colors.warning,
+          width: 2,
+          type: 'dashed',
+          dashWidth: 6,
+          dashGap: 4,
+        }}
       />
+      {showThreshold && (
+        <View style={styles.legend} testID="monthly-chart-legend">
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: theme.colors.primary }]} />
+            <Text style={[styles.legendLabel, { color: theme.colors.textSecondary }]}>
+              {'Miles Driven'}
+            </Text>
+          </View>
+          <View style={styles.legendItem} testID="monthly-allowance-legend-item">
+            <View
+              style={[styles.legendDash, { backgroundColor: theme.colors.warning }]}
+              testID="monthly-allowance-legend-dash"
+            />
+            <Text style={[styles.legendLabel, { color: theme.colors.textSecondary }]}>
+              {'Monthly Allowance'}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -123,5 +155,30 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  legendDash: {
+    borderRadius: 1,
+    height: 3,
+    marginRight: 4,
+    width: 16,
+  },
+  legendDot: {
+    borderRadius: 4,
+    height: 8,
+    marginRight: 4,
+    width: 8,
+  },
+  legendItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginHorizontal: 12,
+  },
+  legendLabel: {
+    fontSize: 12,
   },
 });
