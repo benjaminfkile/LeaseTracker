@@ -54,7 +54,7 @@ export function computeMonthlyBars(
   for (let i = 0; i < sortedKeys.length; i++) {
     const key = sortedKeys[i];
     const endMileage = byMonth.get(key) ?? 0;
-    const prevMileage = i > 0 ? (byMonth.get(sortedKeys[i - 1]) ?? 0) : endMileage;
+    const prevMileage = i > 0 ? (byMonth.get(sortedKeys[i - 1]) ?? 0) : 0;
     const miles = Math.max(0, endMileage - prevMileage);
     bars.push({
       value: miles,

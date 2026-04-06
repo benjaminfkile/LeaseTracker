@@ -102,11 +102,10 @@ describe('computeMonthlyBars', () => {
     expect(bars).toHaveLength(3);
   });
 
-  it('first bar value equals first mileage (no previous month)', () => {
+  it('first bar value equals the first month mileage from zero baseline', () => {
     const bars = computeMonthlyBars(entries, 'full-lease', primaryColor);
-    // First bar: no previous month, so value = 1000 - 1000 = 0
-    // Actually first bar value = endMileage - prevMileage where prev = endMileage for i=0
-    expect(bars[0].value).toBe(0);
+    // First bar: baseline is 0 (start of lease), so value = 1000 - 0 = 1000
+    expect(bars[0].value).toBe(1000);
   });
 
   it('computes delta between consecutive months', () => {
