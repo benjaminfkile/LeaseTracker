@@ -49,15 +49,16 @@ export function SubscriptionScreen(): React.ReactElement {
       const productId =
         selectedPlan === 'monthly' ? PRODUCT_ID_MONTHLY : PRODUCT_ID_YEARLY;
       if (Platform.OS === 'ios') {
-        // iOS: native StoreKit would provide the receipt — placeholder flow
+        // TODO: Obtain receiptData from StoreKit before calling verifyApplePurchase
         await verifyApplePurchase(productId);
       } else {
-        // Android: native Billing would provide the purchase token — placeholder flow
+        // TODO: Obtain purchaseToken from Google Play Billing before calling verifyGooglePurchase
         await verifyGooglePurchase(productId, '');
       }
       await queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
       navigation.goBack();
-    } catch {
+    } catch (error) {
+      console.error('Purchase failed:', error);
       setErrorMessage('Purchase could not be completed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -68,8 +69,11 @@ export function SubscriptionScreen(): React.ReactElement {
     setIsLoading(true);
     setErrorMessage(null);
     try {
+      // TODO: Call platform-specific restore APIs (StoreKit restorePurchases on iOS,
+      // queryPurchases on Android) before invalidating the cache.
       await queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
-    } catch {
+    } catch (error) {
+      console.error('Restore purchases failed:', error);
       setErrorMessage('Could not restore purchases. Please try again.');
     } finally {
       setIsLoading(false);
