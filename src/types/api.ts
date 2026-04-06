@@ -63,6 +63,12 @@ export type AlertConfig = {
   projectedOverageThresholdMiles: number;
   notifyEmail: boolean;
   notifyPush: boolean;
+  approachingLimitEnabled: boolean;
+  approachingLimitPercent: number;
+  overPaceEnabled: boolean;
+  leaseEndEnabled: boolean;
+  leaseEndDays: number;
+  savedTripEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -137,6 +143,12 @@ export type UpdateAlertConfigInput = Partial<
     | 'projectedOverageThresholdMiles'
     | 'notifyEmail'
     | 'notifyPush'
+    | 'approachingLimitEnabled'
+    | 'approachingLimitPercent'
+    | 'overPaceEnabled'
+    | 'leaseEndEnabled'
+    | 'leaseEndDays'
+    | 'savedTripEnabled'
   >
 >;
 
