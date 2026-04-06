@@ -67,6 +67,23 @@ jest.mock('../src/screens/home/PaceDetailScreen', () => {
   };
 });
 
+jest.mock('../src/screens/home/BuybackAnalysisScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    BuybackAnalysisScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'buyback-analysis-screen' },
+        MockReact.createElement(
+          Text,
+          { testID: 'buyback-analysis-title' },
+          'Buyback Analysis',
+        ),
+      ),
+  };
+});
+
 jest.mock('../src/screens/leases/LeaseListScreen', () => {
   const MockReact = require('react');
   const { View, Text } = require('react-native');
