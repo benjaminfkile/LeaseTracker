@@ -1,0 +1,96 @@
+export type User = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Lease = {
+  id: string;
+  userId: string;
+  vehicleYear: number;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleTrim?: string;
+  startDate: string;
+  endDate: string;
+  totalMiles: number;
+  startingMileage: number;
+  currentMileage: number;
+  monthlyMiles: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LeaseSummary = {
+  leaseId: string;
+  vehicleLabel: string;
+  startDate: string;
+  endDate: string;
+  totalMiles: number;
+  milesUsed: number;
+  milesRemaining: number;
+  daysRemaining: number;
+  projectedMiles: number;
+  isOverPace: boolean;
+};
+
+export type OdometerReading = {
+  id: string;
+  leaseId: string;
+  mileage: number;
+  readingDate: string;
+  note?: string;
+  createdAt: string;
+};
+
+export type SavedTrip = {
+  id: string;
+  leaseId: string;
+  distance: number;
+  tripDate: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AlertConfig = {
+  id: string;
+  leaseId: string;
+  overPaceThresholdPercent: number;
+  projectedOverageThresholdMiles: number;
+  notifyEmail: boolean;
+  notifyPush: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LeaseMember = {
+  id: string;
+  leaseId: string;
+  userId: string;
+  email: string;
+  role: 'owner' | 'viewer';
+  createdAt: string;
+};
+
+export type SubscriptionStatus = {
+  isPremium: boolean;
+  tier: 'free' | 'premium';
+  expiresAt: string | null;
+  platform: 'ios' | 'android' | null;
+  productId: string | null;
+};
+
+export type MileageHistoryEntry = {
+  date: string;
+  mileage: number;
+  projectedMileage: number;
+};
+
+export type MileageHistory = {
+  leaseId: string;
+  entries: MileageHistoryEntry[];
+};
