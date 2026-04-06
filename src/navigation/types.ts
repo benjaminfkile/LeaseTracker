@@ -15,6 +15,7 @@ export type HomeStackParamList = {
   AddReading: { leaseId: string };
   PaceDetail: { leaseId: string };
   BuybackAnalysis: { leaseId: string };
+  LeaseEndOptions: { leaseId: string };
 };
 
 export type AppTabParamList = {

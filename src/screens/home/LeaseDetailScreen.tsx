@@ -417,6 +417,22 @@ export function LeaseDetailScreen(): React.ReactElement {
             styles.toolRow,
             { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
           ]}
+          onPress={() => navigation.navigate('LeaseEndOptions', { leaseId })}
+          accessibilityRole="button"
+          accessibilityLabel="Lease End Options"
+          testID="lease-end-options-row"
+        >
+          <Text style={[styles.toolLabel, { color: theme.colors.textPrimary }]}>
+            {'Lease End Options'}
+          </Text>
+          <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.toolRow,
+            { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+          ]}
           onPress={() => navigation.navigate('BuybackAnalysis', { leaseId })}
           accessibilityRole="button"
           accessibilityLabel="Buyback Analysis"
