@@ -51,7 +51,7 @@ export function ReadingImpactCard({
               style={[styles.statValue, { color: theme.colors.success }]}
               testID="reading-impact-miles-added"
             >
-              {`+${milesAdded!.toLocaleString()} mi`}
+              {`+${(milesAdded ?? 0).toLocaleString()} mi`}
             </Text>
             <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
               Miles Added
