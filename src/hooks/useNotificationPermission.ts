@@ -16,7 +16,8 @@ export function useNotificationPermission() {
           setShouldShowModal(true);
         }
       })
-      .catch(() => {
+      .catch(error => {
+        console.warn('[useNotificationPermission] Failed to read storage:', error);
         setShouldShowModal(true);
       });
   }, []);
@@ -27,7 +28,8 @@ export function useNotificationPermission() {
       try {
         await messaging().requestPermission();
         await AsyncStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'granted');
-      } catch {
+      } catch (error) {
+        console.warn('[useNotificationPermission] requestPermission failed:', error);
         await AsyncStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'denied');
       }
     } else {

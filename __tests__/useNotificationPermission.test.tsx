@@ -32,10 +32,9 @@ type HookRef = {
   handlePermission: (allow: boolean) => Promise<void>;
 };
 
-function TestHookComponent({ hookRef }: { hookRef: { current: HookRef | null } }) {
+function TestHookComponent({ onRender }: { onRender: (result: HookRef) => void }) {
   const result = useNotificationPermission();
-  // eslint-disable-next-line no-param-reassign
-  hookRef.current = result;
+  onRender(result);
   return (
     <View>
       <Text testID="should-show-modal">{String(result.shouldShowModal)}</Text>
@@ -52,54 +51,53 @@ describe('useNotificationPermission', () => {
   describe('shouldShowModal', () => {
     it('starts as false and remains false when a stored permission exists', async () => {
       mockGetItem.mockResolvedValue('granted');
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(false);
+      expect(latest!.shouldShowModal).toBe(false);
     });
 
     it('becomes true when no stored permission exists', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(true);
+      expect(latest!.shouldShowModal).toBe(true);
     });
 
     it('stays false when permission is already stored as granted', async () => {
       mockGetItem.mockResolvedValue('granted');
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(false);
+      expect(latest!.shouldShowModal).toBe(false);
     });
 
     it('stays false when permission is already stored as denied', async () => {
       mockGetItem.mockResolvedValue('denied');
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(false);
+      expect(latest!.shouldShowModal).toBe(false);
     });
 
     it('becomes true when AsyncStorage.getItem rejects', async () => {
       mockGetItem.mockRejectedValue(new Error('storage error'));
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(true);
+      expect(latest!.shouldShowModal).toBe(true);
     });
 
     it('reads from the correct AsyncStorage key', async () => {
       mockGetItem.mockResolvedValue('granted');
-      const hookRef: { current: HookRef | null } = { current: null };
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={() => {}} />);
       });
       expect(mockGetItem).toHaveBeenCalledWith(NOTIFICATION_PERMISSION_KEY);
     });
@@ -108,27 +106,27 @@ describe('useNotificationPermission', () => {
   describe('handlePermission — allow', () => {
     it('hides the modal when allow is true', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(true);
+      expect(latest!.shouldShowModal).toBe(true);
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(true);
+        await latest!.handlePermission(true);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(false);
+      expect(latest!.shouldShowModal).toBe(false);
     });
 
     it('calls messaging().requestPermission() when allow is true', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(true);
+        await latest!.handlePermission(true);
       });
       const instance = mockMessaging.mock.results[mockMessaging.mock.results.length - 1].value;
       expect(instance.requestPermission).toHaveBeenCalled();
@@ -136,13 +134,13 @@ describe('useNotificationPermission', () => {
 
     it('stores "granted" in AsyncStorage when requestPermission succeeds', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(true);
+        await latest!.handlePermission(true);
       });
       expect(mockSetItem).toHaveBeenCalledWith(NOTIFICATION_PERMISSION_KEY, 'granted');
     });
@@ -152,13 +150,13 @@ describe('useNotificationPermission', () => {
         requestPermission: jest.fn().mockRejectedValue(new Error('permission denied')),
       });
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(true);
+        await latest!.handlePermission(true);
       });
       expect(mockSetItem).toHaveBeenCalledWith(NOTIFICATION_PERMISSION_KEY, 'denied');
     });
@@ -167,40 +165,40 @@ describe('useNotificationPermission', () => {
   describe('handlePermission — deny', () => {
     it('hides the modal when allow is false', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(true);
+      expect(latest!.shouldShowModal).toBe(true);
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(false);
+        await latest!.handlePermission(false);
       });
-      expect(hookRef.current!.shouldShowModal).toBe(false);
+      expect(latest!.shouldShowModal).toBe(false);
     });
 
     it('stores "denied" in AsyncStorage when allow is false', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(false);
+        await latest!.handlePermission(false);
       });
       expect(mockSetItem).toHaveBeenCalledWith(NOTIFICATION_PERMISSION_KEY, 'denied');
     });
 
     it('does not call messaging().requestPermission() when allow is false', async () => {
       mockGetItem.mockResolvedValue(null);
-      const hookRef: { current: HookRef | null } = { current: null };
+      let latest: HookRef | undefined;
       await ReactTestRenderer.act(async () => {
-        ReactTestRenderer.create(<TestHookComponent hookRef={hookRef} />);
+        ReactTestRenderer.create(<TestHookComponent onRender={r => { latest = r; }} />);
       });
 
       await ReactTestRenderer.act(async () => {
-        await hookRef.current!.handlePermission(false);
+        await latest!.handlePermission(false);
       });
       expect(mockMessaging).not.toHaveBeenCalled();
     });
