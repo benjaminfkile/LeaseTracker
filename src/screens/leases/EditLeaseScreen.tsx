@@ -438,7 +438,10 @@ export function EditLeaseScreen(): React.ReactElement {
     queryFn: () => getLeaseMembers(leaseId),
   });
 
-  // Pre-populate form when lease data loads
+  // Pre-populate form when lease data loads.
+  // Fields not yet in the Lease API response (vehicleColor, vin, licensePlate,
+  // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
+  // mpgEstimate, notes) are left empty — they are collected for future API support.
   useEffect(() => {
     if (lease) {
       reset({
@@ -529,7 +532,7 @@ export function EditLeaseScreen(): React.ReactElement {
 
   const isOwner = Boolean(lease && currentUser && lease.userId === currentUser.sub);
   const viewerMembers = members.filter(m => m.role === 'viewer');
-  const showTransferOwnership = isOwner && members.length > 0;
+  const showTransferOwnership = isOwner && viewerMembers.length > 0;
 
   const handleTransferOwnership = () => {
     if (viewerMembers.length === 0) {
