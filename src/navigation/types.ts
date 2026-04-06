@@ -25,7 +25,7 @@ export type AppTabParamList = {
 };
 
 export type LeaseStackParamList = {
-  LeaseList: undefined;
+  LeaseList: { leaseId?: string } | undefined;
   AddLease: undefined;
   EditLease: { leaseId: string };
   TurnInChecklist: { leaseId: string };
