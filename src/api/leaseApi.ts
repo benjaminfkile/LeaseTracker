@@ -1,6 +1,7 @@
 import client, { normalizeError } from './client';
 import type {
   Lease,
+  LeaseMember,
   LeaseSummary,
   MileageHistory,
   CreateLeaseInput,
@@ -63,6 +64,15 @@ export async function getLeaseSummary(id: string): Promise<LeaseSummary> {
 export async function getMileageHistory(id: string): Promise<MileageHistory> {
   try {
     const response = await client.get<MileageHistory>(`/leases/${id}/mileage-history`);
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+export async function getLeaseMembers(id: string): Promise<LeaseMember[]> {
+  try {
+    const response = await client.get<LeaseMember[]>(`/leases/${id}/members`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
