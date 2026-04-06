@@ -8,8 +8,16 @@ const AD_UNIT_ID: string = __DEV__
   ? TestIds.ADAPTIVE_BANNER
   : (Config.ADMOB_BANNER_UNIT_ID ?? TestIds.ADAPTIVE_BANNER);
 
-export function BannerAdView(): React.ReactElement {
+type Props = {
+  isPremium?: boolean;
+};
+
+export function BannerAdView({ isPremium }: Props): React.ReactElement | null {
   const insets = useSafeAreaInsets();
+
+  if (isPremium) {
+    return null;
+  }
 
   return (
     <View

@@ -58,4 +58,30 @@ describe('BannerAdView', () => {
     const bannerAd = renderer!.root.findByType('BannerAd' as unknown as React.ElementType);
     expect(bannerAd.props.unitId).toBe('ca-app-pub-3940256099942544/2435281174');
   });
+
+  it('renders nothing when isPremium is true', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<BannerAdView isPremium={true} />);
+    });
+    expect(renderer!.toJSON()).toBeNull();
+  });
+
+  it('renders the ad when isPremium is false', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<BannerAdView isPremium={false} />);
+    });
+    const container = renderer!.root.findByProps({ testID: 'banner-ad-view' });
+    expect(container).toBeDefined();
+  });
+
+  it('renders the ad when isPremium is not provided', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<BannerAdView />);
+    });
+    const container = renderer!.root.findByProps({ testID: 'banner-ad-view' });
+    expect(container).toBeDefined();
+  });
 });
