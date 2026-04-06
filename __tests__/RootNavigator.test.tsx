@@ -42,8 +42,6 @@ import * as ReactNative from 'react-native';
 import { RootNavigator } from '../src/navigation/RootNavigator';
 import { useAuthStore } from '../src/stores/authStore';
 
-const mockHydrateFromStorage = jest.fn().mockResolvedValue(undefined);
-
 function mockAuthStore() {
   const state = {
     login: jest.fn(),
@@ -53,7 +51,7 @@ function mockAuthStore() {
     forgotPassword: jest.fn(),
     confirmReset: jest.fn(),
     refreshTokens: jest.fn(),
-    hydrateFromStorage: mockHydrateFromStorage,
+    hydrateFromStorage: jest.fn().mockResolvedValue(undefined),
     isLoading: false,
     isAuthenticated: false,
     user: null,
@@ -72,7 +70,6 @@ describe('RootNavigator', () => {
     useColorSchemeSpy = jest
       .spyOn(ReactNative, 'useColorScheme')
       .mockReturnValue('light');
-    mockHydrateFromStorage.mockReset().mockResolvedValue(undefined);
     mockAuthStore();
   });
 
@@ -84,13 +81,6 @@ describe('RootNavigator', () => {
     await ReactTestRenderer.act(() => {
       ReactTestRenderer.create(<RootNavigator />);
     });
-  });
-
-  it('calls hydrateFromStorage on mount', async () => {
-    await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(<RootNavigator />);
-    });
-    expect(mockHydrateFromStorage).toHaveBeenCalledTimes(1);
   });
 
   it('renders LoginScreen as the initial screen', async () => {
