@@ -13,6 +13,7 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores/authStore';
 import { useNotificationPermission } from './src/hooks/useNotificationPermission';
 import { useForegroundNotification } from './src/hooks/useForegroundNotification';
+import { useBackgroundNotification } from './src/hooks/useBackgroundNotification';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function App() {
   const hydrateFromStorage = useAuthStore(state => state.hydrateFromStorage);
   const { shouldShowModal, handlePermission } = useNotificationPermission();
   useForegroundNotification();
+  useBackgroundNotification();
 
   useEffect(() => {
     hydrateFromStorage().finally(() => {
