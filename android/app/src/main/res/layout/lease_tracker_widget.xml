@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Initial placeholder layout shown while react-native-android-widget renders
+  the JS widget component for the first time.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Lease Tracker"
+        android:textSize="14sp"
+        android:textColor="#1A1A1A" />
+
+</FrameLayout>
