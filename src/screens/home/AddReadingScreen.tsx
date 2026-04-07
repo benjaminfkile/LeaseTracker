@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -186,6 +186,15 @@ export function AddReadingScreen(): React.ReactElement {
   const { field: readingDateField } = useController({ control, name: 'readingDate' });
   const { field: noteField } = useController({ control, name: 'note' });
 
+  // Pre-fill mileage when returning from OCR camera screen
+  useEffect(() => {
+    if (route.params.initialMileage != null) {
+      mileageField.onChange(String(route.params.initialMileage));
+    }
+  // mileageField.onChange is stable; only re-run when initialMileage changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params.initialMileage]);
+
   const watchedMileage = watch('mileage');
   const parsedNewMileage = watchedMileage.length > 0 ? parseInt(watchedMileage, 10) : null;
   const currentMileage = lease?.currentMileage ?? 0;
@@ -206,10 +215,7 @@ export function AddReadingScreen(): React.ReactElement {
   };
 
   const handleCameraPress = () => {
-    Alert.alert(
-      'Coming Soon',
-      'OCR camera capture will be available in a future update.',
-    );
+    navigation.navigate('OdometerCamera', { leaseId });
   };
 
   return (
