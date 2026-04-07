@@ -12,7 +12,8 @@ export type HomeStackParamList = {
   Dashboard: undefined;
   LeaseDetail: { leaseId: string };
   OdometerLog: { leaseId: string };
-  AddReading: { leaseId: string };
+  AddReading: { leaseId: string; initialMileage?: number };
+  OdometerCamera: { leaseId: string };
   PaceDetail: { leaseId: string };
   BuybackAnalysis: { leaseId: string };
   LeaseEndOptions: { leaseId: string };

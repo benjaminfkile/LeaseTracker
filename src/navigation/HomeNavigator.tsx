@@ -4,6 +4,7 @@ import { DashboardScreen } from '../screens/home/DashboardScreen';
 import { LeaseDetailScreen } from '../screens/home/LeaseDetailScreen';
 import { OdometerLogScreen } from '../screens/home/OdometerLogScreen';
 import { AddReadingScreen } from '../screens/home/AddReadingScreen';
+import { OdometerCameraScreen } from '../screens/home/OdometerCameraScreen';
 import { PaceDetailScreen } from '../screens/home/PaceDetailScreen';
 import { BuybackAnalysisScreen } from '../screens/home/BuybackAnalysisScreen';
 import { LeaseEndOptionsScreen } from '../screens/home/LeaseEndOptionsScreen';
@@ -21,6 +22,7 @@ export function HomeNavigator(): React.ReactElement {
       <Stack.Screen name="LeaseDetail" component={LeaseDetailScreen} />
       <Stack.Screen name="OdometerLog" component={OdometerLogScreen} />
       <Stack.Screen name="AddReading" component={AddReadingScreen} />
+      <Stack.Screen name="OdometerCamera" component={OdometerCameraScreen} />
       <Stack.Screen name="PaceDetail" component={PaceDetailScreen} />
       <Stack.Screen name="BuybackAnalysis" component={BuybackAnalysisScreen} />
       <Stack.Screen name="LeaseEndOptions" component={LeaseEndOptionsScreen} />
