@@ -13,7 +13,7 @@ import type { RouteProp } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { getLease, getLeaseSummary, getMileageHistory } from '../../api/leaseApi';
 import { getStatus } from '../../api/subscriptionApi';
-import { BannerAdView } from '../../components/BannerAdView';
+import { BannerAdView } from '../../components/ads/BannerAdView';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { MonthlyMileageChart } from '../../components/MonthlyMileageChart';
 import { PremiumGate } from '../../components/PremiumGate';

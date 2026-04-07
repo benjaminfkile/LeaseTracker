@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BannerAdView } from '../../components/BannerAdView';
+import { BannerAdView } from '../../components/ads/BannerAdView';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
