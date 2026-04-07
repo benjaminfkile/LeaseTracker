@@ -1,4 +1,19 @@
 {
   "name": "LeaseTracker",
-  "displayName": "LeaseTracker"
+  "displayName": "LeaseTracker",
+  "widgets": [
+    {
+      "name": "LeaseTracker",
+      "label": "Lease Tracker",
+      "description": "Monitor your lease mileage at a glance.",
+      "minWidth": "180dp",
+      "minHeight": "110dp",
+      "targetCellWidth": 2,
+      "targetCellHeight": 2,
+      "updatePeriodMillis": 1800000,
+      "resizeMode": "horizontal|vertical",
+      "widgetFeatures": "reconfigurable|configuration_optional",
+      "initialLayout": "@layout/lease_tracker_widget"
+    }
+  ]
 }
