@@ -31,7 +31,7 @@ jest.mock('react-native-google-mobile-ads', () => ({
 
 jest.mock('react-native-config', () => ({
   API_BASE_URL: 'https://api.test.com',
-  ADMOB_BANNER_UNIT_ID: undefined,
+  AD_BANNER_UNIT_ID: undefined,
 }));
 
 jest.mock('react-native-safe-area-context', () => {

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const AD_UNIT_ID: string = __DEV__
   ? TestIds.ADAPTIVE_BANNER
-  : (Config.ADMOB_BANNER_UNIT_ID ?? TestIds.ADAPTIVE_BANNER);
+  : (Config.AD_BANNER_UNIT_ID ?? TestIds.ADAPTIVE_BANNER);
 
 type Props = {
   isPremium?: boolean;
