@@ -12,12 +12,14 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BannerAdView } from '../../components/ads/BannerAdView';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { QuickAddFAB } from '../../components/QuickAddFAB';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useTheme } from '../../theme';
 import { deleteReading, getReadings } from '../../api/readingsApi';
+import { getStatus } from '../../api/subscriptionApi';
 import type { OdometerReading } from '../../types/api';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
 
@@ -182,6 +184,13 @@ export function OdometerLogScreen(): React.ReactElement {
     queryFn: () => getReadings(leaseId),
   });
 
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['subscription-status'],
+    queryFn: getStatus,
+  });
+
+  const isPremium = subscriptionData?.isPremium ?? false;
+
   const { mutate: removeReading } = useMutation({
     mutationFn: (readingId: string) => deleteReading(leaseId, readingId),
     onSuccess: () => {
@@ -272,6 +281,7 @@ export function OdometerLogScreen(): React.ReactElement {
           <QuickAddFAB onPress={handleAddReading} testID="odometer-log-fab" />
         </>
       )}
+      {!isPremium && <BannerAdView />}
     </View>
   );
 }
