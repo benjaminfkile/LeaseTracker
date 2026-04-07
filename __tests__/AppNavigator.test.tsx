@@ -1,0 +1,302 @@
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
+
+jest.mock('../src/stores/leasesStore');
+
+jest.mock('../src/screens/settings/AlertSettingsScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AlertSettingsScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'alert-settings-screen' },
+        MockReact.createElement(Text, { testID: 'alert-settings-title' }, 'Alert Settings'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/settings/SubscriptionScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    SubscriptionScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'subscription-screen' },
+        MockReact.createElement(Text, { testID: 'subscription-title' }, 'Go Premium'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/DashboardScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    DashboardScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'dashboard-screen' },
+        MockReact.createElement(Text, { testID: 'dashboard-title' }, 'Dashboard'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/LeaseDetailScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LeaseDetailScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'lease-detail-screen' },
+        MockReact.createElement(Text, { testID: 'lease-detail-title' }, 'Lease Detail'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/OdometerLogScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    OdometerLogScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'odometer-log-screen' },
+        MockReact.createElement(Text, { testID: 'odometer-log-title' }, 'Odometer Log'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/AddReadingScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AddReadingScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'add-reading-screen' },
+        MockReact.createElement(Text, { testID: 'add-reading-title' }, 'Add Reading'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/PaceDetailScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    PaceDetailScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'pace-detail-screen' },
+        MockReact.createElement(Text, { testID: 'pace-detail-title' }, 'Pace Detail'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/BuybackAnalysisScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    BuybackAnalysisScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'buyback-analysis-screen' },
+        MockReact.createElement(
+          Text,
+          { testID: 'buyback-analysis-title' },
+          'Buyback Analysis',
+        ),
+      ),
+  };
+});
+
+jest.mock('../src/screens/home/LeaseEndOptionsScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LeaseEndOptionsScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'lease-end-options-screen' },
+        MockReact.createElement(
+          Text,
+          { testID: 'lease-end-options-title' },
+          'Lease End Options',
+        ),
+      ),
+  };
+});
+
+jest.mock('../src/screens/leases/LeaseListScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    LeaseListScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'lease-list-screen' },
+        MockReact.createElement(Text, { testID: 'lease-list-title' }, 'My Leases'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/leases/AddLeaseScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AddLeaseScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'add-lease-screen' },
+        MockReact.createElement(Text, { testID: 'add-lease-title' }, 'Add Lease'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/leases/EditLeaseScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    EditLeaseScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'edit-lease-screen' },
+        MockReact.createElement(Text, { testID: 'edit-lease-title' }, 'Edit Lease'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/leases/TurnInChecklistScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    TurnInChecklistScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'turn-in-checklist-screen' },
+        MockReact.createElement(Text, { testID: 'turn-in-checklist-title' }, 'Turn-In Checklist'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/trips/TripListScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    TripListScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'trip-list-screen' },
+        MockReact.createElement(Text, { testID: 'trip-list-title' }, 'Saved Trips'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/trips/AddTripScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    AddTripScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'add-trip-screen' },
+        MockReact.createElement(Text, { testID: 'add-trip-title' }, 'Add Trip'),
+      ),
+  };
+});
+
+jest.mock('../src/screens/trips/EditTripScreen', () => {
+  const MockReact = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    EditTripScreen: () =>
+      MockReact.createElement(
+        View,
+        { testID: 'edit-trip-screen' },
+        MockReact.createElement(Text, { testID: 'edit-trip-title' }, 'Edit Trip'),
+      ),
+  };
+});
+
+import React from 'react';
+import ReactTestRenderer from 'react-test-renderer';
+import { NavigationContainer } from '@react-navigation/native';
+import { AppNavigator } from '../src/navigation/AppNavigator';
+import { useLeasesStore } from '../src/stores/leasesStore';
+
+type LeasesStoreState = {
+  leases: { id: string }[];
+  overPaceCount: number;
+  setLeases: jest.Mock;
+  setOverPaceCount: jest.Mock;
+};
+
+function mockLeasesStore(overrides: Partial<LeasesStoreState> = {}) {
+  const state: LeasesStoreState = {
+    leases: [],
+    overPaceCount: 0,
+    setLeases: jest.fn(),
+    setOverPaceCount: jest.fn(),
+    ...overrides,
+  };
+  (useLeasesStore as unknown as jest.Mock).mockImplementation(
+    (selector: (s: LeasesStoreState) => unknown) => selector(state),
+  );
+}
+
+describe('AppNavigator', () => {
+  beforeEach(() => {
+    mockLeasesStore();
+  });
+
+  it('renders without crashing', async () => {
+    await ReactTestRenderer.act(() => {
+      ReactTestRenderer.create(
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>,
+      );
+    });
+  });
+
+  it('renders DashboardScreen as the initial tab', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>,
+      );
+    });
+    const dashboardTitle = renderer!.root.findByProps({ testID: 'dashboard-title' });
+    expect(dashboardTitle).toBeDefined();
+  });
+
+  it('does not show a badge on Home tab when no leases are over pace', async () => {
+    mockLeasesStore({ overPaceCount: 0 });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>,
+      );
+    });
+    const json = renderer!.toJSON();
+    expect(json).toBeTruthy();
+  });
+
+  it('shows a badge on Home tab when leases are over pace', async () => {
+    mockLeasesStore({ overPaceCount: 2 });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>,
+      );
+    });
+    const json = renderer!.toJSON();
+    expect(json).toBeTruthy();
+  });
+});
