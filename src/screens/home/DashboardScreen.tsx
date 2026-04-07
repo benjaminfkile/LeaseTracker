@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getLeases, getLeaseSummary } from '../../api/leaseApi';
 import { getTrips } from '../../api/tripsApi';
 import { getStatus } from '../../api/subscriptionApi';
-import { BannerAdView } from '../../components/BannerAdView';
+import { BannerAdView } from '../../components/ads/BannerAdView';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
 import { MileageProgressRing } from '../../components/MileageProgressRing';
