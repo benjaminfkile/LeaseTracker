@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -21,6 +21,7 @@ import { ProjectionChart } from '../../components/ProjectionChart';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
 import type { Lease, LeaseSummary } from '../../types/api';
+import { computeThisYearStats, computeThisYearForwardBehind } from '../../utils/leaseYear';
 
 type PaceDetailRouteProp = RouteProp<HomeStackParamList, 'PaceDetail'>;
 type Mode = 'full-lease' | 'this-year';
@@ -117,13 +118,41 @@ export function PaceDetailScreen(): React.ReactElement {
   }
 
   const entries = history?.entries ?? [];
-  const projectedOverage =
-    summary != null ? Math.max(0, summary.projectedMiles - summary.totalMiles) : 0;
+
+  const thisYearStats = useMemo(() => {
+    if (lease == null || summary == null) {
+      return null;
+    }
+    return computeThisYearStats(lease, summary, entries.length > 0 ? entries : undefined);
+  }, [lease, summary, entries]);
+
+  // Stats that change based on mode
+  const displayMilesUsed =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.milesUsedThisYear
+      : (summary?.milesUsed ?? 0);
+  const displayMilesRemaining =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.milesRemainingThisYear
+      : (summary?.milesRemaining ?? 0);
+  const displayProjectedMiles =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.projectedMilesThisYear
+      : (summary?.projectedMiles ?? 0);
+  const displayTotalMiles =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.totalMilesThisYear
+      : (summary?.totalMiles ?? 0);
+
+  const projectedOverage = Math.max(0, displayProjectedMiles - displayTotalMiles);
   const costAtPace = projectedOverage * DEFAULT_OVERAGE_COST_PER_MILE;
+
   const forwardBehind =
-    lease != null && summary != null
-      ? computeDaysForwardBehind(lease, summary)
-      : null;
+    mode === 'this-year' && thisYearStats != null
+      ? computeThisYearForwardBehind(thisYearStats)
+      : lease != null && summary != null
+        ? computeDaysForwardBehind(lease, summary)
+        : null;
 
   return (
     <SafeAreaView
@@ -271,7 +300,7 @@ export function PaceDetailScreen(): React.ReactElement {
               style={[styles.statValue, { color: theme.colors.textPrimary }]}
               testID="stats-miles-used"
             >
-              {`${(summary?.milesUsed ?? 0).toLocaleString()} mi`}
+              {`${displayMilesUsed.toLocaleString()} mi`}
             </Text>
           </View>
 
@@ -283,7 +312,7 @@ export function PaceDetailScreen(): React.ReactElement {
               style={[styles.statValue, { color: theme.colors.textPrimary }]}
               testID="stats-miles-remaining"
             >
-              {`${(summary?.milesRemaining ?? 0).toLocaleString()} mi`}
+              {`${displayMilesRemaining.toLocaleString()} mi`}
             </Text>
           </View>
 
@@ -296,14 +325,14 @@ export function PaceDetailScreen(): React.ReactElement {
                 styles.statValue,
                 {
                   color:
-                    (summary?.projectedMiles ?? 0) > (summary?.totalMiles ?? 0)
+                    displayProjectedMiles > displayTotalMiles
                       ? theme.colors.error
                       : theme.colors.success,
                 },
               ]}
               testID="stats-projected-total"
             >
-              {`${(summary?.projectedMiles ?? 0).toLocaleString()} mi`}
+              {`${displayProjectedMiles.toLocaleString()} mi`}
             </Text>
           </View>
 

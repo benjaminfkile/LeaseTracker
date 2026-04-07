@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -24,6 +24,9 @@ import { StatCard } from '../../components/StatCard';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp } from '../../navigation/types';
 import { useLeasesStore } from '../../stores/leasesStore';
+import { computeThisYearStats } from '../../utils/leaseYear';
+
+type Mode = 'full-lease' | 'this-year';
 
 export function DashboardScreen(): React.ReactElement {
   const theme = useTheme();
@@ -31,6 +34,8 @@ export function DashboardScreen(): React.ReactElement {
 
   const activeLeaseId = useLeasesStore(state => state.activeLeaseId);
   const setActiveLeaseId = useLeasesStore(state => state.setActiveLeaseId);
+
+  const [mode, setMode] = useState<Mode>('full-lease');
 
   const {
     data: leases,
@@ -75,17 +80,51 @@ export function DashboardScreen(): React.ReactElement {
   const activeTrips = tripsData?.active ?? [];
   const reservedMiles = activeTrips.reduce((sum, t) => sum + t.distance, 0);
 
+  const thisYearStats = useMemo(() => {
+    if (selectedLease == null || summary == null) {
+      return null;
+    }
+    return computeThisYearStats(selectedLease, summary);
+  }, [selectedLease, summary]);
+
+  // Display values that change based on mode
+  const displayMilesRemaining =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.milesRemainingThisYear
+      : (summary?.milesRemaining ?? 0);
+  const displayDaysRemaining =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.daysRemainingThisYear
+      : (summary?.daysRemaining ?? 0);
+  const displayTotalMiles =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.totalMilesThisYear
+      : (summary?.totalMiles ?? 0);
+  const displayMilesUsed =
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.milesUsedThisYear
+      : (summary?.milesUsed ?? 0);
+
   const paceStatus: PaceStatus =
-    summary?.isOverPace === true
-      ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
-        ? 'over-pace'
-        : 'slightly-over'
-      : 'on-track';
+    mode === 'this-year' && thisYearStats != null
+      ? thisYearStats.isOverPaceThisYear
+        ? thisYearStats.totalMilesThisYear > 0 &&
+          thisYearStats.projectedMilesThisYear / thisYearStats.totalMilesThisYear > 1.1
+          ? 'over-pace'
+          : 'slightly-over'
+        : 'on-track'
+      : summary?.isOverPace === true
+        ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
+          ? 'over-pace'
+          : 'slightly-over'
+        : 'on-track';
 
   const recommendedPace =
-    summary != null && summary.daysRemaining > 0
-      ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
-      : 0;
+    mode === 'this-year' && thisYearStats != null && thisYearStats.daysRemainingThisYear > 0
+      ? Math.ceil(thisYearStats.milesRemainingThisYear / thisYearStats.daysRemainingThisYear)
+      : summary != null && summary.daysRemaining > 0
+        ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
+        : 0;
 
   if (leasesLoading || summaryLoading) {
     return (
@@ -167,12 +206,66 @@ export function DashboardScreen(): React.ReactElement {
           />
         )}
 
+        {/* Full Lease / This Year toggle */}
+        {summary != null && (
+          <View
+            style={[
+              styles.toggleRow,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            testID="dashboard-toggle"
+          >
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                mode === 'full-lease' && { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={() => setMode('full-lease')}
+              testID="dashboard-toggle-full-lease"
+              accessibilityRole="button"
+            >
+              <Text
+                style={[
+                  styles.toggleLabel,
+                  {
+                    color:
+                      mode === 'full-lease' ? theme.colors.surface : theme.colors.textSecondary,
+                  },
+                ]}
+              >
+                {'Full Lease'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.toggleButton,
+                mode === 'this-year' && { backgroundColor: theme.colors.primary },
+              ]}
+              onPress={() => setMode('this-year')}
+              testID="dashboard-toggle-this-year"
+              accessibilityRole="button"
+            >
+              <Text
+                style={[
+                  styles.toggleLabel,
+                  {
+                    color:
+                      mode === 'this-year' ? theme.colors.surface : theme.colors.textSecondary,
+                  },
+                ]}
+              >
+                {'This Year'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Mileage progress ring */}
         {summary != null && (
           <View style={styles.ringContainer} testID="dashboard-ring-container">
             <MileageProgressRing
-              totalMiles={summary.totalMiles}
-              usedMiles={summary.milesUsed}
+              totalMiles={displayTotalMiles}
+              usedMiles={displayMilesUsed}
             />
           </View>
         )}
@@ -187,14 +280,14 @@ export function DashboardScreen(): React.ReactElement {
         >
           <StatCard
             label="Miles Remaining"
-            value={summary?.milesRemaining ?? 0}
+            value={displayMilesRemaining}
             unit="mi"
             testID="stat-miles-remaining"
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
             label="Days Left"
-            value={summary?.daysRemaining ?? 0}
+            value={displayDaysRemaining}
             unit="days"
             testID="stat-days-left"
           />
@@ -417,6 +510,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+  toggleButton: {
+    alignItems: 'center',
+    borderRadius: 6,
+    flex: 1,
+    paddingVertical: 8,
+  },
+  toggleLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  toggleRow: {
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 4,
   },
   scrollContent: {
     paddingBottom: 96,
