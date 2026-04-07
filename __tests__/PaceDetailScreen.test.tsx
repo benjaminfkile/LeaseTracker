@@ -431,6 +431,64 @@ describe('PaceDetailScreen', () => {
     const scroll = renderer!.root.findByProps({ testID: 'pace-detail-scroll' });
     expect(scroll).toBeDefined();
   });
+
+  it('stats table still renders after switching to This Year mode', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    const table = renderer!.root.findByProps({ testID: 'pace-detail-stats-table' });
+    expect(table).toBeDefined();
+  });
+
+  it('miles used stat renders in This Year mode', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    const stat = renderer!.root.findByProps({ testID: 'stats-miles-used' });
+    expect(stat).toBeDefined();
+    // Should show "X mi" format regardless of mode
+    expect(stat.props.children).toMatch(/\d+ mi/);
+  });
+
+  it('days forward/behind renders in This Year mode', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    const stat = renderer!.root.findByProps({ testID: 'stats-days-forward-behind' });
+    expect(stat).toBeDefined();
+  });
+
+  it('switching back to Full Lease mode restores full-lease miles used', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<PaceDetailScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    const fullLeaseBtn = renderer!.root.findByProps({ testID: 'toggle-full-lease' });
+    await ReactTestRenderer.act(() => {
+      fullLeaseBtn.props.onPress();
+    });
+    const stat = renderer!.root.findByProps({ testID: 'stats-miles-used' });
+    expect(stat.props.children).toBe('12,000 mi');
+  });
 });
 
 describe('computeDaysForwardBehind', () => {

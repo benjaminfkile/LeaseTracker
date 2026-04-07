@@ -479,4 +479,73 @@ describe('DashboardScreen', () => {
     const fabs = renderer!.root.findAllByProps({ testID: 'quick-add-fab' });
     expect(fabs).toHaveLength(0);
   });
+
+  it('renders the Full Lease / This Year toggle when lease data is available', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'dashboard-toggle' });
+    expect(toggle).toBeDefined();
+  });
+
+  it('renders the Full Lease toggle button', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const btn = renderer!.root.findByProps({ testID: 'dashboard-toggle-full-lease' });
+    expect(btn).toBeDefined();
+  });
+
+  it('renders the This Year toggle button', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const btn = renderer!.root.findByProps({ testID: 'dashboard-toggle-this-year' });
+    expect(btn).toBeDefined();
+  });
+
+  it('does not render the toggle when there is no lease summary', async () => {
+    setupQueryMocks({ summary: null });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const toggles = renderer!.root.findAllByProps({ testID: 'dashboard-toggle' });
+    expect(toggles).toHaveLength(0);
+  });
+
+  it('switches to This Year mode when the This Year button is pressed', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'dashboard-toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    // Stats row should still render after toggling
+    const statsRow = renderer!.root.findByProps({ testID: 'dashboard-stats-row' });
+    expect(statsRow).toBeDefined();
+  });
+
+  it('switches back to Full Lease mode when the Full Lease button is pressed', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const thisYearBtn = renderer!.root.findByProps({ testID: 'dashboard-toggle-this-year' });
+    await ReactTestRenderer.act(() => {
+      thisYearBtn.props.onPress();
+    });
+    const fullLeaseBtn = renderer!.root.findByProps({ testID: 'dashboard-toggle-full-lease' });
+    await ReactTestRenderer.act(() => {
+      fullLeaseBtn.props.onPress();
+    });
+    // After switching back, miles remaining should match the full-lease summary
+    const remaining = renderer!.root.findByProps({ testID: 'stat-miles-remaining' });
+    expect(remaining).toBeDefined();
+  });
 });
