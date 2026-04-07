@@ -5,7 +5,7 @@ jest.mock('react-native-google-mobile-ads', () => ({
 }));
 
 jest.mock('react-native-config', () => ({
-  ADMOB_BANNER_UNIT_ID: undefined,
+  AD_BANNER_UNIT_ID: undefined,
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
