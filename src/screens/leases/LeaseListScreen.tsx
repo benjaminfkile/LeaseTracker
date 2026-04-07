@@ -11,6 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteLease, getLeases } from '../../api/leaseApi';
+import { getStatus } from '../../api/subscriptionApi';
+import { BannerAdView } from '../../components/ads/BannerAdView';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { LeaseCard } from '../../components/LeaseCard';
@@ -33,6 +35,13 @@ export function LeaseListScreen(): React.ReactElement {
     queryKey: ['leases'],
     queryFn: getLeases,
   });
+
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['subscription-status'],
+    queryFn: getStatus,
+  });
+
+  const isPremium = subscriptionData?.isPremium ?? false;
 
   const { mutate: archiveLease } = useMutation({
     mutationFn: (id: string) => deleteLease(id),
@@ -65,6 +74,7 @@ export function LeaseListScreen(): React.ReactElement {
   return (
     <SafeAreaView
       style={[styles.flex, { backgroundColor: theme.colors.background }]}
+      edges={['top', 'left', 'right']}
       testID="lease-list-screen"
     >
       <ScreenHeader
@@ -111,6 +121,7 @@ export function LeaseListScreen(): React.ReactElement {
           }
         />
       )}
+      {!isPremium && <BannerAdView />}
     </SafeAreaView>
   );
 }
