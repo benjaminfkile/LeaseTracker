@@ -25,6 +25,7 @@ import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp } from '../../navigation/types';
 import { useLeasesStore } from '../../stores/leasesStore';
 import { computeThisYearStats } from '../../utils/leaseYear';
+import { updateWidgetData } from '../../native/WidgetDataBridge';
 
 type Mode = 'full-lease' | 'this-year';
 
@@ -86,6 +87,21 @@ export function DashboardScreen(): React.ReactElement {
     }
     return computeThisYearStats(selectedLease, summary);
   }, [selectedLease, summary]);
+
+  // Push latest summary to the iOS home-screen widget via shared UserDefaults.
+  useEffect(() => {
+    if (summary == null || selectedLease == null) return;
+    const isOver = summary.isOverPace;
+    const isWayOver =
+      summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1;
+    const status = isOver ? (isWayOver ? 'over-pace' : 'slightly-over') : 'on-track';
+    updateWidgetData({
+      milesRemaining: summary.milesRemaining,
+      daysRemaining: summary.daysRemaining,
+      paceStatus: status,
+      vehicleLabel: summary.vehicleLabel,
+    });
+  }, [summary, selectedLease]);
 
   // Display values that change based on mode
   const displayMilesRemaining =

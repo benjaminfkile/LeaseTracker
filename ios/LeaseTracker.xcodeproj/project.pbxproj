@@ -12,6 +12,10 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		E3258EEA6C0EBD3462A1D289 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		A100011000000000C0000001 /* WidgetDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000F000000000C0000001 /* WidgetDataBridge.swift */; };
+		A100012000000000C0000001 /* WidgetDataBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A100010000000000C0000001 /* WidgetDataBridge.m */; };
+		A10000C000000000C0000001 /* LeaseTrackerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000A000000000C0000001 /* LeaseTrackerWidget.swift */; };
+		A100016000000000C0000001 /* LeaseTrackerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A100000200000000C0000001 /* LeaseTrackerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +29,13 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = LeaseTracker/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = LeaseTracker/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		A100000200000000C0000001 /* LeaseTrackerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LeaseTrackerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000A000000000C0000001 /* LeaseTrackerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaseTrackerWidget.swift; sourceTree = "<group>"; };
+		A10000B000000000C0000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A100013000000000C0000001 /* LeaseTrackerWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LeaseTrackerWidget.entitlements; sourceTree = "<group>"; };
+		A10000F000000000C0000001 /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetDataBridge.swift; path = LeaseTracker/WidgetDataBridge.swift; sourceTree = "<group>"; };
+		A100010000000000C0000001 /* WidgetDataBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WidgetDataBridge.m; path = LeaseTracker/WidgetDataBridge.m; sourceTree = "<group>"; };
+		A100014000000000C0000001 /* LeaseTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = LeaseTracker.entitlements; path = LeaseTracker/LeaseTracker.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +44,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-LeaseTracker.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A100000800000000C0000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,8 +65,22 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				A10000F000000000C0000001 /* WidgetDataBridge.swift */,
+				A100010000000000C0000001 /* WidgetDataBridge.m */,
+				A100014000000000C0000001 /* LeaseTracker.entitlements */,
 			);
 			name = LeaseTracker;
+			sourceTree = "<group>";
+		};
+		A100000600000000C0000001 /* LeaseTrackerWidget */ = {
+			isa = PBXGroup;
+			children = (
+				A10000A000000000C0000001 /* LeaseTrackerWidget.swift */,
+				A10000B000000000C0000001 /* Info.plist */,
+				A100013000000000C0000001 /* LeaseTrackerWidget.entitlements */,
+			);
+			name = LeaseTrackerWidget;
+			path = LeaseTrackerWidget;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -71,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* LeaseTracker */,
+				A100000600000000C0000001 /* LeaseTrackerWidget */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
@@ -85,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* LeaseTracker.app */,
+				A100000200000000C0000001 /* LeaseTrackerWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -112,15 +146,34 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				A100015000000000C0000001 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A10000E000000000C0000001 /* PBXTargetDependency */,
 			);
 			name = LeaseTracker;
 			productName = LeaseTracker;
 			productReference = 13B07F961A680F5B00A75B9A /* LeaseTracker.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A100000100000000C0000001 /* LeaseTrackerWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A100000300000000C0000001 /* Build configuration list for PBXNativeTarget "LeaseTrackerWidget" */;
+			buildPhases = (
+				A100000700000000C0000001 /* Sources */,
+				A100000800000000C0000001 /* Frameworks */,
+				A100000900000000C0000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LeaseTrackerWidget;
+			productName = LeaseTrackerWidget;
+			productReference = A100000200000000C0000001 /* LeaseTrackerWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -132,6 +185,9 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
+					};
+					A100000100000000C0000001 = {
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
@@ -149,6 +205,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* LeaseTracker */,
+				A100000100000000C0000001 /* LeaseTrackerWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -164,7 +221,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A100000900000000C0000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A100015000000000C0000001 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A100016000000000C0000001 /* LeaseTrackerWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
@@ -247,10 +325,38 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				A100011000000000C0000001 /* WidgetDataBridge.swift in Sources */,
+				A100012000000000C0000001 /* WidgetDataBridge.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A100000700000000C0000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000C000000000C0000001 /* LeaseTrackerWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000D000000000C0000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A100000100000000C0000001;
+			remoteInfo = LeaseTrackerWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		A10000E000000000C0000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A100000100000000C0000001 /* LeaseTrackerWidget */;
+			targetProxy = A10000D000000000C0000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
@@ -259,6 +365,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LeaseTracker/LeaseTracker.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = LeaseTracker/Info.plist;
@@ -289,6 +396,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LeaseTracker/LeaseTracker.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = LeaseTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -308,6 +416,55 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		A100000400000000C0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LeaseTrackerWidget/LeaseTrackerWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LeaseTrackerWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.LeaseTracker.widget";
+				PRODUCT_NAME = LeaseTrackerWidget;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A100000500000000C0000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LeaseTrackerWidget/LeaseTrackerWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LeaseTrackerWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.LeaseTracker.widget";
+				PRODUCT_NAME = LeaseTrackerWidget;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -484,6 +641,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A100000300000000C0000001 /* Build configuration list for PBXNativeTarget "LeaseTrackerWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000400000000C0000001 /* Debug */,
+				A100000500000000C0000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
