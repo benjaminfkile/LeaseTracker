@@ -17,7 +17,7 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Button } from '../../components/Button';
-import { useTheme } from '../../theme';
+import { palette, useTheme } from '../../theme';
 import type { LeaseStackNavigationProp, LeaseStackParamList } from '../../navigation/types';
 
 type ItemStatus = 'ok' | 'minor' | 'damage' | null;
@@ -431,7 +431,7 @@ export function TurnInChecklistScreen(): React.ReactElement {
                               <Text
                                 style={[
                                   styles.statusButtonText,
-                                  { color: isSelected ? '#FFFFFF' : btnColor },
+                                  { color: isSelected ? palette.white : btnColor },
                                 ]}
                               >
                                 {opt.label}
@@ -455,7 +455,7 @@ export function TurnInChecklistScreen(): React.ReactElement {
                               onPress={() => removePhoto(category.id, item.id)}
                               testID={`checklist-remove-photo-${item.id}`}
                             >
-                              <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
+                              <MaterialCommunityIcons name="close" size={14} color={palette.white} />
                             </TouchableOpacity>
                           </View>
                         ) : (
@@ -491,7 +491,7 @@ export function TurnInChecklistScreen(): React.ReactElement {
             isLoading={isGenerating}
             disabled={completedCount === 0}
             leftIcon={
-              <MaterialCommunityIcons name="file-image" size={20} color="#FFFFFF" />
+              <MaterialCommunityIcons name="file-image" size={20} color={palette.white} />
             }
             testID="generate-report-button"
           />

@@ -13,7 +13,7 @@ import { Camera, useCameraDevice, useCameraPermission } from 'react-native-visio
 import type { PhotoFile } from 'react-native-vision-camera';
 import MlkitOcr from 'react-native-mlkit-ocr';
 import type { MlkitOcrResult } from 'react-native-mlkit-ocr';
-import { useTheme } from '../../theme';
+import { palette, useTheme } from '../../theme';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
 
 // ---------- OCR Parsing ----------
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: 'center',
-    backgroundColor: '#4F6AF5',
+    backgroundColor: palette.brand,
     borderRadius: 10,
     marginTop: 20,
     paddingHorizontal: 32,

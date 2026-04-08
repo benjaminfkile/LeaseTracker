@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useTheme } from '../theme';
+import { palette, useTheme } from '../theme';
 
 export type NotificationPermissionModalProps = {
   visible: boolean;
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   allowButtonText: {
-    color: '#FFFFFF',
+    color: palette.white,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
