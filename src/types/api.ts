@@ -20,6 +20,7 @@ export type Lease = {
   startingMileage: number;
   currentMileage: number;
   monthlyMiles: number;
+  mpgEstimate?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -119,6 +120,7 @@ export type CreateLeaseInput = {
   totalMiles: number;
   startingMileage: number;
   monthlyMiles: number;
+  mpgEstimate?: number;
 };
 
 export type UpdateLeaseInput = Partial<CreateLeaseInput>;

@@ -441,7 +441,7 @@ export function EditLeaseScreen(): React.ReactElement {
   // Pre-populate form when lease data loads.
   // Fields not yet in the Lease API response (vehicleColor, vin, licensePlate,
   // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
-  // mpgEstimate, notes) are left empty — they are collected for future API support.
+  // notes) are left empty — they are collected for future API support.
   useEffect(() => {
     if (lease) {
       reset({
@@ -463,7 +463,7 @@ export function EditLeaseScreen(): React.ReactElement {
         dealerName: '',
         dealerPhone: '',
         contractNumber: '',
-        mpgEstimate: '',
+        mpgEstimate: lease.mpgEstimate != null ? String(lease.mpgEstimate) : '',
         notes: '',
       });
     }
@@ -588,6 +588,7 @@ export function EditLeaseScreen(): React.ReactElement {
 
   const onSubmit = (data: EditLeaseFormData) => {
     const milesPerYearNum = parseInt(data.milesPerYear, 10);
+    const mpg = parseFloat(data.mpgEstimate);
     submitUpdate({
       vehicleYear: parseInt(data.vehicleYear, 10),
       vehicleMake: data.vehicleMake,
@@ -598,6 +599,7 @@ export function EditLeaseScreen(): React.ReactElement {
       totalMiles: parseInt(data.totalMiles, 10),
       startingMileage: parseInt(data.startingOdometer, 10),
       monthlyMiles: Math.round(milesPerYearNum / 12),
+      mpgEstimate: !isNaN(mpg) && mpg > 0 ? mpg : undefined,
     });
   };
 
