@@ -28,12 +28,16 @@ import type { SettingsStackNavigationProp } from '../../navigation/types';
 
 const DEFAULT_APPROACHING_PERCENT = 80;
 const DEFAULT_LEASE_END_DAYS = 30;
+const DEFAULT_BUYBACK_THRESHOLD = 50;
 const PERCENT_STEP = 5;
 const DAYS_STEP = 1;
+const DOLLARS_STEP = 10;
 const PERCENT_MIN = 1;
 const PERCENT_MAX = 100;
 const DAYS_MIN = 1;
 const DAYS_MAX = 365;
+const DOLLARS_MIN = 10;
+const DOLLARS_MAX = 500;
 
 // ---------- Helpers ----------
 
@@ -49,6 +53,8 @@ function configToFormState(config: AlertConfig): FormState {
     leaseEndEnabled: config.leaseEndEnabled,
     leaseEndDays: config.leaseEndDays,
     savedTripEnabled: config.savedTripEnabled,
+    mileageBuybackEnabled: config.mileageBuybackEnabled,
+    mileageBuybackThresholdDollars: config.mileageBuybackThresholdDollars,
   };
 }
 
@@ -60,6 +66,8 @@ function defaultFormState(): FormState {
     leaseEndEnabled: false,
     leaseEndDays: DEFAULT_LEASE_END_DAYS,
     savedTripEnabled: false,
+    mileageBuybackEnabled: false,
+    mileageBuybackThresholdDollars: DEFAULT_BUYBACK_THRESHOLD,
   };
 }
 
@@ -72,6 +80,8 @@ type FormState = {
   leaseEndEnabled: boolean;
   leaseEndDays: number;
   savedTripEnabled: boolean;
+  mileageBuybackEnabled: boolean;
+  mileageBuybackThresholdDollars: number;
 };
 
 // ---------- Stepper ----------
@@ -82,6 +92,7 @@ type StepperProps = {
   onIncrement: () => void;
   minReached: boolean;
   maxReached: boolean;
+  prefix?: string;
   suffix: string;
   testID?: string;
 };
@@ -92,6 +103,7 @@ function Stepper({
   onIncrement,
   minReached,
   maxReached,
+  prefix,
   suffix,
   testID,
 }: StepperProps): React.ReactElement {
@@ -121,7 +133,7 @@ function Stepper({
         style={[stepperStyles.value, { color: theme.colors.textPrimary }]}
         testID={testID != null ? `${testID}-value` : undefined}
       >
-        {`${value}${suffix}`}
+        {`${prefix ?? ''}${value}${suffix}`}
       </Text>
 
       <TouchableOpacity
@@ -282,6 +294,8 @@ export function AlertSettingsScreen(): React.ReactElement {
       leaseEndEnabled: form.leaseEndEnabled,
       leaseEndDays: form.leaseEndDays,
       savedTripEnabled: form.savedTripEnabled,
+      mileageBuybackEnabled: form.mileageBuybackEnabled,
+      mileageBuybackThresholdDollars: form.mileageBuybackThresholdDollars,
     });
   };
 
@@ -501,6 +515,67 @@ export function AlertSettingsScreen(): React.ReactElement {
                   >
                     {'Notifies you 3 days before a saved trip date.'}
                   </Text>
+                </View>
+
+                {/* Mileage buy-back alert */}
+                <View
+                  style={[
+                    styles.card,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                  ]}
+                  testID="mileage-buyback-card"
+                >
+                  <ToggleRow
+                    label="Mileage buy-back alert"
+                    value={form.mileageBuybackEnabled}
+                    onValueChange={v =>
+                      setForm(prev => ({ ...prev, mileageBuybackEnabled: v }))
+                    }
+                    testID="mileage-buyback-toggle"
+                  />
+                  <Text
+                    style={[styles.cardNote, { color: theme.colors.textSecondary }]}
+                    testID="mileage-buyback-note"
+                  >
+                    {'Alerts you when projected overage cost exceeds the threshold so you can consider buying miles early.'}
+                  </Text>
+                  {form.mileageBuybackEnabled && (
+                    <View testID="mileage-buyback-stepper-container">
+                      <Text
+                        style={[styles.stepperLabel, { color: theme.colors.textSecondary }]}
+                      >
+                        {'Notify when projected overage cost exceeds:'}
+                      </Text>
+                      <Stepper
+                        value={form.mileageBuybackThresholdDollars}
+                        onDecrement={() =>
+                          setForm(prev => ({
+                            ...prev,
+                            mileageBuybackThresholdDollars: clamp(
+                              prev.mileageBuybackThresholdDollars - DOLLARS_STEP,
+                              DOLLARS_MIN,
+                              DOLLARS_MAX,
+                            ),
+                          }))
+                        }
+                        onIncrement={() =>
+                          setForm(prev => ({
+                            ...prev,
+                            mileageBuybackThresholdDollars: clamp(
+                              prev.mileageBuybackThresholdDollars + DOLLARS_STEP,
+                              DOLLARS_MIN,
+                              DOLLARS_MAX,
+                            ),
+                          }))
+                        }
+                        minReached={form.mileageBuybackThresholdDollars <= DOLLARS_MIN}
+                        maxReached={form.mileageBuybackThresholdDollars >= DOLLARS_MAX}
+                        prefix="$"
+                        suffix=""
+                        testID="mileage-buyback-threshold-stepper"
+                      />
+                    </View>
+                  )}
                 </View>
 
                 {/* Test notification (dev only) */}

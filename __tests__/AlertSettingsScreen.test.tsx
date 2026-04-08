@@ -76,6 +76,8 @@ const mockAlertConfig: AlertConfig = {
   leaseEndEnabled: true,
   leaseEndDays: 30,
   savedTripEnabled: false,
+  mileageBuybackEnabled: false,
+  mileageBuybackThresholdDollars: 50,
   createdAt: '2023-01-01T00:00:00Z',
   updatedAt: '2023-01-01T00:00:00Z',
 };
@@ -416,6 +418,8 @@ describe('AlertSettingsScreen', () => {
         leaseEndEnabled: true,
         leaseEndDays: 30,
         savedTripEnabled: false,
+        mileageBuybackEnabled: false,
+        mileageBuybackThresholdDollars: 50,
       }),
     );
   });
@@ -512,6 +516,136 @@ describe('AlertSettingsScreen', () => {
       toggle.props.onValueChange(true);
     });
     const toggleAfter = renderer!.root.findByProps({ testID: 'over-pace-toggle' });
+    expect(toggleAfter.props.value).toBe(true);
+  });
+
+  it('renders the mileage-buyback toggle', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
+    expect(toggle).toBeDefined();
+  });
+
+  it('renders the mileage-buyback note text', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const note = renderer!.root.findByProps({ testID: 'mileage-buyback-note' });
+    expect(note).toBeDefined();
+  });
+
+  it('shows threshold stepper when mileage-buyback is enabled', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const stepper = renderer!.root.findByProps({ testID: 'mileage-buyback-threshold-stepper' });
+    expect(stepper).toBeDefined();
+  });
+
+  it('hides threshold stepper when mileage-buyback is disabled', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: false } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    expect(() =>
+      renderer!.root.findByProps({ testID: 'mileage-buyback-threshold-stepper' }),
+    ).toThrow();
+  });
+
+  it('shows the dollar value from config in the mileage-buyback stepper', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 80 } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const valueEl = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-value',
+    });
+    expect(valueEl.props.children).toBe('$80');
+  });
+
+  it('increments the mileage-buyback threshold when increment is pressed', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const incrementBtn = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-increment',
+    });
+    await ReactTestRenderer.act(() => {
+      incrementBtn.props.onPress();
+    });
+    const valueEl = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-value',
+    });
+    expect(valueEl.props.children).toBe('$60');
+  });
+
+  it('decrements the mileage-buyback threshold when decrement is pressed', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const decrementBtn = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-decrement',
+    });
+    await ReactTestRenderer.act(() => {
+      decrementBtn.props.onPress();
+    });
+    const valueEl = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-value',
+    });
+    expect(valueEl.props.children).toBe('$40');
+  });
+
+  it('mileage-buyback threshold decrement is disabled at minimum value', async () => {
+    setupMocks({
+      config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 10 },
+    });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const decrementBtn = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-decrement',
+    });
+    expect(decrementBtn.props.disabled).toBe(true);
+  });
+
+  it('mileage-buyback threshold increment is disabled at maximum value', async () => {
+    setupMocks({
+      config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 500 },
+    });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const incrementBtn = renderer!.root.findByProps({
+      testID: 'mileage-buyback-threshold-stepper-increment',
+    });
+    expect(incrementBtn.props.disabled).toBe(true);
+  });
+
+  it('toggling mileage-buyback switch updates state', async () => {
+    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: false } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
+    expect(toggle.props.value).toBe(false);
+    await ReactTestRenderer.act(() => {
+      toggle.props.onValueChange(true);
+    });
+    const toggleAfter = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
     expect(toggleAfter.props.value).toBe(true);
   });
 

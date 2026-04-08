@@ -71,6 +71,8 @@ export type AlertConfig = {
   leaseEndEnabled: boolean;
   leaseEndDays: number;
   savedTripEnabled: boolean;
+  mileageBuybackEnabled: boolean;
+  mileageBuybackThresholdDollars: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -159,6 +161,8 @@ export type UpdateAlertConfigInput = Partial<
     | 'leaseEndEnabled'
     | 'leaseEndDays'
     | 'savedTripEnabled'
+    | 'mileageBuybackEnabled'
+    | 'mileageBuybackThresholdDollars'
   >
 >;
 

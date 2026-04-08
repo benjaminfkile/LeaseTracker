@@ -31,9 +31,11 @@ export function useForegroundNotification(): void {
     const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
         const leaseId = detail.notification?.data?.leaseId as string | undefined;
+        const screen = detail.notification?.data?.screen as string | undefined;
         if (leaseId && navigationRef.isReady()) {
+          const targetScreen = screen === 'BuybackAnalysis' ? 'BuybackAnalysis' : 'LeaseDetail';
           navigationRef.dispatch(
-            CommonActions.navigate({ name: 'LeaseDetail', params: { leaseId } }),
+            CommonActions.navigate({ name: targetScreen, params: { leaseId } }),
           );
         }
       }

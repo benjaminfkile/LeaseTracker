@@ -49,6 +49,8 @@ const mockAlertConfig: AlertConfig = {
   leaseEndEnabled: false,
   leaseEndDays: 30,
   savedTripEnabled: false,
+  mileageBuybackEnabled: false,
+  mileageBuybackThresholdDollars: 50,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
