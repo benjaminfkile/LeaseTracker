@@ -117,7 +117,7 @@ export function LeaseDetailScreen(): React.ReactElement {
   const allTrips = [...(tripsData?.active ?? []), ...(tripsData?.completed ?? [])];
   const tripCount = allTrips.length;
 
-  const sharedMembers = members?.filter(m => m.role === 'viewer') ?? [];
+  const sharedMembers = members?.filter(m => m.role !== 'owner') ?? [];
 
   const paceStatus: PaceStatus =
     summary?.isOverPace === true
@@ -304,11 +304,22 @@ export function LeaseDetailScreen(): React.ReactElement {
 
         {/* Shared With row */}
         {isPremium ? (
-          <View
+          <TouchableOpacity
             style={[
               styles.listRow,
               { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
             ]}
+            onPress={() => {
+              const parent = navigation.getParent();
+              if (parent != null) {
+                (parent.navigate as unknown as (screen: string, params: object) => void)(
+                  'Leases',
+                  { screen: 'ShareLease', params: { leaseId } },
+                );
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Share Lease"
             testID="shared-with-row"
           >
             <View style={styles.listRowContent}>
@@ -351,7 +362,7 @@ export function LeaseDetailScreen(): React.ReactElement {
               )}
             </View>
             <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
-          </View>
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={[

@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
-import { getLeases, getLeaseSummary } from '../../api/leaseApi';
+import { getLeases, getLeaseSummary, getLeaseMembers } from '../../api/leaseApi';
 import { getTrips } from '../../api/tripsApi';
 import { getStatus } from '../../api/subscriptionApi';
 import { BannerAdView } from '../../components/ads/BannerAdView';
@@ -71,6 +71,12 @@ export function DashboardScreen(): React.ReactElement {
     enabled: activeLeaseId != null,
   });
 
+  const { data: members } = useQuery({
+    queryKey: ['lease-members', activeLeaseId],
+    queryFn: () => getLeaseMembers(activeLeaseId as string),
+    enabled: activeLeaseId != null,
+  });
+
   const { data: subscription } = useQuery({
     queryKey: ['subscription-status'],
     queryFn: getStatus,
@@ -80,6 +86,7 @@ export function DashboardScreen(): React.ReactElement {
   const selectedLease = leases?.find(l => l.id === activeLeaseId);
   const activeTrips = tripsData?.active ?? [];
   const reservedMiles = activeTrips.reduce((sum, t) => sum + t.distance, 0);
+  const sharedCount = (members ?? []).filter(m => m.role !== 'owner').length;
 
   const thisYearStats = useMemo(() => {
     if (selectedLease == null || summary == null) {
@@ -220,6 +227,21 @@ export function DashboardScreen(): React.ReactElement {
             selectedId={activeLeaseId}
             onSelect={setActiveLeaseId}
           />
+        )}
+
+        {/* Shared-with indicator */}
+        {sharedCount > 0 && (
+          <View
+            style={[
+              styles.sharedRow,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            testID="dashboard-shared-indicator"
+          >
+            <Text style={[styles.sharedText, { color: theme.colors.textSecondary }]}>
+              {`Shared with ${sharedCount} ${sharedCount === 1 ? 'person' : 'people'}`}
+            </Text>
+          </View>
         )}
 
         {/* Full Lease / This Year toggle */}
@@ -547,6 +569,19 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 96,
+  },
+  sharedRow: {
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginHorizontal: 16,
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  sharedText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   statDivider: {
     height: '70%',

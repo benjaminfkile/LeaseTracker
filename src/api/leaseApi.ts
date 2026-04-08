@@ -6,6 +6,7 @@ import type {
   MileageHistory,
   CreateLeaseInput,
   UpdateLeaseInput,
+  InviteMemberInput,
 } from '../types/api';
 
 export async function getLeases(): Promise<Lease[]> {
@@ -73,6 +74,38 @@ export async function getMileageHistory(id: string): Promise<MileageHistory> {
 export async function getLeaseMembers(id: string): Promise<LeaseMember[]> {
   try {
     const response = await client.get<LeaseMember[]>(`/leases/${id}/members`);
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+export async function inviteLeaseMember(
+  leaseId: string,
+  data: InviteMemberInput,
+): Promise<LeaseMember> {
+  try {
+    const response = await client.post<LeaseMember>(`/leases/${leaseId}/members`, data);
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+export async function removeLeaseMember(
+  leaseId: string,
+  memberId: string,
+): Promise<void> {
+  try {
+    await client.delete(`/leases/${leaseId}/members/${memberId}`);
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
+
+export async function acceptLeaseInvite(leaseId: string): Promise<LeaseMember> {
+  try {
+    const response = await client.post<LeaseMember>(`/leases/${leaseId}/accept-invite`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
