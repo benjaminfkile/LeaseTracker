@@ -43,6 +43,7 @@ export type OdometerReading = {
   mileage: number;
   readingDate: string;
   note?: string;
+  loggedByName?: string;
   createdAt: string;
 };
 
@@ -78,8 +79,15 @@ export type LeaseMember = {
   leaseId: string;
   userId: string;
   email: string;
-  role: 'owner' | 'viewer';
+  firstName?: string;
+  lastName?: string;
+  role: 'owner' | 'editor' | 'viewer';
   createdAt: string;
+};
+
+export type InviteMemberInput = {
+  email: string;
+  role: 'editor' | 'viewer';
 };
 
 export type SubscriptionStatus = {

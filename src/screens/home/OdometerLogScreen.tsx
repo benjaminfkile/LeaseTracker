@@ -152,6 +152,15 @@ function ReadingRow({ reading, onDelete }: ReadingRowProps): React.ReactElement 
               {`${reading.delta >= 0 ? '+' : ''}${reading.delta.toLocaleString()} mi`}
             </Text>
           )}
+          {reading.loggedByName != null && (
+            <Text
+              style={[styles.loggedBy, { color: theme.colors.textSecondary }]}
+              testID={`reading-logged-by-${reading.id}`}
+              numberOfLines={1}
+            >
+              {`Logged by ${reading.loggedByName}`}
+            </Text>
+          )}
           <View
             style={[styles.sourceBadge, { backgroundColor: theme.colors.border }]}
             testID={`reading-source-${reading.id}`}
@@ -305,6 +314,10 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
+  },
+  loggedBy: {
+    fontSize: 11,
+    marginBottom: 2,
   },
   loader: {
     flex: 1,

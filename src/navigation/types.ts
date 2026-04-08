@@ -31,6 +31,7 @@ export type LeaseStackParamList = {
   AddLease: undefined;
   EditLease: { leaseId: string };
   TurnInChecklist: { leaseId: string };
+  ShareLease: { leaseId: string };
 };
 
 export type TripsStackParamList = {

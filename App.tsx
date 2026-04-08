@@ -14,6 +14,7 @@ import { useAuthStore } from './src/stores/authStore';
 import { useNotificationPermission } from './src/hooks/useNotificationPermission';
 import { useForegroundNotification } from './src/hooks/useForegroundNotification';
 import { useBackgroundNotification } from './src/hooks/useBackgroundNotification';
+import { acceptLeaseInvite } from './src/api/leaseApi';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,15 +42,18 @@ function App() {
   }, [hydrateFromStorage]);
 
   const handleDeepLink = useCallback(({ url }: { url: string }) => {
-    // The NavigationContainer linking config in RootNavigator handles URL→screen
-    // navigation automatically for both paths. This handler is the hook point for
-    // invite-acceptance side-effects (e.g. API call to accept the invite) that must
-    // run in addition to navigation. The accept-invite business logic will be added
-    // here once the corresponding API endpoint is available.
     const inviteMatch = url.match(INVITE_URL_PATTERN);
     if (inviteMatch) {
-      // leaseId = inviteMatch[1]
-      // TODO: dispatch accept-invite action when the endpoint is ready
+      const leaseId = inviteMatch[1];
+      acceptLeaseInvite(leaseId)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['leases'] });
+          queryClient.invalidateQueries({ queryKey: ['lease-members', leaseId] });
+        })
+        .catch(() => {
+          // Invite acceptance failed — navigation still lands on the lease list
+          // so the user can see available leases.
+        });
     }
   }, []);
 
