@@ -15,6 +15,7 @@ import { useNotificationPermission } from './src/hooks/useNotificationPermission
 import { useForegroundNotification } from './src/hooks/useForegroundNotification';
 import { useBackgroundNotification } from './src/hooks/useBackgroundNotification';
 import { useMileageBuybackAlert } from './src/hooks/useMileageBuybackAlert';
+import { useWeeklySummaryAlert } from './src/hooks/useWeeklySummaryAlert';
 import { acceptLeaseInvite } from './src/api/leaseApi';
 
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ function App() {
   useForegroundNotification();
   useBackgroundNotification();
   useMileageBuybackAlert();
+  useWeeklySummaryAlert();
 
   useEffect(() => {
     hydrateFromStorage().finally(() => {

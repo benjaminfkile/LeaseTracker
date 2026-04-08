@@ -78,6 +78,7 @@ const mockAlertConfig: AlertConfig = {
   savedTripEnabled: false,
   mileageBuybackEnabled: false,
   mileageBuybackThresholdDollars: 50,
+  weeklySummaryEnabled: false,
   createdAt: '2023-01-01T00:00:00Z',
   updatedAt: '2023-01-01T00:00:00Z',
 };
@@ -420,6 +421,7 @@ describe('AlertSettingsScreen', () => {
         savedTripEnabled: false,
         mileageBuybackEnabled: false,
         mileageBuybackThresholdDollars: 50,
+        weeklySummaryEnabled: false,
       }),
     );
   });
@@ -699,6 +701,49 @@ describe('AlertSettingsScreen', () => {
     });
     const incrementBtn = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-increment' });
     expect(incrementBtn.props.disabled).toBe(true);
+  });
+
+  it('renders the weekly-summary toggle', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
+    expect(toggle).toBeDefined();
+  });
+
+  it('renders the weekly-summary note text', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const note = renderer!.root.findByProps({ testID: 'weekly-summary-note' });
+    expect(note).toBeDefined();
+  });
+
+  it('populates weekly-summary toggle from loaded config (enabled=true)', async () => {
+    setupMocks({ config: { ...mockAlertConfig, weeklySummaryEnabled: true } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
+    expect(toggle.props.value).toBe(true);
+  });
+
+  it('toggling weekly-summary switch updates state', async () => {
+    setupMocks({ config: { ...mockAlertConfig, weeklySummaryEnabled: false } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
+    expect(toggle.props.value).toBe(false);
+    await ReactTestRenderer.act(() => {
+      toggle.props.onValueChange(true);
+    });
+    const toggleAfter = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
+    expect(toggleAfter.props.value).toBe(true);
   });
 });
 
