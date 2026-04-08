@@ -55,6 +55,7 @@ function configToFormState(config: AlertConfig): FormState {
     savedTripEnabled: config.savedTripEnabled,
     mileageBuybackEnabled: config.mileageBuybackEnabled,
     mileageBuybackThresholdDollars: config.mileageBuybackThresholdDollars,
+    weeklySummaryEnabled: config.weeklySummaryEnabled,
   };
 }
 
@@ -68,6 +69,7 @@ function defaultFormState(): FormState {
     savedTripEnabled: false,
     mileageBuybackEnabled: false,
     mileageBuybackThresholdDollars: DEFAULT_BUYBACK_THRESHOLD,
+    weeklySummaryEnabled: false,
   };
 }
 
@@ -82,6 +84,7 @@ type FormState = {
   savedTripEnabled: boolean;
   mileageBuybackEnabled: boolean;
   mileageBuybackThresholdDollars: number;
+  weeklySummaryEnabled: boolean;
 };
 
 // ---------- Stepper ----------
@@ -296,6 +299,7 @@ export function AlertSettingsScreen(): React.ReactElement {
       savedTripEnabled: form.savedTripEnabled,
       mileageBuybackEnabled: form.mileageBuybackEnabled,
       mileageBuybackThresholdDollars: form.mileageBuybackThresholdDollars,
+      weeklySummaryEnabled: form.weeklySummaryEnabled,
     });
   };
 
@@ -576,6 +580,30 @@ export function AlertSettingsScreen(): React.ReactElement {
                       />
                     </View>
                   )}
+                </View>
+
+                {/* Weekly mileage summary */}
+                <View
+                  style={[
+                    styles.card,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                  ]}
+                  testID="weekly-summary-card"
+                >
+                  <ToggleRow
+                    label={'"How am I doing?" weekly summary'}
+                    value={form.weeklySummaryEnabled}
+                    onValueChange={v =>
+                      setForm(prev => ({ ...prev, weeklySummaryEnabled: v }))
+                    }
+                    testID="weekly-summary-toggle"
+                  />
+                  <Text
+                    style={[styles.cardNote, { color: theme.colors.textSecondary }]}
+                    testID="weekly-summary-note"
+                  >
+                    {'Every Monday morning: a push notification with your previous week\u2019s mileage and pace status.'}
+                  </Text>
                 </View>
 
                 {/* Test notification (dev only) */}

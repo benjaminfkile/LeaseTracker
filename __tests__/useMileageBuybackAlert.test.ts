@@ -82,6 +82,7 @@ const mockAlertConfig: AlertConfig = {
   savedTripEnabled: false,
   mileageBuybackEnabled: true,
   mileageBuybackThresholdDollars: 50,
+  weeklySummaryEnabled: false,
   createdAt: '2023-01-01T00:00:00Z',
   updatedAt: '2023-01-01T00:00:00Z',
 };

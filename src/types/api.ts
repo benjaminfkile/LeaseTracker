@@ -73,6 +73,7 @@ export type AlertConfig = {
   savedTripEnabled: boolean;
   mileageBuybackEnabled: boolean;
   mileageBuybackThresholdDollars: number;
+  weeklySummaryEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -163,6 +164,7 @@ export type UpdateAlertConfigInput = Partial<
     | 'savedTripEnabled'
     | 'mileageBuybackEnabled'
     | 'mileageBuybackThresholdDollars'
+    | 'weeklySummaryEnabled'
   >
 >;
 
