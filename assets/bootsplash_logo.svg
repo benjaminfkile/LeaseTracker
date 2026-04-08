@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <!-- Car silhouette icon representing lease tracking -->
+  <rect x="30" y="80" width="140" height="60" rx="20" ry="20" fill="#4F6AF5"/>
+  <!-- Roof -->
+  <path d="M60 80 L80 50 L140 50 L160 80" fill="#4F6AF5"/>
+  <!-- Windows -->
+  <path d="M65 78 L82 54 L110 54 L110 78 Z" fill="#FFFFFF" opacity="0.9"/>
+  <path d="M115 78 L115 54 L138 54 L155 78 Z" fill="#FFFFFF" opacity="0.9"/>
+  <!-- Wheels -->
+  <circle cx="70" cy="140" r="18" fill="#1F2937"/>
+  <circle cx="70" cy="140" r="8" fill="#9CA3AF"/>
+  <circle cx="130" cy="140" r="18" fill="#1F2937"/>
+  <circle cx="130" cy="140" r="8" fill="#9CA3AF"/>
+  <!-- Headlights -->
+  <rect x="155" y="95" width="15" height="10" rx="3" fill="#FBBF24"/>
+  <rect x="30" y="95" width="15" height="10" rx="3" fill="#FBBF24"/>
+  <!-- Speedometer line (tracking element) -->
+  <line x1="85" y1="170" x2="115" y2="170" stroke="#4F6AF5" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="100" cy="170" r="3" fill="#4F6AF5"/>
+</svg>

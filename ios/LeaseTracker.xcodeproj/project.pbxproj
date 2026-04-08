@@ -16,6 +16,8 @@
 		A100012000000000C0000001 /* WidgetDataBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A100010000000000C0000001 /* WidgetDataBridge.m */; };
 		A10000C000000000C0000001 /* LeaseTrackerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000A000000000C0000001 /* LeaseTrackerWidget.swift */; };
 		A100016000000000C0000001 /* LeaseTrackerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A100000200000000C0000001 /* LeaseTrackerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6D376FF306824B68A7EEBDA6 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F42ECAEB0002430C9DDF8037 /* BootSplash.storyboard */; };
+		04FFFF8924B342A4870FE517 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B914FDE8E4D845C6A7778FF3 /* Colors.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		A10000F000000000C0000001 /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetDataBridge.swift; path = LeaseTracker/WidgetDataBridge.swift; sourceTree = "<group>"; };
 		A100010000000000C0000001 /* WidgetDataBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WidgetDataBridge.m; path = LeaseTracker/WidgetDataBridge.m; sourceTree = "<group>"; };
 		A100014000000000C0000001 /* LeaseTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = LeaseTracker.entitlements; path = LeaseTracker/LeaseTracker.entitlements; sourceTree = "<group>"; };
+		F42ECAEB0002430C9DDF8037 /* BootSplash.storyboard */ = {isa = PBXFileReference; name = "BootSplash.storyboard"; path = "LeaseTracker/BootSplash.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B914FDE8E4D845C6A7778FF3 /* Colors.xcassets */ = {isa = PBXFileReference; name = "Colors.xcassets"; path = "LeaseTracker/Colors.xcassets"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = folder.assetcatalog; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,8 @@
 				A10000F000000000C0000001 /* WidgetDataBridge.swift */,
 				A100010000000000C0000001 /* WidgetDataBridge.m */,
 				A100014000000000C0000001 /* LeaseTracker.entitlements */,
+				F42ECAEB0002430C9DDF8037 /* BootSplash.storyboard */,
+				B914FDE8E4D845C6A7778FF3 /* Colors.xcassets */,
 			);
 			name = LeaseTracker;
 			sourceTree = "<group>";
@@ -218,6 +224,8 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				E3258EEA6C0EBD3462A1D289 /* PrivacyInfo.xcprivacy in Resources */,
+				6D376FF306824B68A7EEBDA6 /* BootSplash.storyboard in Resources */,
+				04FFFF8924B342A4870FE517 /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
