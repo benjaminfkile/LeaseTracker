@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     width: 44,
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: palette.white,
     fontSize: 18,
     fontWeight: '700',
   },

@@ -26,7 +26,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { PremiumGate } from '../../components/PremiumGate';
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { useTheme } from '../../theme';
+import { palette, useTheme } from '../../theme';
 import type { LeaseStackNavigationProp } from '../../navigation/types';
 
 const TOTAL_STEPS = 4;
@@ -175,7 +175,7 @@ function StepIndicator({
                   stepStyles.dotText,
                   {
                     color: filledDot
-                      ? '#FFFFFF'
+                      ? palette.white
                       : theme.colors.textSecondary,
                   },
                 ]}

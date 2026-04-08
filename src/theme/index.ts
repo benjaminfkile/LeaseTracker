@@ -34,6 +34,16 @@ export function useTheme(): Theme {
   return effectiveScheme === 'dark' ? darkTheme : lightTheme;
 }
 
+export function useIsDark(): boolean {
+  const systemScheme = useColorScheme();
+  const mode = useAppearanceStore(state => state.mode);
+
+  const effectiveScheme =
+    mode === 'system' ? systemScheme : mode;
+
+  return effectiveScheme === 'dark';
+}
+
 export { palette };
 export type { ColorTokens, SpacingScale };
 export { spacing, typography };

@@ -3,7 +3,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { Linking, StatusBar, useColorScheme } from 'react-native';
+import { Linking, StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BootSplash from 'react-native-bootsplash';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ import { useBackgroundNotification } from './src/hooks/useBackgroundNotification
 import { useMileageBuybackAlert } from './src/hooks/useMileageBuybackAlert';
 import { useWeeklySummaryAlert } from './src/hooks/useWeeklySummaryAlert';
 import { acceptLeaseInvite } from './src/api/leaseApi';
+import { useIsDark } from './src/theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +33,7 @@ const queryClient = new QueryClient({
 const INVITE_URL_PATTERN = /^leasetracker:\/\/invite\/(.+)$/;
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDark = useIsDark();
   const hydrateFromStorage = useAuthStore(state => state.hydrateFromStorage);
   const hydrateAppearance = useAppearanceStore(state => state.hydrate);
   const { shouldShowModal, handlePermission } = useNotificationPermission();
@@ -80,7 +81,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <StatusBar
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={isDark ? '#111827' : '#F9FAFB'}
+        />
         <ErrorBoundary>
           <RootNavigator />
           <NotificationPermissionModal

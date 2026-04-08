@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useTheme } from '../theme';
+import { palette, useTheme } from '../theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
@@ -42,7 +42,7 @@ export function Button({
         : 'transparent';
   const borderColor =
     variant === 'secondary' ? theme.colors.primary : 'transparent';
-  const contentColor = isFilled ? '#FFFFFF' : theme.colors.primary;
+  const contentColor = isFilled ? palette.white : theme.colors.primary;
 
   return (
     <TouchableOpacity

@@ -32,7 +32,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useAuthStore } from '../../stores/authStore';
-import { useTheme } from '../../theme';
+import { palette, useTheme } from '../../theme';
 import type { LeaseStackNavigationProp, LeaseStackParamList } from '../../navigation/types';
 
 const TOTAL_STEPS = 4;
@@ -180,7 +180,7 @@ function StepIndicator({
                   stepStyles.dotText,
                   {
                     color: filledDot
-                      ? '#FFFFFF'
+                      ? palette.white
                       : theme.colors.textSecondary,
                   },
                 ]}

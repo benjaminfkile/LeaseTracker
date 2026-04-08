@@ -20,7 +20,7 @@ import { z } from 'zod';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { useTheme } from '../../theme';
+import { palette, useTheme } from '../../theme';
 import {
   getLeaseMembers,
   inviteLeaseMember,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   roleBadgeText: {
-    color: '#FFFFFF',
+    color: palette.white,
     fontSize: 11,
     fontWeight: '600',
   },
