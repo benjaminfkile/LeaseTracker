@@ -11,6 +11,7 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { NotificationPermissionModal } from './src/components/NotificationPermissionModal';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores/authStore';
+import { useAppearanceStore } from './src/stores/appearanceStore';
 import { useNotificationPermission } from './src/hooks/useNotificationPermission';
 import { useForegroundNotification } from './src/hooks/useForegroundNotification';
 import { useBackgroundNotification } from './src/hooks/useBackgroundNotification';
@@ -33,6 +34,7 @@ const INVITE_URL_PATTERN = /^leasetracker:\/\/invite\/(.+)$/;
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const hydrateFromStorage = useAuthStore(state => state.hydrateFromStorage);
+  const hydrateAppearance = useAppearanceStore(state => state.hydrate);
   const { shouldShowModal, handlePermission } = useNotificationPermission();
   useForegroundNotification();
   useBackgroundNotification();
@@ -40,10 +42,10 @@ function App() {
   useWeeklySummaryAlert();
 
   useEffect(() => {
-    hydrateFromStorage().finally(() => {
+    Promise.all([hydrateFromStorage(), hydrateAppearance()]).finally(() => {
       BootSplash.hide({ fade: true });
     });
-  }, [hydrateFromStorage]);
+  }, [hydrateFromStorage, hydrateAppearance]);
 
   const handleDeepLink = useCallback(({ url }: { url: string }) => {
     const inviteMatch = url.match(INVITE_URL_PATTERN);

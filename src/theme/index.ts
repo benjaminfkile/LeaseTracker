@@ -4,6 +4,7 @@ import type { ColorTokens } from './colors';
 import spacing from './spacing';
 import type { SpacingScale } from './spacing';
 import typography from './typography';
+import { useAppearanceStore } from '../stores/appearanceStore';
 
 export type Theme = {
   colors: ColorTokens;
@@ -24,8 +25,13 @@ export const darkTheme: Theme = {
 };
 
 export function useTheme(): Theme {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? darkTheme : lightTheme;
+  const systemScheme = useColorScheme();
+  const mode = useAppearanceStore(state => state.mode);
+
+  const effectiveScheme =
+    mode === 'system' ? systemScheme : mode;
+
+  return effectiveScheme === 'dark' ? darkTheme : lightTheme;
 }
 
 export { palette };
