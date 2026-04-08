@@ -505,7 +505,8 @@ export function AddLeaseScreen(): React.ReactElement {
     const milesPerYearNum = parseInt(data.milesPerYear, 10);
     // Fields not yet in CreateLeaseInput (displayName, vehicleColor, vin, licensePlate,
     // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
-    // mpgEstimate, notes) are collected for future API support and shown in the review.
+    // notes) are collected for future API support and shown in the review.
+    const mpg = parseFloat(data.mpgEstimate);
     submitLease({
       vehicleYear: parseInt(data.vehicleYear, 10),
       vehicleMake: data.vehicleMake,
@@ -516,6 +517,7 @@ export function AddLeaseScreen(): React.ReactElement {
       totalMiles: parseInt(data.totalMiles, 10),
       startingMileage: parseInt(data.startingOdometer, 10),
       monthlyMiles: Math.round(milesPerYearNum / 12),
+      mpgEstimate: !isNaN(mpg) && mpg > 0 ? mpg : undefined,
     });
   };
 

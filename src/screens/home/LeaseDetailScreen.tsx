@@ -21,6 +21,7 @@ import { MileageProgressRing } from '../../components/MileageProgressRing';
 import { PaceStatusBadge } from '../../components/PaceStatusBadge';
 import type { PaceStatus } from '../../components/PaceStatusBadge';
 import { ScreenHeader } from '../../components/ScreenHeader';
+import { CarbonFootprintCard } from '../../components/CarbonFootprintCard';
 import { StatCard } from '../../components/StatCard';
 import { useTheme } from '../../theme';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
@@ -396,6 +397,9 @@ export function LeaseDetailScreen(): React.ReactElement {
             <Text style={[styles.chevron, { color: theme.colors.textSecondary }]}>{'→'}</Text>
           </TouchableOpacity>
         )}
+
+        {/* Carbon Footprint fun fact card */}
+        {lease != null && <CarbonFootprintCard lease={lease} />}
 
         {/* Lease Info collapsible panel */}
         <View
