@@ -145,8 +145,10 @@ export function SettingsScreen(): React.ReactElement {
             Account
           </Text>
         </View>
-        <View
+        <TouchableOpacity
           style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+          onPress={() => navigation.navigate('Account')}
+          activeOpacity={0.7}
           testID="settings-account"
         >
           <View style={styles.accountRow}>
@@ -167,8 +169,9 @@ export function SettingsScreen(): React.ReactElement {
                 {email}
               </Text>
             </View>
+            <Text style={[styles.rowChevron, { color: theme.colors.textSecondary }]}>{'>'}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* ── Subscription ── */}
         <View style={styles.sectionHeader}>
