@@ -17,6 +17,7 @@ export type HomeStackParamList = {
   PaceDetail: { leaseId: string };
   BuybackAnalysis: { leaseId: string };
   LeaseEndOptions: { leaseId: string };
+  LeaseComparison: undefined;
 };
 
 export type AppTabParamList = {

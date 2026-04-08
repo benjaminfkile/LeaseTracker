@@ -8,6 +8,7 @@ import { OdometerCameraScreen } from '../screens/home/OdometerCameraScreen';
 import { PaceDetailScreen } from '../screens/home/PaceDetailScreen';
 import { BuybackAnalysisScreen } from '../screens/home/BuybackAnalysisScreen';
 import { LeaseEndOptionsScreen } from '../screens/home/LeaseEndOptionsScreen';
+import { LeaseComparisonScreen } from '../screens/home/LeaseComparisonScreen';
 import type { HomeStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -26,6 +27,7 @@ export function HomeNavigator(): React.ReactElement {
       <Stack.Screen name="PaceDetail" component={PaceDetailScreen} />
       <Stack.Screen name="BuybackAnalysis" component={BuybackAnalysisScreen} />
       <Stack.Screen name="LeaseEndOptions" component={LeaseEndOptionsScreen} />
+      <Stack.Screen name="LeaseComparison" component={LeaseComparisonScreen} />
     </Stack.Navigator>
   );
 }
