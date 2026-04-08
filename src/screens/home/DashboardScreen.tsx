@@ -391,6 +391,24 @@ export function DashboardScreen(): React.ReactElement {
           </View>
         )}
 
+        {/* Compare leases — only if 2+ leases */}
+        {leases.length >= 2 && (
+          <TouchableOpacity
+            style={[
+              styles.compareButton,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            ]}
+            onPress={() => navigation.navigate('LeaseComparison')}
+            accessibilityRole="button"
+            accessibilityLabel="Compare Leases"
+            testID="dashboard-compare-leases"
+          >
+            <Text style={[styles.compareButtonText, { color: theme.colors.primary }]}>
+              {'Compare Leases →'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Quick-action row */}
         <View style={styles.quickActions} testID="dashboard-quick-actions">
           <TouchableOpacity
@@ -494,6 +512,18 @@ const styles = StyleSheet.create({
   calloutText: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  compareButton: {
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  compareButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   center: {
     alignItems: 'center',
