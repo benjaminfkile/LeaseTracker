@@ -81,7 +81,7 @@ android {
 
     namespace "com.leasetracker"
     defaultConfig {
-        applicationId "com.leasetracker"
+        applicationId "com.benjaminfkile.leasetracker"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
