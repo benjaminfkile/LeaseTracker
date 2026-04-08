@@ -14,6 +14,7 @@ import { useAuthStore } from './src/stores/authStore';
 import { useNotificationPermission } from './src/hooks/useNotificationPermission';
 import { useForegroundNotification } from './src/hooks/useForegroundNotification';
 import { useBackgroundNotification } from './src/hooks/useBackgroundNotification';
+import { useMileageBuybackAlert } from './src/hooks/useMileageBuybackAlert';
 import { acceptLeaseInvite } from './src/api/leaseApi';
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ function App() {
   const { shouldShowModal, handlePermission } = useNotificationPermission();
   useForegroundNotification();
   useBackgroundNotification();
+  useMileageBuybackAlert();
 
   useEffect(() => {
     hydrateFromStorage().finally(() => {
