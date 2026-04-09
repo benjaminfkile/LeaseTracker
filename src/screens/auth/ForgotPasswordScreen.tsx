@@ -85,11 +85,9 @@ export function ForgotPasswordScreen({ navigation }: Props): React.ReactElement 
   const [step, setStep] = useState<'email' | 'reset'>('email');
   const [emailForReset, setEmailForReset] = useState('');
 
-  const { forgotPassword, confirmReset, isLoading } = useAuthStore(state => ({
-    forgotPassword: state.forgotPassword,
-    confirmReset: state.confirmReset,
-    isLoading: state.isLoading,
-  }));
+  const forgotPassword = useAuthStore(state => state.forgotPassword);
+  const confirmReset = useAuthStore(state => state.confirmReset);
+  const isLoading = useAuthStore(state => state.isLoading);
 
   const {
     control: emailControl,

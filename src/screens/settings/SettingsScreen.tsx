@@ -29,7 +29,7 @@ import { useQuery } from '@tanstack/react-query';
 const APP_VERSION = require('../../../package.json').version;
 
 const APP_STORE_URL = 'https://apps.apple.com/app/leasetracker/id0000000000';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.leasetracker';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.benjaminfkile.leasetracker';
 const HELP_URL = 'https://leasetracker.app/help';
 const PRIVACY_URL = 'https://leasetracker.app/privacy';
 const TERMS_URL = 'https://leasetracker.app/terms';

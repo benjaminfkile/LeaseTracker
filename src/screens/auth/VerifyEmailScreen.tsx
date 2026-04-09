@@ -43,11 +43,9 @@ function mapVerifyError(err: unknown): string {
 export function VerifyEmailScreen({ navigation, route }: Props): React.ReactElement {
   const { email } = route.params;
   const theme = useTheme();
-  const { confirmEmail, resendCode, isLoading } = useAuthStore(state => ({
-    confirmEmail: state.confirmEmail,
-    resendCode: state.resendCode,
-    isLoading: state.isLoading,
-  }));
+  const confirmEmail = useAuthStore(state => state.confirmEmail);
+  const resendCode = useAuthStore(state => state.resendCode);
+  const isLoading = useAuthStore(state => state.isLoading);
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [error, setError] = useState<string | null>(null);

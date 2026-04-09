@@ -54,10 +54,8 @@ function mapRegisterError(err: unknown): string {
 
 export function RegisterScreen({ navigation }: Props): React.ReactElement {
   const theme = useTheme();
-  const { register, isLoading } = useAuthStore(state => ({
-    register: state.register,
-    isLoading: state.isLoading,
-  }));
+  const register = useAuthStore(state => state.register);
+  const isLoading = useAuthStore(state => state.isLoading);
 
   const {
     control,

@@ -46,10 +46,8 @@ function mapLoginError(err: unknown): string {
 
 export function LoginScreen({ navigation }: Props): React.ReactElement {
   const theme = useTheme();
-  const { login, isLoading } = useAuthStore(state => ({
-    login: state.login,
-    isLoading: state.isLoading,
-  }));
+  const login = useAuthStore(state => state.login);
+  const isLoading = useAuthStore(state => state.isLoading);
 
   const {
     control,
