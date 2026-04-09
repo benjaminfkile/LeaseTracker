@@ -14,7 +14,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { BannerAdView } from '../src/components/BannerAdView';
+import { BannerAdView } from '../src/components/ads/BannerAdView';
 
 describe('BannerAdView', () => {
   it('renders without crashing', async () => {

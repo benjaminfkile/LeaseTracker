@@ -1,3 +1,15 @@
+jest.mock('react-native-safe-area-context', () => {
+  const MockView = require('react-native').View;
+  const MockReact = require('react');
+  return {
+    useSafeAreaInsets: () => ({ top: 0, bottom: 34, left: 0, right: 0 }),
+    SafeAreaView: ({ children }: { children?: React.ReactNode }) =>
+      MockReact.createElement(MockView, {}, children),
+    SafeAreaProvider: ({ children }: { children?: React.ReactNode }) =>
+      MockReact.createElement(MockView, {}, children),
+  };
+});
+
 jest.mock('react-native-gesture-handler', () => {
   const React = require('react');
   const { View } = require('react-native');
