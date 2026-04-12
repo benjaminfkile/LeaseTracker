@@ -6,7 +6,7 @@ export async function getTrips(
 ): Promise<{ active: SavedTrip[]; completed: SavedTrip[] }> {
   try {
     const response = await client.get<{ active: SavedTrip[]; completed: SavedTrip[] }>(
-      `/leases/${leaseId}/trips`,
+      `/api/leases/${leaseId}/trips`,
     );
     return response.data;
   } catch (error) {
@@ -16,7 +16,7 @@ export async function getTrips(
 
 export async function createTrip(leaseId: string, data: CreateTripInput): Promise<SavedTrip> {
   try {
-    const response = await client.post<SavedTrip>(`/leases/${leaseId}/trips`, data);
+    const response = await client.post<SavedTrip>(`/api/leases/${leaseId}/trips`, data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -29,7 +29,7 @@ export async function updateTrip(
   data: UpdateTripInput,
 ): Promise<SavedTrip> {
   try {
-    const response = await client.put<SavedTrip>(`/leases/${leaseId}/trips/${tripId}`, data);
+    const response = await client.put<SavedTrip>(`/api/leases/${leaseId}/trips/${tripId}`, data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -38,7 +38,7 @@ export async function updateTrip(
 
 export async function deleteTrip(leaseId: string, tripId: string): Promise<void> {
   try {
-    await client.delete(`/leases/${leaseId}/trips/${tripId}`);
+    await client.delete(`/api/leases/${leaseId}/trips/${tripId}`);
   } catch (error) {
     throw normalizeError(error);
   }

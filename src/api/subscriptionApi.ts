@@ -3,7 +3,7 @@ import type { SubscriptionStatus } from '../types/api';
 
 export async function verifyApplePurchase(receiptData: string): Promise<SubscriptionStatus> {
   try {
-    const response = await client.post<SubscriptionStatus>('/subscription/verify/apple', {
+    const response = await client.post<SubscriptionStatus>('/api/subscriptions/apple/verify', {
       receiptData,
     });
     return response.data;
@@ -17,7 +17,7 @@ export async function verifyGooglePurchase(
   purchaseToken: string,
 ): Promise<SubscriptionStatus> {
   try {
-    const response = await client.post<SubscriptionStatus>('/subscription/verify/google', {
+    const response = await client.post<SubscriptionStatus>('/api/subscriptions/google/verify', {
       productId,
       purchaseToken,
     });
@@ -29,7 +29,7 @@ export async function verifyGooglePurchase(
 
 export async function getStatus(): Promise<SubscriptionStatus> {
   try {
-    const response = await client.get<SubscriptionStatus>('/subscription/status');
+    const response = await client.get<SubscriptionStatus>('/api/subscriptions/status');
     return response.data;
   } catch (error) {
     throw normalizeError(error);

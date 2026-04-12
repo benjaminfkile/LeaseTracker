@@ -28,7 +28,7 @@ export const linking: LinkingOptions<AppTabParamList> = {
 };
 
 export function RootNavigator(): React.ReactElement {
-  const isLoading = useAuthStore(state => state.isLoading);
+  const isHydrating = useAuthStore(state => state.isHydrating);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const theme = useTheme();
   const isDark = useIsDark();
@@ -46,7 +46,7 @@ export function RootNavigator(): React.ReactElement {
     },
   };
 
-  if (isLoading) {
+  if (isHydrating) {
     return (
       <View style={[styles.splash, { backgroundColor: theme.colors.background }]} testID="root-splash">
         <ActivityIndicator size="large" color={theme.colors.primary} testID="root-splash-indicator" />

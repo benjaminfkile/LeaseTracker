@@ -76,7 +76,7 @@ describe('verifyApplePurchase', () => {
 
     const result = await verifyApplePurchase('receipt-data-abc');
 
-    expect(client.post).toHaveBeenCalledWith('/subscription/verify/apple', {
+    expect(client.post).toHaveBeenCalledWith('/api/subscriptions/apple/verify', {
       receiptData: 'receipt-data-abc',
     });
     expect(result).toEqual(mockPremiumIos);
@@ -87,7 +87,7 @@ describe('verifyApplePurchase', () => {
 
     const result = await verifyApplePurchase('invalid-receipt');
 
-    expect(client.post).toHaveBeenCalledWith('/subscription/verify/apple', {
+    expect(client.post).toHaveBeenCalledWith('/api/subscriptions/apple/verify', {
       receiptData: 'invalid-receipt',
     });
     expect(result).toEqual(mockFree);
@@ -113,7 +113,7 @@ describe('verifyGooglePurchase', () => {
       'purchase-token-xyz',
     );
 
-    expect(client.post).toHaveBeenCalledWith('/subscription/verify/google', {
+    expect(client.post).toHaveBeenCalledWith('/api/subscriptions/google/verify', {
       productId: 'com.benkile.leasetracker.premium.annual',
       purchaseToken: 'purchase-token-xyz',
     });
@@ -125,7 +125,7 @@ describe('verifyGooglePurchase', () => {
 
     const result = await verifyGooglePurchase('com.benkile.leasetracker.premium.monthly', 'bad-token');
 
-    expect(client.post).toHaveBeenCalledWith('/subscription/verify/google', {
+    expect(client.post).toHaveBeenCalledWith('/api/subscriptions/google/verify', {
       productId: 'com.benkile.leasetracker.premium.monthly',
       purchaseToken: 'bad-token',
     });
@@ -151,7 +151,7 @@ describe('getStatus', () => {
 
     const result = await getStatus();
 
-    expect(client.get).toHaveBeenCalledWith('/subscription/status');
+    expect(client.get).toHaveBeenCalledWith('/api/subscriptions/status');
     expect(result).toEqual(mockPremiumIos);
   });
 
@@ -160,7 +160,7 @@ describe('getStatus', () => {
 
     const result = await getStatus();
 
-    expect(client.get).toHaveBeenCalledWith('/subscription/status');
+    expect(client.get).toHaveBeenCalledWith('/api/subscriptions/status');
     expect(result).toEqual(mockFree);
   });
 

@@ -94,7 +94,7 @@ describe('getLeases', () => {
 
     const result = await getLeases();
 
-    expect(client.get).toHaveBeenCalledWith('/leases');
+    expect(client.get).toHaveBeenCalledWith('/api/leases');
     expect(result).toEqual([mockLease]);
   });
 
@@ -123,7 +123,7 @@ describe('getLease', () => {
 
     const result = await getLease('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1');
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1');
     expect(result).toEqual(mockLease);
   });
 
@@ -156,7 +156,7 @@ describe('createLease', () => {
 
     const result = await createLease(input);
 
-    expect(client.post).toHaveBeenCalledWith('/leases', input);
+    expect(client.post).toHaveBeenCalledWith('/api/leases', input);
     expect(result).toEqual(mockLease);
   });
 
@@ -166,7 +166,7 @@ describe('createLease', () => {
 
     const result = await createLease(inputWithoutTrim);
 
-    expect(client.post).toHaveBeenCalledWith('/leases', inputWithoutTrim);
+    expect(client.post).toHaveBeenCalledWith('/api/leases', inputWithoutTrim);
     expect(result.vehicleTrim).toBeUndefined();
   });
 
@@ -190,7 +190,7 @@ describe('updateLease', () => {
 
     const result = await updateLease('lease-1', patch);
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1', patch);
     expect(result).toEqual(updatedLease);
   });
 
@@ -199,7 +199,7 @@ describe('updateLease', () => {
 
     const result = await updateLease('lease-1', {});
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1', {});
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1', {});
     expect(result).toEqual(mockLease);
   });
 
@@ -220,7 +220,7 @@ describe('deleteLease', () => {
 
     const result = await deleteLease('lease-1');
 
-    expect(client.delete).toHaveBeenCalledWith('/leases/lease-1');
+    expect(client.delete).toHaveBeenCalledWith('/api/leases/lease-1');
     expect(result).toBeUndefined();
   });
 
@@ -241,7 +241,7 @@ describe('getLeaseSummary', () => {
 
     const result = await getLeaseSummary('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/summary');
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/summary');
     expect(result).toEqual(mockSummary);
   });
 
@@ -262,7 +262,7 @@ describe('getMileageHistory', () => {
 
     const result = await getMileageHistory('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/mileage-history');
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/mileage-history');
     expect(result).toEqual(mockHistory);
   });
 

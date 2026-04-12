@@ -68,8 +68,8 @@ const client = axios.create({
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const { tokens } = useAuthStore.getState();
-    if (tokens?.idToken) {
-      config.headers.Authorization = `Bearer ${tokens.idToken}`;
+    if (tokens?.accessToken) {
+      config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
     return config;
   },
@@ -114,8 +114,8 @@ client.interceptors.response.use(
       await authService.storeTokens(newTokens);
       const user = authService.decodeIdToken(newTokens.idToken);
       useAuthStore.setState({ tokens: newTokens, user, isAuthenticated: true });
-      processQueue(null, newTokens.idToken);
-      originalRequest.headers.Authorization = `Bearer ${newTokens.idToken}`;
+      processQueue(null, newTokens.accessToken);
+      originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
       return client(originalRequest);
     } catch (refreshError) {
       processQueue(normalizeError(refreshError), null);

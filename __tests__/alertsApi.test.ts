@@ -68,7 +68,7 @@ describe('getAlertConfig', () => {
 
     const result = await getAlertConfig('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/alerts');
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/alerts');
     expect(result).toEqual(mockAlertConfig);
   });
 
@@ -91,7 +91,7 @@ describe('updateAlertConfig', () => {
 
     const result = await updateAlertConfig('lease-1', patch);
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/alerts', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', patch);
     expect(result).toEqual(updatedConfig);
   });
 
@@ -107,7 +107,7 @@ describe('updateAlertConfig', () => {
 
     const result = await updateAlertConfig('lease-1', patch);
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/alerts', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', patch);
     expect(result).toEqual(updatedConfig);
   });
 
@@ -116,7 +116,7 @@ describe('updateAlertConfig', () => {
 
     const result = await updateAlertConfig('lease-1', {});
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/alerts', {});
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', {});
     expect(result).toEqual(mockAlertConfig);
   });
 

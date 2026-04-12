@@ -123,6 +123,7 @@ beforeEach(() => {
     user: null,
     tokens: null,
     isLoading: false,
+    isHydrating: false,
     isAuthenticated: false,
     error: null,
   });
@@ -139,6 +140,7 @@ describe('authStore', () => {
       expect(state.user).toBeNull();
       expect(state.tokens).toBeNull();
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       expect(state.isAuthenticated).toBe(false);
       expect(state.error).toBeNull();
     });
@@ -426,6 +428,7 @@ describe('authStore', () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       expect(state.user).toBeNull();
     });
 
@@ -442,6 +445,7 @@ describe('authStore', () => {
       expect(state.tokens).toEqual(tokens);
       expect(state.user?.email).toBe('test@example.com');
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       // should NOT have called refreshSession
       expect(pool.getCurrentUser).not.toHaveBeenCalled();
     });
@@ -464,6 +468,7 @@ describe('authStore', () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(true);
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       expect(mockAsyncStorage.setItem).toHaveBeenCalled();
     });
 
@@ -499,6 +504,7 @@ describe('authStore', () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('@auth_tokens');
     });
 
@@ -511,6 +517,7 @@ describe('authStore', () => {
 
       const state = useAuthStore.getState();
       expect(state.isLoading).toBe(false);
+      expect(state.isHydrating).toBe(false);
       expect(state.error).toBe('StorageReadError');
       expect(state.isAuthenticated).toBe(false);
     });

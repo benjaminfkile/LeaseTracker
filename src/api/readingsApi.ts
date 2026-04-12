@@ -11,7 +11,7 @@ export async function getReadings(
   params?: PaginationParams,
 ): Promise<OdometerReading[]> {
   try {
-    const response = await client.get<OdometerReading[]>(`/leases/${leaseId}/readings`, {
+    const response = await client.get<OdometerReading[]>(`/api/leases/${leaseId}/readings`, {
       params,
     });
     return response.data;
@@ -25,7 +25,7 @@ export async function addReading(
   data: CreateReadingInput,
 ): Promise<OdometerReading> {
   try {
-    const response = await client.post<OdometerReading>(`/leases/${leaseId}/readings`, data);
+    const response = await client.post<OdometerReading>(`/api/leases/${leaseId}/readings`, data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -39,7 +39,7 @@ export async function updateReading(
 ): Promise<OdometerReading> {
   try {
     const response = await client.put<OdometerReading>(
-      `/leases/${leaseId}/readings/${readingId}`,
+      `/api/leases/${leaseId}/readings/${readingId}`,
       data,
     );
     return response.data;
@@ -50,7 +50,7 @@ export async function updateReading(
 
 export async function deleteReading(leaseId: string, readingId: string): Promise<void> {
   try {
-    await client.delete(`/leases/${leaseId}/readings/${readingId}`);
+    await client.delete(`/api/leases/${leaseId}/readings/${readingId}`);
   } catch (error) {
     throw normalizeError(error);
   }

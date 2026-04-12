@@ -56,6 +56,7 @@ type AuthStoreState = {
   refreshTokens: jest.Mock;
   hydrateFromStorage: jest.Mock;
   isLoading: boolean;
+  isHydrating: boolean;
   isAuthenticated: boolean;
   user: null;
   tokens: null;
@@ -73,6 +74,7 @@ function mockAuthStore(overrides: Partial<AuthStoreState> = {}) {
     refreshTokens: jest.fn(),
     hydrateFromStorage: jest.fn().mockResolvedValue(undefined),
     isLoading: false,
+    isHydrating: false,
     isAuthenticated: false,
     user: null,
     tokens: null,
@@ -113,8 +115,8 @@ describe('RootNavigator', () => {
     expect(loginTitle).toBeDefined();
   });
 
-  it('renders the splash indicator while isLoading is true', async () => {
-    mockAuthStore({ isLoading: true });
+  it('renders the splash indicator while isHydrating is true', async () => {
+    mockAuthStore({ isHydrating: true });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<RootNavigator />);
@@ -125,8 +127,8 @@ describe('RootNavigator', () => {
     expect(indicator).toBeDefined();
   });
 
-  it('does not render NavigationContainer while isLoading is true', async () => {
-    mockAuthStore({ isLoading: true });
+  it('does not render NavigationContainer while isHydrating is true', async () => {
+    mockAuthStore({ isHydrating: true });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<RootNavigator />);

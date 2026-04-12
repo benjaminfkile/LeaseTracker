@@ -11,7 +11,7 @@ import type {
 
 export async function getLeases(): Promise<Lease[]> {
   try {
-    const response = await client.get<Lease[]>('/leases');
+    const response = await client.get<Lease[]>('/api/leases');
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -20,7 +20,7 @@ export async function getLeases(): Promise<Lease[]> {
 
 export async function getLease(id: string): Promise<Lease> {
   try {
-    const response = await client.get<Lease>(`/leases/${id}`);
+    const response = await client.get<Lease>(`/api/leases/${id}`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -29,7 +29,7 @@ export async function getLease(id: string): Promise<Lease> {
 
 export async function createLease(data: CreateLeaseInput): Promise<Lease> {
   try {
-    const response = await client.post<Lease>('/leases', data);
+    const response = await client.post<Lease>('/api/leases', data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -38,7 +38,7 @@ export async function createLease(data: CreateLeaseInput): Promise<Lease> {
 
 export async function updateLease(id: string, data: UpdateLeaseInput): Promise<Lease> {
   try {
-    const response = await client.put<Lease>(`/leases/${id}`, data);
+    const response = await client.put<Lease>(`/api/leases/${id}`, data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -47,7 +47,7 @@ export async function updateLease(id: string, data: UpdateLeaseInput): Promise<L
 
 export async function deleteLease(id: string): Promise<void> {
   try {
-    await client.delete(`/leases/${id}`);
+    await client.delete(`/api/leases/${id}`);
   } catch (error) {
     throw normalizeError(error);
   }
@@ -55,7 +55,7 @@ export async function deleteLease(id: string): Promise<void> {
 
 export async function getLeaseSummary(id: string): Promise<LeaseSummary> {
   try {
-    const response = await client.get<LeaseSummary>(`/leases/${id}/summary`);
+    const response = await client.get<LeaseSummary>(`/api/leases/${id}/summary`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -64,7 +64,7 @@ export async function getLeaseSummary(id: string): Promise<LeaseSummary> {
 
 export async function getMileageHistory(id: string): Promise<MileageHistory> {
   try {
-    const response = await client.get<MileageHistory>(`/leases/${id}/mileage-history`);
+    const response = await client.get<MileageHistory>(`/api/leases/${id}/mileage-history`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -73,7 +73,7 @@ export async function getMileageHistory(id: string): Promise<MileageHistory> {
 
 export async function getLeaseMembers(id: string): Promise<LeaseMember[]> {
   try {
-    const response = await client.get<LeaseMember[]>(`/leases/${id}/members`);
+    const response = await client.get<LeaseMember[]>(`/api/leases/${id}/members`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -85,7 +85,7 @@ export async function inviteLeaseMember(
   data: InviteMemberInput,
 ): Promise<LeaseMember> {
   try {
-    const response = await client.post<LeaseMember>(`/leases/${leaseId}/members`, data);
+    const response = await client.post<LeaseMember>(`/api/leases/${leaseId}/members`, data);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -97,7 +97,7 @@ export async function removeLeaseMember(
   memberId: string,
 ): Promise<void> {
   try {
-    await client.delete(`/leases/${leaseId}/members/${memberId}`);
+    await client.delete(`/api/leases/${leaseId}/members/${memberId}`);
   } catch (error) {
     throw normalizeError(error);
   }
@@ -105,7 +105,7 @@ export async function removeLeaseMember(
 
 export async function acceptLeaseInvite(leaseId: string): Promise<LeaseMember> {
   try {
-    const response = await client.post<LeaseMember>(`/leases/${leaseId}/accept-invite`);
+    const response = await client.post<LeaseMember>(`/api/leases/${leaseId}/accept-invite`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);

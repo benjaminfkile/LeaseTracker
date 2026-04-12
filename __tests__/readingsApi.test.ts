@@ -75,7 +75,7 @@ describe('getReadings', () => {
 
     const result = await getReadings('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/readings', { params: undefined });
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/readings', { params: undefined });
     expect(result).toEqual([mockReading, mockReading2]);
   });
 
@@ -93,7 +93,7 @@ describe('getReadings', () => {
 
     const result = await getReadings('lease-1', params);
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/readings', { params });
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/readings', { params });
     expect(result).toEqual([mockReading]);
   });
 
@@ -103,7 +103,7 @@ describe('getReadings', () => {
 
     await getReadings('lease-1', params);
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/readings', { params });
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/readings', { params });
   });
 
   it('works with only limit param provided', async () => {
@@ -112,7 +112,7 @@ describe('getReadings', () => {
 
     await getReadings('lease-1', params);
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/readings', { params });
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/readings', { params });
   });
 
   it('throws a normalized ApiError on failure', async () => {
@@ -138,7 +138,7 @@ describe('addReading', () => {
 
     const result = await addReading('lease-1', input);
 
-    expect(client.post).toHaveBeenCalledWith('/leases/lease-1/readings', input);
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/readings', input);
     expect(result).toEqual(mockReading);
   });
 
@@ -149,7 +149,7 @@ describe('addReading', () => {
 
     const result = await addReading('lease-1', inputWithoutNote);
 
-    expect(client.post).toHaveBeenCalledWith('/leases/lease-1/readings', inputWithoutNote);
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/readings', inputWithoutNote);
     expect(result.note).toBeUndefined();
   });
 
@@ -173,7 +173,7 @@ describe('updateReading', () => {
 
     const result = await updateReading('lease-1', 'reading-1', patch);
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/readings/reading-1', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/readings/reading-1', patch);
     expect(result).toEqual(updatedReading);
   });
 
@@ -182,7 +182,7 @@ describe('updateReading', () => {
 
     const result = await updateReading('lease-1', 'reading-1', {});
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/readings/reading-1', {});
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/readings/reading-1', {});
     expect(result).toEqual(mockReading);
   });
 
@@ -203,7 +203,7 @@ describe('deleteReading', () => {
 
     const result = await deleteReading('lease-1', 'reading-1');
 
-    expect(client.delete).toHaveBeenCalledWith('/leases/lease-1/readings/reading-1');
+    expect(client.delete).toHaveBeenCalledWith('/api/leases/lease-1/readings/reading-1');
     expect(result).toBeUndefined();
   });
 

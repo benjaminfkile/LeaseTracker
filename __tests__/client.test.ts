@@ -113,11 +113,11 @@ beforeEach(() => {
 // ─── Request interceptor ────────────────────────────────────────────────────
 
 describe('request interceptor', () => {
-  it('attaches Authorization header when idToken is present', async () => {
+  it('attaches Authorization header when accessToken is present', async () => {
     const handler = getInterceptorHandler('request');
     const config = makeConfig();
     const result = await handler.fulfilled(config);
-    expect(result.headers.get('Authorization')).toBe('Bearer old-id-token');
+    expect(result.headers.get('Authorization')).toBe('Bearer old-access-token');
   });
 
   it('does not attach Authorization header when tokens are null', async () => {
@@ -201,7 +201,7 @@ describe('response interceptor', () => {
     expect(result.status).toBe(200);
   });
 
-  it('sets Authorization header to new idToken on retry', async () => {
+  it('sets Authorization header to new accessToken on retry', async () => {
     const handler = getInterceptorHandler('response');
     const config = makeConfig();
     const err = make401Error(config);
@@ -210,7 +210,7 @@ describe('response interceptor', () => {
 
     const mockAdapter = client.defaults.adapter as jest.Mock;
     const retryConfig = mockAdapter.mock.calls[0][0] as { headers: AxiosHeaders };
-    expect(retryConfig.headers.get('Authorization')).toBe(`Bearer ${newMockTokens.idToken}`);
+    expect(retryConfig.headers.get('Authorization')).toBe(`Bearer ${newMockTokens.accessToken}`);
   });
 
   it('calls logout and rejects when no refresh token is available', async () => {

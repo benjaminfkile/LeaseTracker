@@ -49,6 +49,7 @@ export interface AuthState {
   user: IdTokenClaims | null;
   tokens: AuthTokens | null;
   isLoading: boolean;
+  isHydrating: boolean;
   isAuthenticated: boolean;
   error: string | null;
 }
@@ -71,6 +72,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   tokens: null,
   isLoading: false,
+  isHydrating: true,
   isAuthenticated: false,
   error: null,
 
@@ -175,7 +177,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const tokens = await getStoredTokens();
       if (!tokens) {
-        set({ isLoading: false });
+        set({ isLoading: false, isHydrating: false });
         return;
       }
 
@@ -187,15 +189,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           await storeTokens(activeTokens);
         } catch {
           await clearTokens();
-          set({ isLoading: false });
+          set({ isLoading: false, isHydrating: false });
           return;
         }
       }
 
       const user = decodeIdToken(activeTokens.idToken);
-      set({ tokens: activeTokens, user, isAuthenticated: true, isLoading: false });
+      set({ tokens: activeTokens, user, isAuthenticated: true, isLoading: false, isHydrating: false });
     } catch (err) {
-      set({ isLoading: false, error: err instanceof Error ? err.message : String(err) });
+      set({ isLoading: false, isHydrating: false, error: err instanceof Error ? err.message : String(err) });
     }
   },
 }));

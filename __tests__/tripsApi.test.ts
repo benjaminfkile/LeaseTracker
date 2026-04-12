@@ -69,7 +69,7 @@ describe('getTrips', () => {
 
     const result = await getTrips('lease-1');
 
-    expect(client.get).toHaveBeenCalledWith('/leases/lease-1/trips');
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/trips');
     expect(result).toEqual({ active: [mockTrip1], completed: [mockTrip2] });
   });
 
@@ -104,7 +104,7 @@ describe('createTrip', () => {
 
     const result = await createTrip('lease-1', input);
 
-    expect(client.post).toHaveBeenCalledWith('/leases/lease-1/trips', input);
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/trips', input);
     expect(result).toEqual(mockTrip1);
   });
 
@@ -115,7 +115,7 @@ describe('createTrip', () => {
 
     const result = await createTrip('lease-1', inputWithoutNote);
 
-    expect(client.post).toHaveBeenCalledWith('/leases/lease-1/trips', inputWithoutNote);
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/trips', inputWithoutNote);
     expect(result.note).toBeUndefined();
   });
 
@@ -139,7 +139,7 @@ describe('updateTrip', () => {
 
     const result = await updateTrip('lease-1', 'trip-1', patch);
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/trips/trip-1', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/trips/trip-1', patch);
     expect(result).toEqual(updatedTrip);
   });
 
@@ -148,7 +148,7 @@ describe('updateTrip', () => {
 
     const result = await updateTrip('lease-1', 'trip-1', {});
 
-    expect(client.put).toHaveBeenCalledWith('/leases/lease-1/trips/trip-1', {});
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/trips/trip-1', {});
     expect(result).toEqual(mockTrip1);
   });
 
@@ -169,7 +169,7 @@ describe('deleteTrip', () => {
 
     const result = await deleteTrip('lease-1', 'trip-1');
 
-    expect(client.delete).toHaveBeenCalledWith('/leases/lease-1/trips/trip-1');
+    expect(client.delete).toHaveBeenCalledWith('/api/leases/lease-1/trips/trip-1');
     expect(result).toBeUndefined();
   });
 

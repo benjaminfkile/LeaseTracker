@@ -18,6 +18,7 @@ jest.mock('../src/api/client', () => {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
+    patch: jest.fn(),
     delete: jest.fn(),
   };
 
@@ -57,7 +58,7 @@ describe('getMe', () => {
 
     const result = await getMe();
 
-    expect(client.get).toHaveBeenCalledWith('/me');
+    expect(client.get).toHaveBeenCalledWith('/api/users/me');
     expect(result).toEqual(mockUser);
   });
 
@@ -81,7 +82,7 @@ describe('updateMe', () => {
 
     const result = await updateMe(patch);
 
-    expect(client.put).toHaveBeenCalledWith('/me', patch);
+    expect(client.put).toHaveBeenCalledWith('/api/users/me', patch);
     expect(result).toEqual(updatedUser);
   });
 
@@ -90,7 +91,7 @@ describe('updateMe', () => {
 
     const result = await updateMe({});
 
-    expect(client.put).toHaveBeenCalledWith('/me', {});
+    expect(client.put).toHaveBeenCalledWith('/api/users/me', {});
     expect(result).toEqual(mockUser);
   });
 
@@ -107,17 +108,17 @@ describe('updateMe', () => {
 
 describe('savePushToken', () => {
   it('resolves without a value on success', async () => {
-    (client.post as jest.Mock).mockResolvedValue({ data: undefined });
+    (client.patch as jest.Mock).mockResolvedValue({ data: undefined });
 
     const result = await savePushToken('fcm-token-abc');
 
-    expect(client.post).toHaveBeenCalledWith('/me/push-token', { token: 'fcm-token-abc' });
+    expect(client.patch).toHaveBeenCalledWith('/api/users/me/push-token', { push_token: 'fcm-token-abc' });
     expect(result).toBeUndefined();
   });
 
   it('throws a normalized ApiError on failure', async () => {
     const error = new Error('Server Error');
-    (client.post as jest.Mock).mockRejectedValue(error);
+    (client.patch as jest.Mock).mockRejectedValue(error);
 
     await expect(savePushToken('fcm-token-abc')).rejects.toBeInstanceOf(ApiError);
     expect(normalizeError).toHaveBeenCalledWith(error);
@@ -132,7 +133,7 @@ describe('deleteAccount', () => {
 
     const result = await deleteAccount();
 
-    expect(client.delete).toHaveBeenCalledWith('/me');
+    expect(client.delete).toHaveBeenCalledWith('/api/users/me');
     expect(result).toBeUndefined();
   });
 
