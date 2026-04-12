@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Lease Tracker</string>
-    <string name="build_config_package">com.leasetracker</string>
+    <string name="build_config_package">com.benkile.leasetracker</string>
 </resources>

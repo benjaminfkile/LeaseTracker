@@ -1,4 +1,4 @@
-package com.leasetracker
+package com.benkile.leasetracker
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

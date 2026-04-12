@@ -1,4 +1,4 @@
-package com.leasetracker
+package com.benkile.leasetracker
 
 import android.app.Application
 import com.facebook.react.PackageList
