@@ -21,8 +21,8 @@ const TERMS_URL = 'https://leasetracker.app/terms';
 const PRIVACY_URL = 'https://leasetracker.app/privacy';
 const BILLING_URL = 'https://leasetracker.app/billing';
 
-const PRODUCT_ID_MONTHLY = 'com.benjaminfkile.leasetracker.premium.monthly';
-const PRODUCT_ID_YEARLY = 'com.benjaminfkile.leasetracker.premium.yearly';
+const PRODUCT_ID_MONTHLY = 'com.benkile.leasetracker.premium.monthly';
+const PRODUCT_ID_YEARLY = 'com.benkile.leasetracker.premium.yearly';
 
 type PricingPlan = 'monthly' | 'yearly';
 

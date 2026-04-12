@@ -209,7 +209,7 @@ describe('API types', () => {
         tier: 'premium',
         expiresAt: '2025-12-31T23:59:59Z',
         platform: 'ios',
-        productId: 'com.benjaminfkile.leasetracker.premium.monthly',
+        productId: 'com.benkile.leasetracker.premium.monthly',
       };
       expect(status.isPremium).toBe(true);
       expect(status.tier).toBe('premium');
@@ -237,7 +237,7 @@ describe('API types', () => {
         tier: 'premium',
         expiresAt: '2025-06-30T23:59:59Z',
         platform: 'android',
-        productId: 'com.benjaminfkile.leasetracker.premium.annual',
+        productId: 'com.benkile.leasetracker.premium.annual',
       };
       expect(status.platform).toBe('android');
     });

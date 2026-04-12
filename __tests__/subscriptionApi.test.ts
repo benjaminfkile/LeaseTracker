@@ -45,7 +45,7 @@ const mockPremiumIos: SubscriptionStatus = {
   tier: 'premium',
   expiresAt: '2025-01-01T00:00:00Z',
   platform: 'ios',
-  productId: 'com.benjaminfkile.leasetracker.premium.monthly',
+  productId: 'com.benkile.leasetracker.premium.monthly',
 };
 
 const mockPremiumAndroid: SubscriptionStatus = {
@@ -53,7 +53,7 @@ const mockPremiumAndroid: SubscriptionStatus = {
   tier: 'premium',
   expiresAt: '2025-06-01T00:00:00Z',
   platform: 'android',
-  productId: 'com.benjaminfkile.leasetracker.premium.annual',
+  productId: 'com.benkile.leasetracker.premium.annual',
 };
 
 const mockFree: SubscriptionStatus = {
@@ -109,12 +109,12 @@ describe('verifyGooglePurchase', () => {
     (client.post as jest.Mock).mockResolvedValue({ data: mockPremiumAndroid });
 
     const result = await verifyGooglePurchase(
-      'com.benjaminfkile.leasetracker.premium.annual',
+      'com.benkile.leasetracker.premium.annual',
       'purchase-token-xyz',
     );
 
     expect(client.post).toHaveBeenCalledWith('/subscription/verify/google', {
-      productId: 'com.benjaminfkile.leasetracker.premium.annual',
+      productId: 'com.benkile.leasetracker.premium.annual',
       purchaseToken: 'purchase-token-xyz',
     });
     expect(result).toEqual(mockPremiumAndroid);
@@ -123,10 +123,10 @@ describe('verifyGooglePurchase', () => {
   it('returns free status when purchase token is invalid', async () => {
     (client.post as jest.Mock).mockResolvedValue({ data: mockFree });
 
-    const result = await verifyGooglePurchase('com.benjaminfkile.leasetracker.premium.monthly', 'bad-token');
+    const result = await verifyGooglePurchase('com.benkile.leasetracker.premium.monthly', 'bad-token');
 
     expect(client.post).toHaveBeenCalledWith('/subscription/verify/google', {
-      productId: 'com.benjaminfkile.leasetracker.premium.monthly',
+      productId: 'com.benkile.leasetracker.premium.monthly',
       purchaseToken: 'bad-token',
     });
     expect(result).toEqual(mockFree);
@@ -137,7 +137,7 @@ describe('verifyGooglePurchase', () => {
     (client.post as jest.Mock).mockRejectedValue(error);
 
     await expect(
-      verifyGooglePurchase('com.benjaminfkile.leasetracker.premium.annual', 'purchase-token-xyz'),
+      verifyGooglePurchase('com.benkile.leasetracker.premium.annual', 'purchase-token-xyz'),
     ).rejects.toBeInstanceOf(ApiError);
     expect(normalizeError).toHaveBeenCalledWith(error);
   });
