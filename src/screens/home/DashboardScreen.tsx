@@ -19,6 +19,7 @@ import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
 import { MileageProgressRing } from '../../components/MileageProgressRing';
 import { PaceStatusBadge } from '../../components/PaceStatusBadge';
 import type { PaceStatus } from '../../components/PaceStatusBadge';
+import type { PaceStatus as WidgetPaceStatus } from '../../native/WidgetDataBridge';
 import { QuickAddFAB } from '../../components/QuickAddFAB';
 import { StatCard } from '../../components/StatCard';
 import { useTheme } from '../../theme';
@@ -98,15 +99,18 @@ export function DashboardScreen(): React.ReactElement {
   // Push latest summary to the iOS home-screen widget via shared UserDefaults.
   useEffect(() => {
     if (summary == null || selectedLease == null) return;
-    const isOver = summary.isOverPace;
+    const totalMiles = selectedLease.total_miles_allowed;
+    const isOver = summary.pace_status === 'behind';
     const isWayOver =
-      summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1;
-    const status = isOver ? (isWayOver ? 'over-pace' : 'slightly-over') : 'on-track';
+      totalMiles > 0 && summary.projected_miles_at_end / totalMiles > 1.1;
+    const widgetStatus: WidgetPaceStatus = isOver ? (isWayOver ? 'over-pace' : 'slightly-over') : 'on-track';
+    const vehicleLabel = selectedLease.display_name
+      || [selectedLease.year, selectedLease.make, selectedLease.model, selectedLease.trim].filter(Boolean).join(' ');
     updateWidgetData({
-      milesRemaining: summary.milesRemaining,
-      daysRemaining: summary.daysRemaining,
-      paceStatus: status,
-      vehicleLabel: summary.vehicleLabel,
+      milesRemaining: summary.miles_remaining,
+      daysRemaining: summary.days_remaining,
+      paceStatus: widgetStatus,
+      vehicleLabel,
     });
   }, [summary, selectedLease]);
 
@@ -114,39 +118,32 @@ export function DashboardScreen(): React.ReactElement {
   const displayMilesRemaining =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesRemainingThisYear
-      : (summary?.milesRemaining ?? 0);
+      : (summary?.miles_remaining ?? 0);
   const displayDaysRemaining =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.daysRemainingThisYear
-      : (summary?.daysRemaining ?? 0);
+      : (summary?.days_remaining ?? 0);
   const displayTotalMiles =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.totalMilesThisYear
-      : (summary?.totalMiles ?? 0);
+      : (selectedLease?.total_miles_allowed ?? 0);
   const displayMilesUsed =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesUsedThisYear
-      : (summary?.milesUsed ?? 0);
+      : (summary?.miles_driven ?? 0);
 
   const paceStatus: PaceStatus =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.isOverPaceThisYear
-        ? thisYearStats.totalMilesThisYear > 0 &&
-          thisYearStats.projectedMilesThisYear / thisYearStats.totalMilesThisYear > 1.1
-          ? 'over-pace'
-          : 'slightly-over'
-        : 'on-track'
-      : summary?.isOverPace === true
-        ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
-          ? 'over-pace'
-          : 'slightly-over'
-        : 'on-track';
+        ? 'behind'
+        : 'on_track'
+      : (summary?.pace_status ?? 'on_track');
 
   const recommendedPace =
     mode === 'this-year' && thisYearStats != null && thisYearStats.daysRemainingThisYear > 0
       ? Math.ceil(thisYearStats.milesRemainingThisYear / thisYearStats.daysRemainingThisYear)
-      : summary != null && summary.daysRemaining > 0
-        ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
+      : summary != null && summary.days_remaining > 0
+        ? Math.ceil(summary.miles_remaining / summary.days_remaining)
         : 0;
 
   if (leasesLoading || summaryLoading) {
@@ -332,7 +329,7 @@ export function DashboardScreen(): React.ReactElement {
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
             label="Monthly Miles"
-            value={selectedLease?.monthlyMiles ?? 0}
+            value={selectedLease != null ? Math.round(selectedLease.miles_per_year / 12) : 0}
             unit="mi"
             testID="stat-monthly-miles"
           />
