@@ -8,32 +8,32 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../theme';
 import type { Lease } from '../types/api';
+import type { PaceStatus } from './PaceStatusBadge';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-type PaceStatus = 'on-track' | 'slightly-over' | 'over-pace';
-
 const PACE_CONFIG: Record<PaceStatus, { label: string; colorKey: 'success' | 'warning' | 'error' }> = {
-  'on-track': { label: 'On Track', colorKey: 'success' },
-  'slightly-over': { label: 'Slightly Over', colorKey: 'warning' },
-  'over-pace': { label: 'Over Pace', colorKey: 'error' },
+  ahead: { label: 'Over Pace', colorKey: 'error' },
+  on_track: { label: 'On Track', colorKey: 'success' },
+  behind: { label: 'Under Pace', colorKey: 'success' },
 };
 
 function computePaceStatus(lease: Lease): PaceStatus {
   const today = Date.now();
-  const start = new Date(lease.startDate).getTime();
-  const end = new Date(lease.endDate).getTime();
+  const start = new Date(lease.lease_start_date).getTime();
+  const end = new Date(lease.lease_end_date).getTime();
   const totalDays = Math.max(1, (end - start) / MS_PER_DAY);
   const elapsedDays = Math.max(0, (today - start) / MS_PER_DAY);
-  const milesUsed = lease.currentMileage - lease.startingMileage;
-  const expectedMiles = (elapsedDays / totalDays) * lease.totalMiles;
-  if (milesUsed > expectedMiles * 1.1) {
-    return 'over-pace';
-  }
+  const currentOdometer = lease.current_odometer ?? lease.starting_odometer;
+  const milesUsed = currentOdometer - lease.starting_odometer;
+  const expectedMiles = (elapsedDays / totalDays) * lease.total_miles_allowed;
   if (milesUsed > expectedMiles) {
-    return 'slightly-over';
+    return 'ahead';
   }
-  return 'on-track';
+  if (milesUsed < expectedMiles) {
+    return 'behind';
+  }
+  return 'on_track';
 }
 
 export type LeaseCardProps = {
@@ -54,15 +54,16 @@ export function LeaseCard({
   const theme = useTheme();
   const swipeableRef = useRef<Swipeable>(null);
 
-  const baseLabel = `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
-  const vehicleLabel = lease.vehicleTrim ? `${baseLabel} ${lease.vehicleTrim}` : baseLabel;
+  const baseLabel = `${lease.year ?? ''} ${lease.make ?? ''} ${lease.model ?? ''}`.trim();
+  const vehicleLabel = lease.trim ? `${baseLabel} ${lease.trim}` : baseLabel;
 
-  const milesUsed = lease.currentMileage - lease.startingMileage;
-  const progressRatio = Math.min(1, Math.max(0, milesUsed / lease.totalMiles));
+  const currentOdometer = lease.current_odometer ?? lease.starting_odometer;
+  const milesUsed = currentOdometer - lease.starting_odometer;
+  const progressRatio = Math.min(1, Math.max(0, milesUsed / lease.total_miles_allowed));
 
   const daysRemaining = Math.max(
     0,
-    Math.ceil((new Date(lease.endDate).getTime() - Date.now()) / MS_PER_DAY),
+    Math.ceil((new Date(lease.lease_end_date).getTime() - Date.now()) / MS_PER_DAY),
   );
 
   const paceStatus = computePaceStatus(lease);
@@ -141,13 +142,13 @@ export function LeaseCard({
             style={[styles.statText, { color: theme.colors.textSecondary }]}
             testID="lease-card-mileage"
           >
-            {`${milesUsed.toLocaleString()} / ${lease.totalMiles.toLocaleString()} mi`}
+            {`${milesUsed.toLocaleString()} / ${lease.total_miles_allowed.toLocaleString()} mi`}
           </Text>
           <Text
             style={[styles.statText, { color: theme.colors.textSecondary }]}
-            testID="lease-card-monthly"
+            testID="lease-card-yearly"
           >
-            {`${lease.monthlyMiles.toLocaleString()} mi/mo`}
+            {`${lease.miles_per_year.toLocaleString()} mi/yr`}
           </Text>
         </View>
 
