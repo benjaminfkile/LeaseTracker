@@ -19,7 +19,7 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: () => ({
-    data: { firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
+    data: { display_name: 'John Doe', email: 'john@example.com', subscription_tier: 'free', subscription_expires_at: null },
     isLoading: false,
   }),
   useMutation: () => ({
