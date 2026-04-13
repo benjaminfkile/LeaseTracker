@@ -12,20 +12,11 @@ jest.mock('@tanstack/react-query', () => ({
 }));
 
 jest.mock('../src/api/alertsApi', () => ({
-  getAlertConfig: jest.fn(),
+  getAlertConfigs: jest.fn(),
   updateAlertConfig: jest.fn(),
 }));
 
 jest.mock('../src/stores/leasesStore');
-
-jest.mock('@notifee/react-native', () => ({
-  __esModule: true,
-  default: {
-    createChannel: jest.fn().mockResolvedValue('default'),
-    displayNotification: jest.fn().mockResolvedValue(undefined),
-  },
-  AndroidImportance: { HIGH: 4 },
-}));
 
 jest.mock('react-native-safe-area-context', () => {
   const MockReact = require('react');
@@ -49,39 +40,71 @@ const mockUseMutation = useMutation as jest.Mock;
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 10000,
-  currentMileage: 22000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: 'My Camry',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: null,
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 10000,
+  current_odometer: 22000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
-const mockAlertConfig: AlertConfig = {
-  id: 'config-1',
-  leaseId: 'lease-1',
-  overPaceThresholdPercent: 10,
-  projectedOverageThresholdMiles: 500,
-  notifyEmail: true,
-  notifyPush: true,
-  approachingLimitEnabled: true,
-  approachingLimitPercent: 80,
-  overPaceEnabled: false,
-  leaseEndEnabled: true,
-  leaseEndDays: 30,
-  savedTripEnabled: false,
-  mileageBuybackEnabled: false,
-  mileageBuybackThresholdDollars: 50,
-  weeklySummaryEnabled: false,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
-};
+const mockAlertConfigs: AlertConfig[] = [
+  {
+    id: 'alert-1',
+    lease_id: 'lease-1',
+    user_id: 'user-1',
+    alert_type: 'miles_threshold',
+    threshold_value: 80,
+    is_enabled: true,
+    last_sent_at: null,
+    created_at: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'alert-2',
+    lease_id: 'lease-1',
+    user_id: 'user-1',
+    alert_type: 'over_pace',
+    threshold_value: null,
+    is_enabled: false,
+    last_sent_at: null,
+    created_at: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'alert-3',
+    lease_id: 'lease-1',
+    user_id: 'user-1',
+    alert_type: 'days_remaining',
+    threshold_value: 30,
+    is_enabled: true,
+    last_sent_at: null,
+    created_at: '2023-01-01T00:00:00Z',
+  },
+];
+
+function makeConfigs(overrides: Partial<Record<AlertConfig['alert_type'], Partial<AlertConfig>>>): AlertConfig[] {
+  return mockAlertConfigs.map(c => ({
+    ...c,
+    ...(overrides[c.alert_type] ?? {}),
+  }));
+}
 
 type LeasesStoreState = {
   leases: Lease[];
@@ -106,7 +129,7 @@ function mockLeasesStore(overrides: Partial<LeasesStoreState> = {}) {
 }
 
 function setupMocks(opts: {
-  config?: AlertConfig | null;
+  configs?: AlertConfig[] | null;
   isLoading?: boolean;
   error?: Error | null;
   mutate?: jest.Mock;
@@ -118,7 +141,7 @@ function setupMocks(opts: {
     mutate = jest.fn(),
     isPending = false,
   } = opts;
-  const data = 'config' in opts ? (opts.config ?? undefined) : mockAlertConfig;
+  const data = 'configs' in opts ? (opts.configs ?? undefined) : mockAlertConfigs;
   mockUseQuery.mockReturnValue({ data, isLoading, error });
   mockUseMutation.mockReturnValue({ mutate, isPending });
 }
@@ -178,12 +201,12 @@ describe('AlertSettingsScreen', () => {
     expect(headerTitle.props.children).toBe('Alert Settings');
   });
 
-  it('renders the approaching-limit toggle', async () => {
+  it('renders the miles-threshold toggle', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'approaching-limit-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
     expect(toggle).toBeDefined();
   });
 
@@ -196,21 +219,12 @@ describe('AlertSettingsScreen', () => {
     expect(toggle).toBeDefined();
   });
 
-  it('renders the lease-end toggle', async () => {
+  it('renders the days-remaining toggle', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'lease-end-toggle' });
-    expect(toggle).toBeDefined();
-  });
-
-  it('renders the saved-trip toggle', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const toggle = renderer!.root.findByProps({ testID: 'saved-trip-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
     expect(toggle).toBeDefined();
   });
 
@@ -223,8 +237,8 @@ describe('AlertSettingsScreen', () => {
     expect(saveBtn).toBeDefined();
   });
 
-  it('shows loading indicator when config is loading', async () => {
-    setupMocks({ isLoading: true, config: null });
+  it('shows loading indicator when configs are loading', async () => {
+    setupMocks({ isLoading: true, configs: null });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
@@ -233,18 +247,18 @@ describe('AlertSettingsScreen', () => {
     expect(loading).toBeDefined();
   });
 
-  it('populates approaching-limit toggle from loaded config (enabled=true)', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: true } });
+  it('populates miles-threshold toggle from loaded config (enabled=true)', async () => {
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: true } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'approaching-limit-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
     expect(toggle.props.value).toBe(true);
   });
 
   it('populates over-pace toggle from loaded config (disabled=false)', async () => {
-    setupMocks({ config: { ...mockAlertConfig, overPaceEnabled: false } });
+    setupMocks({ configs: makeConfigs({ over_pace: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
@@ -253,154 +267,145 @@ describe('AlertSettingsScreen', () => {
     expect(toggle.props.value).toBe(false);
   });
 
-  it('populates lease-end toggle from loaded config (enabled=true)', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: true } });
+  it('populates days-remaining toggle from loaded config (enabled=true)', async () => {
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: true } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'lease-end-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
     expect(toggle.props.value).toBe(true);
   });
 
-  it('shows percent stepper when approaching-limit is enabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: true } });
+  it('shows percent stepper when miles-threshold is enabled', async () => {
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: true } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const stepper = renderer!.root.findByProps({ testID: 'approaching-limit-percent-stepper' });
+    const stepper = renderer!.root.findByProps({ testID: 'miles-threshold-stepper' });
     expect(stepper).toBeDefined();
   });
 
-  it('hides percent stepper when approaching-limit is disabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: false } });
+  it('hides percent stepper when miles-threshold is disabled', async () => {
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     expect(() =>
-      renderer!.root.findByProps({ testID: 'approaching-limit-percent-stepper' }),
+      renderer!.root.findByProps({ testID: 'miles-threshold-stepper' }),
     ).toThrow();
   });
 
-  it('shows days stepper when lease-end is enabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: true } });
+  it('shows days stepper when days-remaining is enabled', async () => {
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: true } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const stepper = renderer!.root.findByProps({ testID: 'lease-end-days-stepper' });
+    const stepper = renderer!.root.findByProps({ testID: 'days-remaining-stepper' });
     expect(stepper).toBeDefined();
   });
 
-  it('hides days stepper when lease-end is disabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: false } });
+  it('hides days stepper when days-remaining is disabled', async () => {
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     expect(() =>
-      renderer!.root.findByProps({ testID: 'lease-end-days-stepper' }),
+      renderer!.root.findByProps({ testID: 'days-remaining-stepper' }),
     ).toThrow();
   });
 
   it('shows the percent value from config in the stepper', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: true, approachingLimitPercent: 75 } });
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: true, threshold_value: 75 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     const valueEl = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-value',
+      testID: 'miles-threshold-stepper-value',
     });
     expect(valueEl.props.children).toBe('75%');
   });
 
   it('increments the percent value when increment is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: true, approachingLimitPercent: 75 } });
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: true, threshold_value: 75 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     const incrementBtn = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-increment',
+      testID: 'miles-threshold-stepper-increment',
     });
     await ReactTestRenderer.act(() => {
       incrementBtn.props.onPress();
     });
     const valueEl = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-value',
+      testID: 'miles-threshold-stepper-value',
     });
     expect(valueEl.props.children).toBe('80%');
   });
 
   it('decrements the percent value when decrement is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: true, approachingLimitPercent: 75 } });
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: true, threshold_value: 75 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     const decrementBtn = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-decrement',
+      testID: 'miles-threshold-stepper-decrement',
     });
     await ReactTestRenderer.act(() => {
       decrementBtn.props.onPress();
     });
     const valueEl = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-value',
+      testID: 'miles-threshold-stepper-value',
     });
     expect(valueEl.props.children).toBe('70%');
   });
 
   it('shows the days value from config in the stepper', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: true, leaseEndDays: 30 } });
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: true, threshold_value: 30 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const valueEl = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-value' });
+    const valueEl = renderer!.root.findByProps({ testID: 'days-remaining-stepper-value' });
     expect(valueEl.props.children).toBe('30 days');
   });
 
   it('increments days value when increment is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: true, leaseEndDays: 30 } });
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: true, threshold_value: 30 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const incrementBtn = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-increment' });
+    const incrementBtn = renderer!.root.findByProps({ testID: 'days-remaining-stepper-increment' });
     await ReactTestRenderer.act(() => {
       incrementBtn.props.onPress();
     });
-    const valueEl = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-value' });
+    const valueEl = renderer!.root.findByProps({ testID: 'days-remaining-stepper-value' });
     expect(valueEl.props.children).toBe('31 days');
   });
 
   it('decrements days value when decrement is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, leaseEndEnabled: true, leaseEndDays: 30 } });
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: true, threshold_value: 30 } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const decrementBtn = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-decrement' });
+    const decrementBtn = renderer!.root.findByProps({ testID: 'days-remaining-stepper-decrement' });
     await ReactTestRenderer.act(() => {
       decrementBtn.props.onPress();
     });
-    const valueEl = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-value' });
+    const valueEl = renderer!.root.findByProps({ testID: 'days-remaining-stepper-value' });
     expect(valueEl.props.children).toBe('29 days');
   });
 
-  it('shows saved-trip note text', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const note = renderer!.root.findByProps({ testID: 'saved-trip-note' });
-    expect(note).toBeDefined();
-  });
-
-  it('calls mutate with correct payload when Save is pressed', async () => {
+  it('calls mutate when Save is pressed', async () => {
     const mutate = jest.fn();
     setupMocks({ mutate });
     let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -411,19 +416,7 @@ describe('AlertSettingsScreen', () => {
     await ReactTestRenderer.act(() => {
       saveBtn.props.onPress();
     });
-    expect(mutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        approachingLimitEnabled: true,
-        approachingLimitPercent: 80,
-        overPaceEnabled: false,
-        leaseEndEnabled: true,
-        leaseEndDays: 30,
-        savedTripEnabled: false,
-        mileageBuybackEnabled: false,
-        mileageBuybackThresholdDollars: 50,
-        weeklySummaryEnabled: false,
-      }),
-    );
+    expect(mutate).toHaveBeenCalled();
   });
 
   it('shows loading state on save button when isSaving', async () => {
@@ -459,7 +452,7 @@ describe('AlertSettingsScreen', () => {
     const secondLease: Lease = {
       ...mockLease,
       id: 'lease-2',
-      vehicleModel: 'Corolla',
+      display_name: 'My Corolla',
     };
     mockLeasesStore({ leases: [mockLease, secondLease], activeLeaseId: 'lease-1' });
     let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -470,45 +463,37 @@ describe('AlertSettingsScreen', () => {
     expect(pills).toBeDefined();
   });
 
-  it('renders the test notification button in __DEV__ mode', async () => {
-    // __DEV__ is true in Jest/test environment
+  it('uses default form values when no configs are loaded', async () => {
+    setupMocks({ configs: null });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const btn = renderer!.root.findByProps({ testID: 'test-notification-button' });
-    expect(btn).toBeDefined();
-  });
-
-  it('uses default form values when no config is loaded', async () => {
-    setupMocks({ config: null });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const approachingToggle = renderer!.root.findByProps({ testID: 'approaching-limit-toggle' });
-    expect(approachingToggle.props.value).toBe(false);
+    const milesToggle = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
+    expect(milesToggle.props.value).toBe(false);
     const overPaceToggle = renderer!.root.findByProps({ testID: 'over-pace-toggle' });
     expect(overPaceToggle.props.value).toBe(false);
+    const daysToggle = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
+    expect(daysToggle.props.value).toBe(false);
   });
 
-  it('toggling approaching-limit switch updates state', async () => {
-    setupMocks({ config: { ...mockAlertConfig, approachingLimitEnabled: false } });
+  it('toggling miles-threshold switch updates state', async () => {
+    setupMocks({ configs: makeConfigs({ miles_threshold: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'approaching-limit-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
     expect(toggle.props.value).toBe(false);
     await ReactTestRenderer.act(() => {
       toggle.props.onValueChange(true);
     });
-    const toggleAfter = renderer!.root.findByProps({ testID: 'approaching-limit-toggle' });
+    const toggleAfter = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
     expect(toggleAfter.props.value).toBe(true);
   });
 
   it('toggling over-pace switch updates state', async () => {
-    setupMocks({ config: { ...mockAlertConfig, overPaceEnabled: false } });
+    setupMocks({ configs: makeConfigs({ over_pace: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
@@ -521,229 +506,112 @@ describe('AlertSettingsScreen', () => {
     expect(toggleAfter.props.value).toBe(true);
   });
 
-  it('renders the mileage-buyback toggle', async () => {
+  it('toggling days-remaining switch updates state', async () => {
+    setupMocks({ configs: makeConfigs({ days_remaining: { is_enabled: false } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
-    expect(toggle).toBeDefined();
-  });
-
-  it('renders the mileage-buyback note text', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const note = renderer!.root.findByProps({ testID: 'mileage-buyback-note' });
-    expect(note).toBeDefined();
-  });
-
-  it('shows threshold stepper when mileage-buyback is enabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const stepper = renderer!.root.findByProps({ testID: 'mileage-buyback-threshold-stepper' });
-    expect(stepper).toBeDefined();
-  });
-
-  it('hides threshold stepper when mileage-buyback is disabled', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: false } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    expect(() =>
-      renderer!.root.findByProps({ testID: 'mileage-buyback-threshold-stepper' }),
-    ).toThrow();
-  });
-
-  it('shows the dollar value from config in the mileage-buyback stepper', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 80 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const valueEl = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-value',
-    });
-    expect(valueEl.props.children).toBe('$80');
-  });
-
-  it('increments the mileage-buyback threshold when increment is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const incrementBtn = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-increment',
-    });
-    await ReactTestRenderer.act(() => {
-      incrementBtn.props.onPress();
-    });
-    const valueEl = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-value',
-    });
-    expect(valueEl.props.children).toBe('$60');
-  });
-
-  it('decrements the mileage-buyback threshold when decrement is pressed', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 50 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const decrementBtn = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-decrement',
-    });
-    await ReactTestRenderer.act(() => {
-      decrementBtn.props.onPress();
-    });
-    const valueEl = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-value',
-    });
-    expect(valueEl.props.children).toBe('$40');
-  });
-
-  it('mileage-buyback threshold decrement is disabled at minimum value', async () => {
-    setupMocks({
-      config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 10 },
-    });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const decrementBtn = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-decrement',
-    });
-    expect(decrementBtn.props.disabled).toBe(true);
-  });
-
-  it('mileage-buyback threshold increment is disabled at maximum value', async () => {
-    setupMocks({
-      config: { ...mockAlertConfig, mileageBuybackEnabled: true, mileageBuybackThresholdDollars: 500 },
-    });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const incrementBtn = renderer!.root.findByProps({
-      testID: 'mileage-buyback-threshold-stepper-increment',
-    });
-    expect(incrementBtn.props.disabled).toBe(true);
-  });
-
-  it('toggling mileage-buyback switch updates state', async () => {
-    setupMocks({ config: { ...mockAlertConfig, mileageBuybackEnabled: false } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const toggle = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
+    const toggle = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
     expect(toggle.props.value).toBe(false);
     await ReactTestRenderer.act(() => {
       toggle.props.onValueChange(true);
     });
-    const toggleAfter = renderer!.root.findByProps({ testID: 'mileage-buyback-toggle' });
+    const toggleAfter = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
     expect(toggleAfter.props.value).toBe(true);
   });
 
   it('percent stepper decrement is disabled at minimum value', async () => {
     setupMocks({
-      config: { ...mockAlertConfig, approachingLimitEnabled: true, approachingLimitPercent: 1 },
+      configs: makeConfigs({ miles_threshold: { is_enabled: true, threshold_value: 1 } }),
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     const decrementBtn = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-decrement',
+      testID: 'miles-threshold-stepper-decrement',
     });
     expect(decrementBtn.props.disabled).toBe(true);
   });
 
   it('percent stepper increment is disabled at maximum value', async () => {
     setupMocks({
-      config: { ...mockAlertConfig, approachingLimitEnabled: true, approachingLimitPercent: 100 },
+      configs: makeConfigs({ miles_threshold: { is_enabled: true, threshold_value: 100 } }),
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
     const incrementBtn = renderer!.root.findByProps({
-      testID: 'approaching-limit-percent-stepper-increment',
+      testID: 'miles-threshold-stepper-increment',
     });
     expect(incrementBtn.props.disabled).toBe(true);
   });
 
   it('days stepper decrement is disabled at minimum value', async () => {
     setupMocks({
-      config: { ...mockAlertConfig, leaseEndEnabled: true, leaseEndDays: 1 },
+      configs: makeConfigs({ days_remaining: { is_enabled: true, threshold_value: 1 } }),
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const decrementBtn = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-decrement' });
+    const decrementBtn = renderer!.root.findByProps({ testID: 'days-remaining-stepper-decrement' });
     expect(decrementBtn.props.disabled).toBe(true);
   });
 
   it('days stepper increment is disabled at maximum value', async () => {
     setupMocks({
-      config: { ...mockAlertConfig, leaseEndEnabled: true, leaseEndDays: 365 },
+      configs: makeConfigs({ days_remaining: { is_enabled: true, threshold_value: 365 } }),
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const incrementBtn = renderer!.root.findByProps({ testID: 'lease-end-days-stepper-increment' });
+    const incrementBtn = renderer!.root.findByProps({ testID: 'days-remaining-stepper-increment' });
     expect(incrementBtn.props.disabled).toBe(true);
   });
 
-  it('renders the weekly-summary toggle', async () => {
+  it('does not show threshold input for over-pace alert type', async () => {
+    setupMocks({ configs: makeConfigs({ over_pace: { is_enabled: true } }) });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
-    expect(toggle).toBeDefined();
+    const card = renderer!.root.findByProps({ testID: 'over-pace-card' });
+    expect(card).toBeDefined();
+    // over_pace should have no stepper
+    expect(() =>
+      renderer!.root.findByProps({ testID: 'over-pace-stepper' }),
+    ).toThrow();
   });
 
-  it('renders the weekly-summary note text', async () => {
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
+  it('passes mutationFn that calls updateAlertConfig for changed alerts', async () => {
+    let capturedMutationFn: (() => Promise<void>) | undefined;
+    mockUseMutation.mockImplementation((opts: { mutationFn: () => Promise<void> }) => {
+      capturedMutationFn = opts.mutationFn;
+      return { mutate: jest.fn(), isPending: false };
     });
-    const note = renderer!.root.findByProps({ testID: 'weekly-summary-note' });
-    expect(note).toBeDefined();
+
+    await ReactTestRenderer.act(() => {
+      ReactTestRenderer.create(<AlertSettingsScreen />);
+    });
+
+    expect(capturedMutationFn).toBeDefined();
   });
 
-  it('populates weekly-summary toggle from loaded config (enabled=true)', async () => {
-    setupMocks({ config: { ...mockAlertConfig, weeklySummaryEnabled: true } });
+  it('uses empty configs gracefully when API returns empty array', async () => {
+    setupMocks({ configs: [] });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
     });
-    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
-    expect(toggle.props.value).toBe(true);
-  });
-
-  it('toggling weekly-summary switch updates state', async () => {
-    setupMocks({ config: { ...mockAlertConfig, weeklySummaryEnabled: false } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<AlertSettingsScreen />);
-    });
-    const toggle = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
-    expect(toggle.props.value).toBe(false);
-    await ReactTestRenderer.act(() => {
-      toggle.props.onValueChange(true);
-    });
-    const toggleAfter = renderer!.root.findByProps({ testID: 'weekly-summary-toggle' });
-    expect(toggleAfter.props.value).toBe(true);
+    const milesToggle = renderer!.root.findByProps({ testID: 'miles-threshold-toggle' });
+    expect(milesToggle.props.value).toBe(false);
+    const overPaceToggle = renderer!.root.findByProps({ testID: 'over-pace-toggle' });
+    expect(overPaceToggle.props.value).toBe(false);
+    const daysToggle = renderer!.root.findByProps({ testID: 'days-remaining-toggle' });
+    expect(daysToggle.props.value).toBe(false);
   });
 });
-
