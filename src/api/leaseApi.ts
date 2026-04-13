@@ -3,7 +3,7 @@ import type {
   Lease,
   LeaseMember,
   LeaseSummary,
-  MileageHistory,
+  MileageHistoryEntry,
   CreateLeaseInput,
   UpdateLeaseInput,
   InviteMemberInput,
@@ -62,9 +62,9 @@ export async function getLeaseSummary(id: string): Promise<LeaseSummary> {
   }
 }
 
-export async function getMileageHistory(id: string): Promise<MileageHistory> {
+export async function getMileageHistory(id: string): Promise<MileageHistoryEntry[]> {
   try {
-    const response = await client.get<MileageHistory>(`/api/leases/${id}/mileage-history`);
+    const response = await client.get<MileageHistoryEntry[]>(`/api/leases/${id}/mileage-history`);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
