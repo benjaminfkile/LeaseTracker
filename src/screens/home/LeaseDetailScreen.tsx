@@ -105,7 +105,7 @@ export function LeaseDetailScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscription?.isPremium ?? false;
+  const isPremium = subscription?.is_active ?? false;
 
   const { data: members } = useQuery({
     queryKey: ['lease-members', leaseId],
@@ -120,20 +120,15 @@ export function LeaseDetailScreen(): React.ReactElement {
 
   const sharedMembers = members?.filter(m => m.role !== 'owner') ?? [];
 
-  const paceStatus: PaceStatus =
-    summary?.isOverPace === true
-      ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
-        ? 'over-pace'
-        : 'slightly-over'
-      : 'on-track';
+  const paceStatus: PaceStatus = summary?.pace_status ?? 'on_track';
 
   const recommendedPace =
-    summary != null && summary.daysRemaining > 0
-      ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
+    summary != null && summary.days_remaining > 0
+      ? Math.ceil(summary.miles_remaining / summary.days_remaining)
       : 0;
 
   const vehicleLabel = lease
-    ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${lease.vehicleTrim ? ` ${lease.vehicleTrim}` : ''}`
+    ? `${lease.year ?? ''} ${lease.make ?? ''} ${lease.model ?? ''}${lease.trim ? ` ${lease.trim}` : ''}`.trim()
     : 'Lease Detail';
 
   if (leaseLoading || summaryLoading) {
@@ -184,8 +179,8 @@ export function LeaseDetailScreen(): React.ReactElement {
         {summary != null && (
           <View style={styles.ringContainer} testID="lease-detail-ring-container">
             <MileageProgressRing
-              totalMiles={summary.totalMiles}
-              usedMiles={summary.milesUsed}
+              totalMiles={lease?.total_miles_allowed ?? 0}
+              usedMiles={summary.miles_driven}
             />
           </View>
         )}
@@ -200,21 +195,21 @@ export function LeaseDetailScreen(): React.ReactElement {
         >
           <StatCard
             label="Miles Remaining"
-            value={summary?.milesRemaining ?? 0}
+            value={summary?.miles_remaining ?? 0}
             unit="mi"
             testID="stat-miles-remaining"
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
             label="Days Left"
-            value={summary?.daysRemaining ?? 0}
+            value={summary?.days_remaining ?? 0}
             unit="days"
             testID="stat-days-left"
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
             label="Monthly Miles"
-            value={lease?.monthlyMiles ?? 0}
+            value={lease != null ? Math.round(lease.miles_per_year / 12) : 0}
             unit="mi"
             testID="stat-monthly-miles"
           />
@@ -266,7 +261,7 @@ export function LeaseDetailScreen(): React.ReactElement {
                 style={[styles.listRowValue, { color: theme.colors.textSecondary }]}
                 testID="odometer-latest-reading"
               >
-                {`${latestReading.mileage.toLocaleString()} mi`}
+                {`${latestReading.odometer.toLocaleString()} mi`}
               </Text>
             )}
           </View>
@@ -432,22 +427,22 @@ export function LeaseDetailScreen(): React.ReactElement {
               />
               <LeaseInfoRow
                 label="Start Date"
-                value={lease.startDate}
+                value={lease.lease_start_date}
                 testID="lease-info-start-date"
               />
               <LeaseInfoRow
                 label="End Date"
-                value={lease.endDate}
+                value={lease.lease_end_date}
                 testID="lease-info-end-date"
               />
               <LeaseInfoRow
                 label="Total Miles"
-                value={`${lease.totalMiles.toLocaleString()} mi`}
+                value={`${lease.total_miles_allowed.toLocaleString()} mi`}
                 testID="lease-info-total-miles"
               />
               <LeaseInfoRow
                 label="Starting Odometer"
-                value={`${lease.startingMileage.toLocaleString()} mi`}
+                value={`${lease.starting_odometer.toLocaleString()} mi`}
                 testID="lease-info-starting-odometer"
               />
             </View>

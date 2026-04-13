@@ -96,66 +96,91 @@ const mockUseQuery = useQuery as jest.Mock;
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry SE',
+  year: 2023,
+  make: 'Toyota',
+  model: 'Camry',
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 365,
-  projectedMiles: 14400,
-  isOverPace: false,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 730,
+  days_remaining: 365,
+  lease_length_days: 1095,
+  expected_miles_to_date: 24000,
+  current_pace_per_month: 500,
+  pace_status: 'on_track',
+  miles_over_under_pace: 0,
+  projected_miles_at_end: 14400,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 66,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockReading: OdometerReading = {
   id: 'reading-1',
-  leaseId: 'lease-1',
-  mileage: 12500,
-  readingDate: '2024-02-01',
-  createdAt: '2024-02-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 12500,
+  reading_date: '2024-02-01',
+  notes: null,
+  source: 'manual',
+  created_at: '2024-02-01T00:00:00Z',
 };
 
 const mockTrip: SavedTrip = {
   id: 'trip-1',
-  leaseId: 'lease-1',
-  distance: 150,
-  tripDate: '2024-01-10',
-  createdAt: '2024-01-10T00:00:00Z',
-  updatedAt: '2024-01-10T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Road Trip',
+  estimated_miles: 150,
+  trip_date: '2024-01-10',
+  notes: null,
+  is_completed: false,
+  created_at: '2024-01-10T00:00:00Z',
+  updated_at: '2024-01-10T00:00:00Z',
 };
 
 const mockMember: LeaseMember = {
   id: 'member-1',
-  leaseId: 'lease-1',
-  userId: 'user-2',
-  email: 'jane@example.com',
+  lease_id: 'lease-1',
+  user_id: 'user-2',
   role: 'viewer',
-  createdAt: '2024-01-01T00:00:00Z',
+  invited_by: null,
+  accepted_at: null,
+  display_name: null,
+  email: 'jane@example.com',
+  created_at: '2024-01-01T00:00:00Z',
 };
 
 const mockSubscription: SubscriptionStatus = {
-  isPremium: false,
-  tier: 'free',
-  expiresAt: null,
+  is_active: false,
+  expires_at: null,
   platform: null,
-  productId: null,
+  product_id: null,
 };
 
 function setupQueryMocks({
@@ -296,7 +321,7 @@ describe('LeaseDetailScreen', () => {
   });
 
   it('renders On Track badge when not over pace', async () => {
-    setupQueryMocks({ summary: { ...mockSummary, isOverPace: false } });
+    setupQueryMocks({ summary: { ...mockSummary, pace_status: 'on_track' } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -305,13 +330,11 @@ describe('LeaseDetailScreen', () => {
     expect(label.props.children).toBe('On Track');
   });
 
-  it('renders Slightly Over badge when slightly over pace', async () => {
+  it('renders Under Pace badge when behind pace', async () => {
     setupQueryMocks({
       summary: {
         ...mockSummary,
-        isOverPace: true,
-        projectedMiles: 38000,
-        totalMiles: 36000,
+        pace_status: 'behind',
       },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -319,16 +342,14 @@ describe('LeaseDetailScreen', () => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
     });
     const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
-    expect(label.props.children).toBe('Slightly Over');
+    expect(label.props.children).toBe('Under Pace');
   });
 
-  it('renders Over Pace badge when significantly over pace', async () => {
+  it('renders Over Pace badge when ahead of pace', async () => {
     setupQueryMocks({
       summary: {
         ...mockSummary,
-        isOverPace: true,
-        projectedMiles: 42000,
-        totalMiles: 36000,
+        pace_status: 'ahead',
       },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -349,7 +370,7 @@ describe('LeaseDetailScreen', () => {
   });
 
   it('does not render the pace callout when daysRemaining is 0', async () => {
-    setupQueryMocks({ summary: { ...mockSummary, daysRemaining: 0 } });
+    setupQueryMocks({ summary: { ...mockSummary, days_remaining: 0 } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -436,7 +457,7 @@ describe('LeaseDetailScreen', () => {
   });
 
   it('shows the premium lock for sharing when not premium', async () => {
-    setupQueryMocks({ subscription: { ...mockSubscription, isPremium: false } });
+    setupQueryMocks({ subscription: { ...mockSubscription, is_active: false } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -448,7 +469,7 @@ describe('LeaseDetailScreen', () => {
   it('shows "Only you" when there are no shared members and user is premium', async () => {
     setupQueryMocks({
       members: [],
-      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+      subscription: { ...mockSubscription, is_active: true },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -461,7 +482,7 @@ describe('LeaseDetailScreen', () => {
   it('renders member avatars when members are present and user is premium', async () => {
     setupQueryMocks({
       members: [mockMember],
-      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+      subscription: { ...mockSubscription, is_active: true },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -482,7 +503,7 @@ describe('LeaseDetailScreen', () => {
     ];
     setupQueryMocks({
       members: extraMembers,
-      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+      subscription: { ...mockSubscription, is_active: true },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -574,7 +595,7 @@ describe('LeaseDetailScreen', () => {
   });
 
   it('renders the banner ad for free-tier users', async () => {
-    setupQueryMocks({ subscription: { ...mockSubscription, isPremium: false } });
+    setupQueryMocks({ subscription: { ...mockSubscription, is_active: false } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
@@ -585,7 +606,7 @@ describe('LeaseDetailScreen', () => {
 
   it('does not render the banner ad for premium users', async () => {
     setupQueryMocks({
-      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+      subscription: { ...mockSubscription, is_active: true },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
