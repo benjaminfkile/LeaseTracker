@@ -13,9 +13,9 @@ import { MonthlyMileageChart, computeMonthlyBars } from '../src/components/Month
 import type { MileageHistoryEntry } from '../src/types/api';
 
 const entries: MileageHistoryEntry[] = [
-  { date: '2024-01-31', mileage: 1000, projectedMileage: 1000 },
-  { date: '2024-02-29', mileage: 2100, projectedMileage: 2000 },
-  { date: '2024-03-31', mileage: 3050, projectedMileage: 3000 },
+  { month: '2024-01', miles_driven: 1000, expected_miles: 1000 },
+  { month: '2024-02', miles_driven: 2100, expected_miles: 2000 },
+  { month: '2024-03', miles_driven: 3050, expected_miles: 3000 },
 ];
 
 describe('MonthlyMileageChart', () => {
@@ -76,7 +76,7 @@ describe('MonthlyMileageChart', () => {
 
   it('renders empty state in this-year mode with no matching entries', async () => {
     const oldEntries: MileageHistoryEntry[] = [
-      { date: '2020-06-01', mileage: 5000, projectedMileage: 5000 },
+      { month: '2020-06', miles_driven: 5000, expected_miles: 5000 },
     ];
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -173,9 +173,9 @@ describe('computeMonthlyBars', () => {
   it('filters by current year in this-year mode', () => {
     const currentYear = new Date().getFullYear();
     const mixedEntries: MileageHistoryEntry[] = [
-      { date: '2020-01-01', mileage: 500, projectedMileage: 500 },
-      { date: `${currentYear}-03-01`, mileage: 3000, projectedMileage: 3000 },
-      { date: `${currentYear}-04-01`, mileage: 4100, projectedMileage: 4000 },
+      { month: '2020-01', miles_driven: 500, expected_miles: 500 },
+      { month: `${currentYear}-03`, miles_driven: 3000, expected_miles: 3000 },
+      { month: `${currentYear}-04`, miles_driven: 4100, expected_miles: 4000 },
     ];
     const bars = computeMonthlyBars(mixedEntries, 'this-year', primaryColor);
     expect(bars).toHaveLength(2);
@@ -184,8 +184,8 @@ describe('computeMonthlyBars', () => {
   it('returns all months in full-lease mode', () => {
     const currentYear = new Date().getFullYear();
     const mixedEntries: MileageHistoryEntry[] = [
-      { date: '2020-01-01', mileage: 500, projectedMileage: 500 },
-      { date: `${currentYear}-03-01`, mileage: 3000, projectedMileage: 3000 },
+      { month: '2020-01', miles_driven: 500, expected_miles: 500 },
+      { month: `${currentYear}-03`, miles_driven: 3000, expected_miles: 3000 },
     ];
     const bars = computeMonthlyBars(mixedEntries, 'full-lease', primaryColor);
     expect(bars).toHaveLength(2);
@@ -194,8 +194,8 @@ describe('computeMonthlyBars', () => {
   it('does not produce negative bar values', () => {
     // mileage decreasing (shouldn't happen in practice but clamps to 0)
     const weirdEntries: MileageHistoryEntry[] = [
-      { date: '2024-01-01', mileage: 2000, projectedMileage: 2000 },
-      { date: '2024-02-01', mileage: 1500, projectedMileage: 2500 },
+      { month: '2024-01', miles_driven: 2000, expected_miles: 2000 },
+      { month: '2024-02', miles_driven: 1500, expected_miles: 2500 },
     ];
     const bars = computeMonthlyBars(weirdEntries, 'full-lease', primaryColor);
     bars.forEach(bar => expect(bar.value).toBeGreaterThanOrEqual(0));

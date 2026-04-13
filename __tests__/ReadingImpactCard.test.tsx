@@ -10,18 +10,30 @@ const FAKE_NOW = new Date('2024-06-15T00:00:00Z');
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: null,
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 describe('ReadingImpactCard', () => {
@@ -272,11 +284,11 @@ describe('ReadingImpactCard', () => {
     jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     const exactLease: Lease = {
       ...mockLease,
-      startDate: '2023-01-01',
-      endDate: '2025-01-01',
-      totalMiles: 73100,
-      startingMileage: 0,
-      currentMileage: 36000,
+      lease_start_date: '2023-01-01',
+      lease_end_date: '2025-01-01',
+      total_miles_allowed: 73100,
+      starting_odometer: 0,
+      current_odometer: 36000,
     };
 
     let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -348,18 +360,18 @@ describe('ReadingImpactCard', () => {
   describe('computeExpectedMileage', () => {
     it('returns a value between startingMileage and startingMileage+totalMiles mid-lease', () => {
       const expected = computeExpectedMileage(mockLease);
-      expect(expected).toBeGreaterThan(mockLease.startingMileage);
-      expect(expected).toBeLessThan(mockLease.startingMileage + mockLease.totalMiles);
+      expect(expected).toBeGreaterThan(mockLease.starting_odometer);
+      expect(expected).toBeLessThan(mockLease.starting_odometer + mockLease.total_miles_allowed);
     });
 
     it('returns startingMileage when today equals startDate', () => {
       jest.setSystemTime(new Date('2023-01-01T00:00:00Z'));
       const lease: Lease = {
         ...mockLease,
-        startDate: '2023-01-01',
-        endDate: '2026-01-01',
-        startingMileage: 5000,
-        totalMiles: 36000,
+        lease_start_date: '2023-01-01',
+        lease_end_date: '2026-01-01',
+        starting_odometer: 5000,
+        total_miles_allowed: 36000,
       };
       const expected = computeExpectedMileage(lease);
       expect(expected).toBe(5000);
@@ -369,10 +381,10 @@ describe('ReadingImpactCard', () => {
       jest.setSystemTime(new Date('2026-01-01T00:00:00Z'));
       const lease: Lease = {
         ...mockLease,
-        startDate: '2023-01-01',
-        endDate: '2026-01-01',
-        startingMileage: 0,
-        totalMiles: 36000,
+        lease_start_date: '2023-01-01',
+        lease_end_date: '2026-01-01',
+        starting_odometer: 0,
+        total_miles_allowed: 36000,
       };
       const expected = computeExpectedMileage(lease);
       expect(Math.round(expected)).toBe(36000);

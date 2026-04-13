@@ -50,7 +50,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values).toContain('On Track');
   });
 
@@ -62,7 +62,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values).toContain('Slightly Over');
   });
 
@@ -74,7 +74,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values).toContain('Over Pace');
   });
 
@@ -86,7 +86,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values.some(v => v.includes('12,000'))).toBe(true);
   });
 
@@ -98,7 +98,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values).toContain('200');
   });
 
@@ -110,7 +110,7 @@ describe('LeaseTrackerWidgetUI', () => {
       );
     });
     const texts = renderer!.root.findAllByProps({ testID: 'text-widget' });
-    const values = texts.map(t => t.props.children as string);
+    const values = texts.map(t => t.props.text as string);
     expect(values).toContain('2023 Toyota Camry SE');
   });
 

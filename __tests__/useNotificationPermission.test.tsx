@@ -31,7 +31,7 @@ import {
 
 const mockGetItem = AsyncStorage.getItem as jest.Mock;
 const mockSetItem = AsyncStorage.setItem as jest.Mock;
-const mockMessaging = messaging as jest.Mock;
+const mockMessaging = messaging as unknown as jest.Mock;
 const mockSavePushToken = savePushToken as jest.Mock;
 
 // Captured ref to hook output so tests can interact with it.

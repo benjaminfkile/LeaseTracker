@@ -2,7 +2,7 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 import type { PaceStatus, WidgetSummary } from '../native/WidgetDataBridge';
 
-function paceColor(status: PaceStatus): string {
+function paceColor(status: PaceStatus): `#${string}` {
   switch (status) {
     case 'over-pace':
       return '#E63D3D';
@@ -51,7 +51,7 @@ export function LeaseTrackerWidgetUI({ data }: Props): React.ReactElement {
           fontWeight: 'bold',
           color,
         }}
-        value={paceLabel(data.paceStatus)}
+        text={paceLabel(data.paceStatus)}
       />
 
       {/* Miles remaining */}
@@ -62,14 +62,14 @@ export function LeaseTrackerWidgetUI({ data }: Props): React.ReactElement {
           color: '#1A1A1A',
           marginTop: 4,
         }}
-        value={`${data.milesRemaining.toLocaleString()} mi`}
+        text={`${data.milesRemaining.toLocaleString()} mi`}
       />
       <TextWidget
         style={{
           fontSize: 11,
           color: '#666666',
         }}
-        value="remaining"
+        text="remaining"
       />
 
       {/* Days to end */}
@@ -80,14 +80,14 @@ export function LeaseTrackerWidgetUI({ data }: Props): React.ReactElement {
           color: '#1A1A1A',
           marginTop: 8,
         }}
-        value={`${data.daysRemaining}`}
+        text={`${data.daysRemaining}`}
       />
       <TextWidget
         style={{
           fontSize: 11,
           color: '#666666',
         }}
-        value="days to end"
+        text="days to end"
       />
 
       {/* Vehicle label */}
@@ -97,7 +97,7 @@ export function LeaseTrackerWidgetUI({ data }: Props): React.ReactElement {
           color: '#999999',
           marginTop: 8,
         }}
-        value={data.vehicleLabel}
+        text={data.vehicleLabel}
         maxLines={1}
       />
     </FlexWidget>

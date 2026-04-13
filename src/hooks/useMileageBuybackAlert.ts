@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import { useQueryClient } from '@tanstack/react-query';
 import { getLeaseSummary } from '../api/leaseApi';
-import { getAlertConfig } from '../api/alertsApi';
+import { getAlertConfigs } from '../api/alertsApi';
 import { useLeasesStore } from '../stores/leasesStore';
 import type { LeaseSummary, AlertConfig } from '../types/api';
 
@@ -11,8 +10,8 @@ const STORAGE_KEY_PREFIX = '@mileage_buyback_alert_sent_';
 const DEFAULT_OVERAGE_COST_PER_MILE = 0.25;
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
-function computeProjectedOverageCost(summary: LeaseSummary): number {
-  const overageMiles = Math.max(0, summary.projectedMiles - summary.totalMiles);
+function computeProjectedOverageCost(summary: LeaseSummary, totalMilesAllowed: number): number {
+  const overageMiles = Math.max(0, summary.projected_miles_at_end - totalMilesAllowed);
   return overageMiles * DEFAULT_OVERAGE_COST_PER_MILE;
 }
 
@@ -39,13 +38,13 @@ async function markAlertSentToday(leaseId: string): Promise<void> {
   await AsyncStorage.setItem(key, 'true');
 }
 
-async function checkAndNotify(leaseId: string): Promise<void> {
-  let config: AlertConfig;
+async function checkAndNotify(leaseId: string, totalMilesAllowed: number): Promise<void> {
+  let configs: AlertConfig[];
   let summary: LeaseSummary;
 
   try {
-    [config, summary] = await Promise.all([
-      getAlertConfig(leaseId),
+    [configs, summary] = await Promise.all([
+      getAlertConfigs(leaseId),
       getLeaseSummary(leaseId),
     ]);
   } catch {
@@ -53,12 +52,13 @@ async function checkAndNotify(leaseId: string): Promise<void> {
     return;
   }
 
-  if (!config.mileageBuybackEnabled || !config.notifyPush) {
+  const config = configs.find(c => c.alert_type === 'miles_threshold');
+  if (config == null || !config.is_enabled) {
     return;
   }
 
-  const overageCost = computeProjectedOverageCost(summary);
-  if (overageCost < config.mileageBuybackThresholdDollars) {
+  const overageCost = computeProjectedOverageCost(summary, totalMilesAllowed);
+  if (overageCost < (config.threshold_value ?? 0)) {
     return;
   }
 
@@ -95,7 +95,7 @@ export function useMileageBuybackAlert(): void {
     // Run once on mount / lease change
     const runChecks = () => {
       for (const lease of leases) {
-        checkAndNotify(lease.id).catch(() => {
+        checkAndNotify(lease.id, lease.total_miles_allowed).catch(() => {
           // Swallow per-lease errors so others still run
         });
       }

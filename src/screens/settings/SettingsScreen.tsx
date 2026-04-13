@@ -75,7 +75,7 @@ export function SettingsScreen(): React.ReactElement {
   });
 
   const displayName = profile
-    ? `${profile.firstName} ${profile.lastName}`.trim()
+    ? (profile.display_name ?? '')
     : user?.name ?? '';
   const email = profile?.email ?? user?.email ?? '';
   const initial = displayName.charAt(0).toUpperCase() || email.charAt(0).toUpperCase() || '?';
@@ -283,7 +283,7 @@ export function SettingsScreen(): React.ReactElement {
               testID="settings-default-lease"
             >
               {leases.map(lease => {
-                const label = `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
+                const label = `${lease.year} ${lease.make} ${lease.model}`;
                 const isSelected = activeLeaseId === lease.id;
                 return (
                   <TouchableOpacity

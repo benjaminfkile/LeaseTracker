@@ -18,13 +18,17 @@ function filterEntries(
 ): MileageHistoryEntry[] {
   if (mode === 'this-year') {
     const currentYear = new Date().getFullYear();
-    return entries.filter(e => new Date(e.date).getFullYear() === currentYear);
+    return entries.filter(e => {
+      const [year] = e.month.split('-');
+      return Number(year) === currentYear;
+    });
   }
   return entries;
 }
 
-function formatMonthLabel(dateStr: string): string {
-  const d = new Date(dateStr);
+function formatMonthLabel(monthStr: string): string {
+  const [year, month] = monthStr.split('-');
+  const d = new Date(Number(year), Number(month) - 1, 1);
   return `${d.toLocaleString('default', { month: 'short' })} '${String(d.getFullYear()).slice(2)}`;
 }
 
@@ -34,7 +38,27 @@ type ChartDataPoint = {
   dataPointText: string;
 };
 
-function buildActualData(filtered: MileageHistoryEntry[], hasProjection: boolean): ChartDataPoint[] {
+function buildCumulativeMiles(filtered: MileageHistoryEntry[]): number[] {
+  const cumulative: number[] = [];
+  let total = 0;
+  for (const e of filtered) {
+    total += e.miles_driven;
+    cumulative.push(total);
+  }
+  return cumulative;
+}
+
+function buildCumulativeExpected(filtered: MileageHistoryEntry[]): number[] {
+  const cumulative: number[] = [];
+  let total = 0;
+  for (const e of filtered) {
+    total += e.expected_miles;
+    cumulative.push(total);
+  }
+  return cumulative;
+}
+
+function buildActualData(filtered: MileageHistoryEntry[], cumulativeMiles: number[], hasProjection: boolean): ChartDataPoint[] {
   return filtered.map((e, i) => {
     let label = '';
     if (i === 0) {
@@ -42,9 +66,9 @@ function buildActualData(filtered: MileageHistoryEntry[], hasProjection: boolean
     } else if (hasProjection && i === filtered.length - 1) {
       label = 'Today';
     } else if (i % Math.ceil(filtered.length / 4) === 0) {
-      label = formatMonthLabel(e.date);
+      label = formatMonthLabel(e.month);
     }
-    return { value: e.mileage, label, dataPointText: '' };
+    return { value: cumulativeMiles[i], label, dataPointText: '' };
   });
 }
 
@@ -72,19 +96,23 @@ export function ProjectionChart({
   }
 
   const hasProjection = lease != null && summary != null && filtered.length > 0;
-  const projectionColor = summary?.isOverPace === true ? theme.colors.error : theme.colors.success;
+  const projectionColor = summary?.pace_status === 'ahead' ? theme.colors.error : theme.colors.success;
 
-  const actualData = buildActualData(filtered, hasProjection);
-  const expectedData: ChartDataPoint[] = filtered.map(e => ({
-    value: e.projectedMileage,
+  const cumulativeMiles = buildCumulativeMiles(filtered);
+  const cumulativeExpected = buildCumulativeExpected(filtered);
+
+  const actualData = buildActualData(filtered, cumulativeMiles, hasProjection);
+  const expectedData: ChartDataPoint[] = filtered.map((_e, i) => ({
+    value: cumulativeExpected[i],
     label: '',
     dataPointText: '',
   }));
 
   let projectedData: ChartDataPoint[] | undefined;
-  if (hasProjection && summary != null) {
-    const { totalMiles, projectedMiles } = summary;
-    const lastMileage = filtered[filtered.length - 1].mileage;
+  if (hasProjection && summary != null && lease != null) {
+    const totalMiles = lease.total_miles_allowed;
+    const projectedMiles = summary.projected_miles_at_end;
+    const lastMileage = cumulativeMiles[cumulativeMiles.length - 1];
     // Extend actual and expected to the lease-end "End" marker
     actualData.push({ value: lastMileage, label: 'End', dataPointText: '' });
     expectedData.push({ value: totalMiles, label: '', dataPointText: '' });

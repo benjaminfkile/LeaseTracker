@@ -11,9 +11,11 @@ type CarbonFootprintCardProps = {
   testID?: string;
 };
 
+const DEFAULT_MPG_ESTIMATE = 25;
+
 function computeCarbonStats(lease: Lease) {
-  const milesDriven = lease.currentMileage - lease.startingMileage;
-  const mpg = lease.mpgEstimate ?? 0;
+  const milesDriven = (lease.current_odometer ?? 0) - lease.starting_odometer;
+  const mpg = DEFAULT_MPG_ESTIMATE;
 
   if (mpg <= 0 || milesDriven <= 0) {
     return null;
@@ -96,7 +98,7 @@ export function CarbonFootprintCard({
         <View style={styles.equivalentRow} testID="carbon-miles-equivalent">
           <Text style={styles.equivalentIcon}>{'🚗'}</Text>
           <Text style={[styles.equivalentText, { color: theme.colors.textPrimary }]}>
-            {`${stats.milesDriven.toLocaleString()} miles driven at ${lease.mpgEstimate} MPG`}
+            {`${stats.milesDriven.toLocaleString()} miles driven at ${DEFAULT_MPG_ESTIMATE} MPG`}
           </Text>
         </View>
       </View>

@@ -33,13 +33,14 @@ export function computeDaysForwardBehind(
   lease: Lease,
   summary: LeaseSummary,
 ): { days: number; isAhead: boolean } {
-  const start = new Date(lease.startDate).getTime();
-  const end = new Date(lease.endDate).getTime();
+  const start = new Date(lease.lease_start_date).getTime();
+  const end = new Date(lease.lease_end_date).getTime();
   const totalDays = Math.max(1, (end - start) / MS_PER_DAY);
-  const daysElapsed = Math.max(0, totalDays - summary.daysRemaining);
-  const expectedMiles = (daysElapsed / totalDays) * summary.totalMiles;
-  const mileDiff = summary.milesUsed - expectedMiles;
-  const dailyRate = summary.totalMiles / totalDays;
+  const daysElapsed = Math.max(0, totalDays - summary.days_remaining);
+  const totalMiles = lease.total_miles_allowed;
+  const expectedMiles = (daysElapsed / totalDays) * totalMiles;
+  const mileDiff = summary.miles_driven - expectedMiles;
+  const dailyRate = totalMiles / totalDays;
   const days = Math.round(Math.abs(mileDiff) / Math.max(1, dailyRate));
   return { days, isAhead: mileDiff >= 0 };
 }
@@ -76,7 +77,7 @@ export function PaceDetailScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscription?.isPremium ?? false;
+  const isPremium = subscription?.is_active ?? false;
   const isLoading = leaseLoading || summaryLoading || historyLoading;
 
   const handleUpgrade = () => {
@@ -117,7 +118,7 @@ export function PaceDetailScreen(): React.ReactElement {
     );
   }
 
-  const entries = history?.entries ?? [];
+  const entries = history ?? [];
 
   const thisYearStats = useMemo(() => {
     if (lease == null || summary == null) {
@@ -130,19 +131,19 @@ export function PaceDetailScreen(): React.ReactElement {
   const displayMilesUsed =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesUsedThisYear
-      : (summary?.milesUsed ?? 0);
+      : (summary?.miles_driven ?? 0);
   const displayMilesRemaining =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesRemainingThisYear
-      : (summary?.milesRemaining ?? 0);
+      : (summary?.miles_remaining ?? 0);
   const displayProjectedMiles =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.projectedMilesThisYear
-      : (summary?.projectedMiles ?? 0);
+      : (summary?.projected_miles_at_end ?? 0);
   const displayTotalMiles =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.totalMilesThisYear
-      : (summary?.totalMiles ?? 0);
+      : (lease?.total_miles_allowed ?? 0);
 
   const projectedOverage = Math.max(0, displayProjectedMiles - displayTotalMiles);
   const costAtPace = projectedOverage * DEFAULT_OVERAGE_COST_PER_MILE;
@@ -274,7 +275,7 @@ export function PaceDetailScreen(): React.ReactElement {
             <MonthlyMileageChart
               entries={entries}
               mode={mode}
-              monthlyAllowance={lease?.monthlyMiles}
+              monthlyAllowance={lease != null ? lease.miles_per_year / 12 : undefined}
               testID="monthly-mileage-chart"
             />
           </View>

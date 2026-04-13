@@ -126,7 +126,7 @@ describe('PremiumGate', () => {
     const locked = renderer!.root.findByProps({ testID: 'premium-gate-locked' });
     const { Text: RNText } = require('react-native');
     const texts = locked.findAllByType(RNText);
-    const descTexts = texts.filter((t: { props: { children: unknown } }) => t.props.children === customDesc);
+    const descTexts = texts.filter((t: any) => t.props.children === customDesc);
     expect(descTexts).toHaveLength(1);
   });
 
@@ -143,7 +143,7 @@ describe('PremiumGate', () => {
     const { Text: RNText } = require('react-native');
     const texts = locked.findAllByType(RNText);
     const defaultDesc = texts.find(
-      (t: { props: { children: unknown } }) =>
+      (t: any) =>
         t.props.children === 'Unlock this feature and more with Premium.',
     );
     expect(defaultDesc).toBeDefined();

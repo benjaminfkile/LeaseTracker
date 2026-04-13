@@ -195,7 +195,7 @@ describe('SubscriptionScreen', () => {
         restore.props.onPress();
       });
 
-      expect(verifyApplePurchase).toHaveBeenCalledWith('receipt-new');
+      expect(verifyApplePurchase).toHaveBeenCalledWith('', 'yearly');
       expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['subscription-status'] });
       expect(mockGoBack).toHaveBeenCalled();
 

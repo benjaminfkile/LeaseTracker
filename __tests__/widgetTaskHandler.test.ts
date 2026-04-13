@@ -30,7 +30,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(mockData));
     await widgetTaskHandler({
       widgetAction: 'WIDGET_ADDED',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(AsyncStorage.getItem).toHaveBeenCalledWith(WIDGET_DATA_KEY);
@@ -43,7 +43,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(mockData));
     await widgetTaskHandler({
       widgetAction: 'WIDGET_UPDATE',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(mockRenderWidget).toHaveBeenCalledTimes(1);
@@ -53,7 +53,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(mockData));
     await widgetTaskHandler({
       widgetAction: 'WIDGET_RESIZED',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 360, height: 220 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 360, height: 220, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(mockRenderWidget).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     await widgetTaskHandler({
       widgetAction: 'WIDGET_ADDED',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(mockRenderWidget).toHaveBeenCalledTimes(1);
@@ -76,7 +76,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockRejectedValue(new Error('storage error'));
     await widgetTaskHandler({
       widgetAction: 'WIDGET_ADDED',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(mockRenderWidget).toHaveBeenCalledTimes(1);
@@ -87,7 +87,7 @@ describe('widgetTaskHandler', () => {
   it('does not call renderWidget for unrecognised actions', async () => {
     await widgetTaskHandler({
       widgetAction: 'WIDGET_DELETED' as never,
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     expect(mockRenderWidget).not.toHaveBeenCalled();
@@ -97,7 +97,7 @@ describe('widgetTaskHandler', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(mockData));
     await widgetTaskHandler({
       widgetAction: 'WIDGET_ADDED',
-      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110 },
+      widgetInfo: { widgetId: 1, widgetName: 'LeaseTracker', width: 180, height: 110, screenInfo: { screenHeightDp: 800, screenWidthDp: 400, density: 2, densityDpi: 320 } },
       renderWidget: mockRenderWidget,
     });
     const element = mockRenderWidget.mock.calls[0][0];

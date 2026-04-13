@@ -197,7 +197,7 @@ export function AddReadingScreen(): React.ReactElement {
 
   const watchedMileage = watch('odometer');
   const parsedNewMileage = watchedMileage.length > 0 ? parseInt(watchedMileage, 10) : null;
-  const currentMileage = lease?.currentMileage ?? 0;
+  const currentMileage = lease?.current_odometer ?? 0;
 
   const onSubmit = (data: AddReadingFormData) => {
     const mileageNum = parseInt(data.odometer, 10);

@@ -35,18 +35,21 @@ export function computeMonthlyBars(
 ): MonthlyBar[] {
   const filtered =
     mode === 'this-year'
-      ? entries.filter(e => new Date(e.date).getFullYear() === new Date().getFullYear())
+      ? entries.filter(e => {
+          const [year] = e.month.split('-');
+          return Number(year) === new Date().getFullYear();
+        })
       : entries;
 
   if (filtered.length === 0) {
     return [];
   }
 
-  // Group by month — take the last entry's mileage per month
+  // Group by month — take the last entry's miles_driven per month
   const byMonth = new Map<string, number>();
   for (const entry of filtered) {
-    const key = buildMonthKey(entry.date);
-    byMonth.set(key, entry.mileage);
+    const key = entry.month;
+    byMonth.set(key, entry.miles_driven);
   }
 
   const sortedKeys = Array.from(byMonth.keys()).sort();

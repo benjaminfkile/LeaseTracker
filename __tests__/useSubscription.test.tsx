@@ -73,11 +73,10 @@ describe('useSubscription', () => {
 
     it('returns isPremium=true and expiresAt when subscription is active', async () => {
       const status: SubscriptionStatus = {
-        isPremium: true,
-        tier: 'premium',
-        expiresAt: '2027-01-01T00:00:00.000Z',
+        is_active: true,
+        expires_at: '2027-01-01T00:00:00.000Z',
         platform: 'ios',
-        productId: 'com.example.premium',
+        product_id: 'com.example.premium',
       };
       mockUseQuery.mockReturnValue({ data: status, isLoading: false });
       let latest: HookResult | undefined;
@@ -91,11 +90,10 @@ describe('useSubscription', () => {
 
     it('returns isPremium=false and expiresAt=null for free tier', async () => {
       const status: SubscriptionStatus = {
-        isPremium: false,
-        tier: 'free',
-        expiresAt: null,
+        is_active: false,
+        expires_at: null,
         platform: null,
-        productId: null,
+        product_id: null,
       };
       mockUseQuery.mockReturnValue({ data: status, isLoading: false });
       let latest: HookResult | undefined;

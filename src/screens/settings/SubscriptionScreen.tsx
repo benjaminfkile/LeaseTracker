@@ -51,7 +51,7 @@ export function SubscriptionScreen(): React.ReactElement {
         selectedPlan === 'monthly' ? PRODUCT_ID_MONTHLY : PRODUCT_ID_YEARLY;
       if (Platform.OS === 'ios') {
         // TODO: Obtain receiptData from StoreKit before calling verifyApplePurchase
-        await verifyApplePurchase(productId);
+        await verifyApplePurchase('', productId);
       } else {
         // TODO: Obtain purchaseToken from Google Play Billing before calling verifyGooglePurchase
         await verifyGooglePurchase(productId, '');
@@ -79,7 +79,7 @@ export function SubscriptionScreen(): React.ReactElement {
         (b.transactionDate ?? 0) > (a.transactionDate ?? 0) ? b : a,
       );
       if (Platform.OS === 'ios') {
-        await verifyApplePurchase(latest.transactionReceipt);
+        await verifyApplePurchase(latest.purchaseToken ?? '', latest.productId);
       } else {
         await verifyGooglePurchase(latest.productId, latest.purchaseToken ?? '');
       }

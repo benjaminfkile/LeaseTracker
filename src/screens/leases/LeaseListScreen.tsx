@@ -41,7 +41,7 @@ export function LeaseListScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscriptionData?.isPremium ?? false;
+  const isPremium = subscriptionData?.is_active ?? false;
 
   const { mutate: archiveLease } = useMutation({
     mutationFn: (id: string) => deleteLease(id),

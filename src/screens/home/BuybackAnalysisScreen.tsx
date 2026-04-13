@@ -79,7 +79,7 @@ export function BuybackAnalysisScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscription?.isPremium ?? false;
+  const isPremium = subscription?.is_active ?? false;
   const isLoading = leaseLoading || summaryLoading;
 
   const handleUpgrade = () => {
@@ -120,8 +120,8 @@ export function BuybackAnalysisScreen(): React.ReactElement {
     );
   }
 
-  const projectedOverage = summary != null
-    ? Math.max(0, summary.projectedMiles - summary.totalMiles)
+  const projectedOverage = summary != null && lease != null
+    ? Math.max(0, summary.projected_miles_at_end - lease.total_miles_allowed)
     : 0;
 
   const buybackRate = parseFloat(buybackRateInput) || 0;
@@ -132,7 +132,7 @@ export function BuybackAnalysisScreen(): React.ReactElement {
   });
 
   const vehicleLabel = lease != null
-    ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${lease.vehicleTrim != null ? ` ${lease.vehicleTrim}` : ''}`
+    ? `${lease.year} ${lease.make} ${lease.model}${lease.trim != null ? ` ${lease.trim}` : ''}`
     : '';
 
   return (

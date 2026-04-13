@@ -82,55 +82,67 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { useQuery } from '@tanstack/react-query';
 import { PaceDetailScreen, computeDaysForwardBehind } from '../src/screens/home/PaceDetailScreen';
-import type { Lease, LeaseSummary, MileageHistory, SubscriptionStatus } from '../src/types/api';
+import type { Lease, LeaseSummary, MileageHistoryEntry, SubscriptionStatus } from '../src/types/api';
 
 const mockUseQuery = useQuery as jest.Mock;
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry SE',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 365,
-  projectedMiles: 14000,
-  isOverPace: false,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 731,
+  days_remaining: 365,
+  lease_length_days: 1096,
+  expected_miles_to_date: 24000,
+  current_pace_per_month: 493,
+  pace_status: 'behind',
+  miles_over_under_pace: -12000,
+  projected_miles_at_end: 14000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 66,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
-const mockHistory: MileageHistory = {
-  leaseId: 'lease-1',
-  entries: [
-    { date: '2023-02-01', mileage: 1000, projectedMileage: 1000 },
-    { date: '2023-03-01', mileage: 2100, projectedMileage: 2000 },
-    { date: '2023-04-01', mileage: 3050, projectedMileage: 3000 },
-  ],
-};
+const mockHistory: MileageHistoryEntry[] = [
+  { month: '2023-02', miles_driven: 1000, expected_miles: 1000 },
+  { month: '2023-03', miles_driven: 2100, expected_miles: 2000 },
+  { month: '2023-04', miles_driven: 3050, expected_miles: 3000 },
+];
 
 const mockSubscription: SubscriptionStatus = {
-  isPremium: false,
-  tier: 'free',
-  expiresAt: null,
+  is_active: false,
+  expires_at: null,
   platform: null,
-  productId: null,
+  product_id: null,
 };
 
 function setupQueryMocks({
@@ -145,7 +157,7 @@ function setupQueryMocks({
 }: {
   lease?: Lease | null;
   summary?: LeaseSummary | null;
-  history?: MileageHistory | null;
+  history?: MileageHistoryEntry[] | null;
   subscription?: SubscriptionStatus;
   leaseLoading?: boolean;
   summaryLoading?: boolean;
@@ -259,7 +271,7 @@ describe('PaceDetailScreen', () => {
 
   it('renders the projection chart section when premium', async () => {
     setupQueryMocks({
-      subscription: { isPremium: true, tier: 'premium', expiresAt: null, platform: 'ios', productId: 'premium_monthly' },
+      subscription: { is_active: true, expires_at: null, platform: 'ios', product_id: 'premium_monthly' },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -271,7 +283,7 @@ describe('PaceDetailScreen', () => {
 
   it('renders the monthly mileage chart section when premium', async () => {
     setupQueryMocks({
-      subscription: { isPremium: true, tier: 'premium', expiresAt: null, platform: 'ios', productId: 'premium_monthly' },
+      subscription: { is_active: true, expires_at: null, platform: 'ios', product_id: 'premium_monthly' },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -282,7 +294,7 @@ describe('PaceDetailScreen', () => {
   });
 
   it('shows premium gate for charts when not premium', async () => {
-    setupQueryMocks({ subscription: { isPremium: false, tier: 'free', expiresAt: null, platform: null, productId: null } });
+    setupQueryMocks({ subscription: { is_active: false, expires_at: null, platform: null, product_id: null } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<PaceDetailScreen />);
@@ -292,7 +304,7 @@ describe('PaceDetailScreen', () => {
   });
 
   it('does not show charts when not premium', async () => {
-    setupQueryMocks({ subscription: { isPremium: false, tier: 'free', expiresAt: null, platform: null, productId: null } });
+    setupQueryMocks({ subscription: { is_active: false, expires_at: null, platform: null, product_id: null } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<PaceDetailScreen />);
@@ -361,7 +373,7 @@ describe('PaceDetailScreen', () => {
 
   it('renders projected overage with miles when over pace', async () => {
     setupQueryMocks({
-      summary: { ...mockSummary, projectedMiles: 38000 },
+      summary: { ...mockSummary, projected_miles_at_end: 38000 },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -382,7 +394,7 @@ describe('PaceDetailScreen', () => {
 
   it('renders estimated cost when there is projected overage', async () => {
     setupQueryMocks({
-      summary: { ...mockSummary, projectedMiles: 38000 },
+      summary: { ...mockSummary, projected_miles_at_end: 38000 },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -404,7 +416,7 @@ describe('PaceDetailScreen', () => {
 
   it('does not render banner ad for premium users', async () => {
     setupQueryMocks({
-      subscription: { isPremium: true, tier: 'premium', expiresAt: null, platform: 'ios', productId: 'premium_monthly' },
+      subscription: { is_active: true, expires_at: null, platform: 'ios', product_id: 'premium_monthly' },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -495,38 +507,55 @@ describe('computeDaysForwardBehind', () => {
   // 2-year lease from 2025-01-01 to 2027-01-01: 365 + 365 = 730 days (no leap years)
   const baseLease: Lease = {
     id: 'lease-1',
-    userId: 'user-1',
-    vehicleYear: 2023,
-    vehicleMake: 'Toyota',
-    vehicleModel: 'Camry',
-    startDate: '2025-01-01',
-    endDate: '2027-01-01',
-    totalMiles: 24000,
-    startingMileage: 0,
-    currentMileage: 0,
-    monthlyMiles: 1000,
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
+    user_id: 'user-1',
+    display_name: '2023 Toyota Camry',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    trim: null,
+    color: null,
+    vin: null,
+    license_plate: null,
+    lease_start_date: '2025-01-01',
+    lease_end_date: '2027-01-01',
+    total_miles_allowed: 24000,
+    miles_per_year: 12000,
+    starting_odometer: 0,
+    current_odometer: 0,
+    overage_cost_per_mile: '0.25',
+    monthly_payment: null,
+    dealer_name: null,
+    dealer_phone: null,
+    contract_number: null,
+    notes: null,
+    is_active: true,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
   };
 
   const baseSummary: LeaseSummary = {
-    leaseId: 'lease-1',
-    vehicleLabel: '2023 Toyota Camry',
-    startDate: '2025-01-01',
-    endDate: '2027-01-01',
-    totalMiles: 24000,
-    milesUsed: 12000,
-    milesRemaining: 12000,
-    daysRemaining: 365,
-    projectedMiles: 13000,
-    isOverPace: false,
+    miles_driven: 12000,
+    miles_remaining: 12000,
+    days_elapsed: 365,
+    days_remaining: 365,
+    lease_length_days: 730,
+    expected_miles_to_date: 12000,
+    current_pace_per_month: 986,
+    pace_status: 'on_track',
+    miles_over_under_pace: 0,
+    projected_miles_at_end: 13000,
+    projected_overage: 0,
+    projected_overage_cost: 0,
+    recommended_daily_miles: 33,
+    reserved_trip_miles: 0,
+    is_premium: false,
   };
 
   it('returns days and ahead=true when above expected mileage', () => {
     // 730 total days, 365 remaining → 365 elapsed
     // expected = (365/730) * 24000 = 12000
     // actual = 13000 (ahead by 1000 miles)
-    const summary = { ...baseSummary, milesUsed: 13000, daysRemaining: 365 };
+    const summary = { ...baseSummary, miles_driven: 13000, days_remaining: 365 };
     const result = computeDaysForwardBehind(baseLease, summary);
     expect(result.isAhead).toBe(true);
     expect(result.days).toBeGreaterThan(0);
@@ -535,7 +564,7 @@ describe('computeDaysForwardBehind', () => {
   it('returns days and ahead=false when below expected mileage', () => {
     // 730 total days, 365 remaining → 365 elapsed
     // expected = 12000, actual = 11000 (behind by 1000 miles)
-    const summary = { ...baseSummary, milesUsed: 11000, daysRemaining: 365 };
+    const summary = { ...baseSummary, miles_driven: 11000, days_remaining: 365 };
     const result = computeDaysForwardBehind(baseLease, summary);
     expect(result.isAhead).toBe(false);
     expect(result.days).toBeGreaterThan(0);
@@ -544,7 +573,7 @@ describe('computeDaysForwardBehind', () => {
   it('returns 0 days when exactly on pace', () => {
     // 730 total days, 365 remaining → 365 elapsed
     // expected = (365/730) * 24000 = 12000, actual = 12000
-    const summary = { ...baseSummary, milesUsed: 12000, daysRemaining: 365 };
+    const summary = { ...baseSummary, miles_driven: 12000, days_remaining: 365 };
     const result = computeDaysForwardBehind(baseLease, summary);
     expect(result.days).toBe(0);
   });

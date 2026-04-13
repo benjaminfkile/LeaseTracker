@@ -129,19 +129,22 @@ const mockSummary: LeaseSummary = {
 
 const mockTrip: SavedTrip = {
   id: 'trip-1',
-  leaseId: 'lease-1',
-  distance: 150,
-  tripDate: '2024-01-10',
-  createdAt: '2024-01-10T00:00:00Z',
-  updatedAt: '2024-01-10T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Road Trip',
+  estimated_miles: 150,
+  trip_date: '2024-01-10',
+  notes: null,
+  is_completed: false,
+  created_at: '2024-01-10T00:00:00Z',
+  updated_at: '2024-01-10T00:00:00Z',
 };
 
 const mockSubscription: SubscriptionStatus = {
-  isPremium: false,
-  tier: 'free',
-  expiresAt: null,
+  is_active: false,
+  expires_at: null,
   platform: null,
-  productId: null,
+  product_id: null,
 };
 
 function setupQueryMocks({
@@ -297,7 +300,7 @@ describe('DashboardScreen', () => {
       renderer = ReactTestRenderer.create(<DashboardScreen />);
     });
     const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
-    expect(label.props.children).toBe('Ahead');
+    expect(label.props.children).toBe('Over Pace');
   });
 
   it('renders On Track badge when on track', async () => {
@@ -317,7 +320,7 @@ describe('DashboardScreen', () => {
       renderer = ReactTestRenderer.create(<DashboardScreen />);
     });
     const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
-    expect(label.props.children).toBe('Behind');
+    expect(label.props.children).toBe('Under Pace');
   });
 
   it('renders the pace callout when daysRemaining > 0', async () => {
@@ -366,7 +369,7 @@ describe('DashboardScreen', () => {
   });
 
   it('renders the banner ad for free-tier users', async () => {
-    setupQueryMocks({ subscription: { ...mockSubscription, isPremium: false } });
+    setupQueryMocks({ subscription: { ...mockSubscription, is_active: false } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<DashboardScreen />);
@@ -377,7 +380,7 @@ describe('DashboardScreen', () => {
 
   it('does not render the banner ad for premium users', async () => {
     setupQueryMocks({
-      subscription: { ...mockSubscription, isPremium: true, tier: 'premium' },
+      subscription: { ...mockSubscription, is_active: true },
     });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -434,7 +437,7 @@ describe('DashboardScreen', () => {
   });
 
   it('displays the correct reserved miles total', async () => {
-    const trip2: SavedTrip = { ...mockTrip, id: 'trip-2', distance: 100 };
+    const trip2: SavedTrip = { ...mockTrip, id: 'trip-2', estimated_miles: 100 };
     setupQueryMocks({ trips: { active: [mockTrip, trip2], completed: [] } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {

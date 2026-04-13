@@ -21,10 +21,10 @@ import type { Lease, LeaseSummary } from '../../types/api';
 export type PaceStatus = 'on-track' | 'slightly-over' | 'over-pace';
 
 export function computePaceStatus(summary: LeaseSummary): PaceStatus {
-  if (!summary.isOverPace) {
+  if (summary.pace_status !== 'ahead') {
     return 'on-track';
   }
-  if (summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1) {
+  if (summary.projected_miles_at_end > 0 && summary.projected_overage > summary.projected_miles_at_end * 0.1) {
     return 'over-pace';
   }
   return 'slightly-over';
@@ -40,8 +40,8 @@ const STATUS_CONFIG: Record<
 };
 
 function formatVehicleLabel(lease: Lease): string {
-  const trim = lease.vehicleTrim != null ? ` ${lease.vehicleTrim}` : '';
-  return `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${trim}`;
+  const trimStr = lease.trim != null ? ` ${lease.trim}` : '';
+  return `${lease.year} ${lease.make} ${lease.model}${trimStr}`;
 }
 
 export function LeaseComparisonScreen(): React.ReactElement {
@@ -62,7 +62,7 @@ export function LeaseComparisonScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscription?.isPremium ?? false;
+  const isPremium = subscription?.is_active ?? false;
 
   // Fetch summaries for all leases
   const lease1 = leases?.[0];
@@ -141,7 +141,12 @@ export function LeaseComparisonScreen(): React.ReactElement {
       <ScreenHeader title="Compare Leases" onBackPress={() => navigation.goBack()} />
       <PremiumGate
         isPremium={isPremium}
-        onUpgrade={() => navigation.getParent()?.navigate('Settings' as never, { screen: 'Subscription' })}
+        onUpgrade={() => {
+          const parent = navigation.getParent();
+          if (parent != null) {
+            (parent.navigate as unknown as (screen: string, params: object) => void)('Settings', { screen: 'Subscription' });
+          }
+        }}
         description="Compare your leases side-by-side with Premium."
       >
         <ScrollView
@@ -207,7 +212,7 @@ export function LeaseComparisonScreen(): React.ReactElement {
                     style={[styles.tableHeaderText, { color: theme.colors.textSecondary }]}
                     numberOfLines={1}
                   >
-                    {`${lease.vehicleYear} ${lease.vehicleModel}`}
+                    {`${lease.year} ${lease.model}`}
                   </Text>
                 </View>
               ))}
@@ -228,7 +233,7 @@ export function LeaseComparisonScreen(): React.ReactElement {
                 return (
                   <View key={lease.id} style={styles.tableValueCell}>
                     <Text style={[styles.tableValueText, { color: theme.colors.textPrimary }]}>
-                      {s != null ? s.milesRemaining.toLocaleString() : '—'}
+                      {s != null ? s.miles_remaining.toLocaleString() : '—'}
                     </Text>
                   </View>
                 );
@@ -250,7 +255,7 @@ export function LeaseComparisonScreen(): React.ReactElement {
                 return (
                   <View key={lease.id} style={styles.tableValueCell}>
                     <Text style={[styles.tableValueText, { color: theme.colors.textPrimary }]}>
-                      {s != null ? s.daysRemaining.toLocaleString() : '—'}
+                      {s != null ? s.days_remaining.toLocaleString() : '—'}
                     </Text>
                   </View>
                 );
@@ -304,8 +309,8 @@ export function LeaseComparisonScreen(): React.ReactElement {
               {leases.map((lease, index) => {
                 const s = summaries[index];
                 const daily =
-                  s != null && s.daysRemaining > 0
-                    ? Math.ceil(s.milesRemaining / s.daysRemaining)
+                  s != null && s.days_remaining > 0
+                    ? Math.ceil(s.miles_remaining / s.days_remaining)
                     : 0;
                 return (
                   <View key={lease.id} style={styles.tableValueCell}>
@@ -337,11 +342,11 @@ function ComparisonCard({ lease, summary, onPress }: ComparisonCardProps): React
   const paceConfig = paceStatus != null ? STATUS_CONFIG[paceStatus] : null;
   const paceColor = paceConfig != null ? theme.colors[paceConfig.colorKey] : theme.colors.textSecondary;
 
-  const milesRemaining = summary?.milesRemaining ?? 0;
-  const daysRemaining = summary?.daysRemaining ?? 0;
+  const milesRemaining = summary?.miles_remaining ?? 0;
+  const daysRemaining = summary?.days_remaining ?? 0;
   const progress =
-    summary != null && summary.totalMiles > 0
-      ? Math.min(summary.milesUsed / summary.totalMiles, 1)
+    summary != null && (summary.miles_driven + summary.miles_remaining) > 0
+      ? Math.min(summary.miles_driven / (summary.miles_driven + summary.miles_remaining), 1)
       : 0;
 
   const progressColor =

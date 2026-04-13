@@ -15,11 +15,11 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export function computeExpectedMileage(lease: Lease): number {
   const today = Date.now();
-  const start = new Date(lease.startDate).getTime();
-  const end = new Date(lease.endDate).getTime();
+  const start = new Date(lease.lease_start_date).getTime();
+  const end = new Date(lease.lease_end_date).getTime();
   const totalDays = Math.max(1, (end - start) / MS_PER_DAY);
   const elapsedDays = Math.max(0, (today - start) / MS_PER_DAY);
-  return lease.startingMileage + (elapsedDays / totalDays) * lease.totalMiles;
+  return lease.starting_odometer + (elapsedDays / totalDays) * lease.total_miles_allowed;
 }
 
 export function ReadingImpactCard({
@@ -32,8 +32,8 @@ export function ReadingImpactCard({
 
   const isValid = newMileage != null && newMileage > currentMileage;
   const milesAdded = isValid ? newMileage - currentMileage : null;
-  const startingMileage = lease?.startingMileage ?? 0;
-  const totalMiles = lease?.totalMiles ?? 0;
+  const startingMileage = lease?.starting_odometer ?? 0;
+  const totalMiles = lease?.total_miles_allowed ?? 0;
   const milesUsed = isValid
     ? newMileage - startingMileage
     : currentMileage - startingMileage;

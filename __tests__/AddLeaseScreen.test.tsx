@@ -71,7 +71,7 @@ function setupMocks({
   mockUseQuery.mockImplementation(({ queryKey }: { queryKey: string[] }) => {
     const key = queryKey[0];
     if (key === 'subscription-status') {
-      return { data: { isPremium, tier: isPremium ? 'premium' : 'free', expiresAt: null } };
+      return { data: { is_active: isPremium, expires_at: null, product_id: null, platform: null } };
     }
     if (key === 'leases') {
       return { data: Array.from({ length: leaseCount }, (_, i) => ({ id: `lease-${i}` })) };

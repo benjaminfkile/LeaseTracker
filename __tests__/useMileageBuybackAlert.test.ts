@@ -21,7 +21,7 @@ jest.mock('../src/api/leaseApi', () => ({
 }));
 
 jest.mock('../src/api/alertsApi', () => ({
-  getAlertConfig: jest.fn(),
+  getAlertConfigs: jest.fn(),
 }));
 
 jest.mock('../src/stores/leasesStore');
@@ -29,7 +29,7 @@ jest.mock('../src/stores/leasesStore');
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee from '@notifee/react-native';
 import { getLeaseSummary } from '../src/api/leaseApi';
-import { getAlertConfig } from '../src/api/alertsApi';
+import { getAlertConfigs } from '../src/api/alertsApi';
 import {
   computeProjectedOverageCost,
   buildNotificationBody,
@@ -37,54 +37,55 @@ import {
 import type { AlertConfig, LeaseSummary } from '../src/types/api';
 
 const mockGetLeaseSummary = getLeaseSummary as jest.Mock;
-const mockGetAlertConfig = getAlertConfig as jest.Mock;
+const mockGetAlertConfigs = getAlertConfigs as jest.Mock;
 const mockGetItem = AsyncStorage.getItem as jest.Mock;
 const mockSetItem = AsyncStorage.setItem as jest.Mock;
 
 const mockSummaryOverPace: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 30000,
-  milesRemaining: 6000,
-  daysRemaining: 180,
-  projectedMiles: 40000,
-  isOverPace: true,
+  miles_driven: 30000,
+  miles_remaining: 6000,
+  days_elapsed: 916,
+  days_remaining: 180,
+  lease_length_days: 1096,
+  expected_miles_to_date: 30073,
+  current_pace_per_month: 982,
+  pace_status: 'ahead',
+  miles_over_under_pace: -73,
+  projected_miles_at_end: 40000,
+  projected_overage: 4000,
+  projected_overage_cost: 1000,
+  recommended_daily_miles: 33,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockSummaryOnPace: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 20000,
-  milesRemaining: 16000,
-  daysRemaining: 365,
-  projectedMiles: 34000,
-  isOverPace: false,
+  miles_driven: 20000,
+  miles_remaining: 16000,
+  days_elapsed: 731,
+  days_remaining: 365,
+  lease_length_days: 1096,
+  expected_miles_to_date: 24000,
+  current_pace_per_month: 821,
+  pace_status: 'behind',
+  miles_over_under_pace: -4000,
+  projected_miles_at_end: 34000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 44,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockAlertConfig: AlertConfig = {
   id: 'config-1',
-  leaseId: 'lease-1',
-  overPaceThresholdPercent: 10,
-  projectedOverageThresholdMiles: 500,
-  notifyEmail: true,
-  notifyPush: true,
-  approachingLimitEnabled: true,
-  approachingLimitPercent: 80,
-  overPaceEnabled: false,
-  leaseEndEnabled: true,
-  leaseEndDays: 30,
-  savedTripEnabled: false,
-  mileageBuybackEnabled: true,
-  mileageBuybackThresholdDollars: 50,
-  weeklySummaryEnabled: false,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  alert_type: 'over_pace',
+  threshold_value: 10,
+  is_enabled: true,
+  last_sent_at: null,
+  created_at: '2023-01-01T00:00:00Z',
 };
 
 beforeEach(() => {
@@ -93,19 +94,19 @@ beforeEach(() => {
 
 describe('computeProjectedOverageCost', () => {
   it('returns 0 when projected miles are under the limit', () => {
-    const cost = computeProjectedOverageCost(mockSummaryOnPace);
+    const cost = computeProjectedOverageCost(mockSummaryOnPace, 36000);
     expect(cost).toBe(0);
   });
 
   it('computes overage cost at $0.25/mi when over pace', () => {
     // 40000 - 36000 = 4000 overage × $0.25 = $1000
-    const cost = computeProjectedOverageCost(mockSummaryOverPace);
+    const cost = computeProjectedOverageCost(mockSummaryOverPace, 36000);
     expect(cost).toBe(1000);
   });
 
   it('returns 0 when projected equals total', () => {
-    const summary = { ...mockSummaryOnPace, projectedMiles: 36000, totalMiles: 36000 };
-    const cost = computeProjectedOverageCost(summary);
+    const summary = { ...mockSummaryOnPace, projected_miles_at_end: 36000 };
+    const cost = computeProjectedOverageCost(summary, 36000);
     expect(cost).toBe(0);
   });
 });

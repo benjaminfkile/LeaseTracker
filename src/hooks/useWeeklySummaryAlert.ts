@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import { getLeaseSummary, getMileageHistory } from '../api/leaseApi';
-import { getAlertConfig } from '../api/alertsApi';
+import { getAlertConfigs } from '../api/alertsApi';
 import { useLeasesStore } from '../stores/leasesStore';
 import type { LeaseSummary, MileageHistoryEntry, AlertConfig } from '../types/api';
 
@@ -57,13 +57,13 @@ function computeLastWeekMiles(entries: MileageHistoryEntry[]): number {
   let mileageAtEnd: number | undefined;
 
   for (const entry of entries) {
-    const entryDate = parseLocalDate(entry.date);
+    const entryDate = parseLocalDate(entry.month);
     const entryTs = entryDate.getTime();
     if (entryTs <= startTs) {
-      mileageAtStart = entry.mileage;
+      mileageAtStart = entry.miles_driven;
     }
     if (entryTs <= endTs) {
-      mileageAtEnd = entry.mileage;
+      mileageAtEnd = entry.miles_driven;
     }
   }
 
@@ -85,14 +85,14 @@ function parseLocalDate(dateStr: string): Date {
  */
 function computePaceDiffMiles(
   summary: LeaseSummary,
-  lease: { startDate: string; endDate: string },
+  lease: { lease_start_date: string; lease_end_date: string; total_miles_allowed: number },
 ): number {
-  const startDate = parseLocalDate(lease.startDate);
-  const endDate = parseLocalDate(lease.endDate);
+  const startDate = parseLocalDate(lease.lease_start_date);
+  const endDate = parseLocalDate(lease.lease_end_date);
   const totalDays = Math.max(1, (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const daysElapsed = Math.max(0, totalDays - summary.daysRemaining);
-  const expectedMiles = summary.totalMiles * (daysElapsed / totalDays);
-  return Math.round(expectedMiles - summary.milesUsed);
+  const daysElapsed = Math.max(0, totalDays - summary.days_remaining);
+  const expectedMiles = lease.total_miles_allowed * (daysElapsed / totalDays);
+  return Math.round(expectedMiles - summary.miles_driven);
 }
 
 function buildNotificationBody(
@@ -114,29 +114,31 @@ async function checkAndNotify(
   leaseId: string,
   leaseStartDate: string,
   leaseEndDate: string,
+  totalMilesAllowed: number,
 ): Promise<void> {
   if (!isMonday()) {
     return;
   }
 
-  let config: AlertConfig;
+  let configs: AlertConfig[];
   let summary: LeaseSummary;
   let historyEntries: MileageHistoryEntry[];
 
   try {
-    const [configResult, summaryResult, historyResult] = await Promise.all([
-      getAlertConfig(leaseId),
+    const [configsResult, summaryResult, historyResult] = await Promise.all([
+      getAlertConfigs(leaseId),
       getLeaseSummary(leaseId),
       getMileageHistory(leaseId),
     ]);
-    config = configResult;
+    configs = configsResult;
     summary = summaryResult;
-    historyEntries = historyResult.entries;
+    historyEntries = historyResult;
   } catch {
     return;
   }
 
-  if (!config.weeklySummaryEnabled || !config.notifyPush) {
+  const config = configs.find(c => c.alert_type === 'days_remaining');
+  if (config == null || !config.is_enabled) {
     return;
   }
 
@@ -147,8 +149,9 @@ async function checkAndNotify(
 
   const weekMiles = computeLastWeekMiles(historyEntries);
   const paceDiff = computePaceDiffMiles(summary, {
-    startDate: leaseStartDate,
-    endDate: leaseEndDate,
+    lease_start_date: leaseStartDate,
+    lease_end_date: leaseEndDate,
+    total_miles_allowed: totalMilesAllowed,
   });
 
   const channelId = await notifee.createChannel({
@@ -178,7 +181,7 @@ export function useWeeklySummaryAlert(): void {
 
     const runChecks = () => {
       for (const lease of leases) {
-        checkAndNotify(lease.id, lease.startDate, lease.endDate).catch(() => {
+        checkAndNotify(lease.id, lease.lease_start_date, lease.lease_end_date, lease.total_miles_allowed).catch(() => {
           // Swallow per-lease errors so others still run
         });
       }

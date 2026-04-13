@@ -23,7 +23,7 @@ import { getStatus } from '../../api/subscriptionApi';
 import type { OdometerReading } from '../../types/api';
 import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigation/types';
 
-type EnrichedReading = OdometerReading & { delta: number | null };
+type EnrichedReading = OdometerReading & { delta: number | null; loggedByName?: string | null };
 
 type ReadingSection = {
   title: string;
@@ -198,7 +198,7 @@ export function OdometerLogScreen(): React.ReactElement {
     queryFn: getStatus,
   });
 
-  const isPremium = subscriptionData?.isPremium ?? false;
+  const isPremium = subscriptionData?.is_active ?? false;
 
   const { mutate: removeReading } = useMutation({
     mutationFn: (readingId: string) => deleteReading(leaseId, readingId),

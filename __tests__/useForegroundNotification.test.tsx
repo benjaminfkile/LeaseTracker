@@ -39,7 +39,7 @@ import { CommonActions } from '@react-navigation/native';
 import { navigationRef } from '../src/navigation/navigationRef';
 import { useForegroundNotification } from '../src/hooks/useForegroundNotification';
 
-const mockMessaging = messaging as jest.Mock;
+const mockMessaging = messaging as unknown as jest.Mock;
 const mockNotifee = notifee as jest.Mocked<typeof notifee>;
 const mockNavigationRef = navigationRef as jest.Mocked<typeof navigationRef>;
 const mockCommonActionsNavigate = CommonActions.navigate as jest.Mock;

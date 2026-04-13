@@ -65,13 +65,13 @@ export function TripListScreen(): React.ReactElement {
 
   const { mutate: markComplete } = useMutation({
     mutationFn: (tripId: string) =>
-      updateTrip(selectedLeaseId, tripId, { completed: true }),
+      updateTrip(selectedLeaseId, tripId, { is_completed: true }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['trips', selectedLeaseId] });
     },
   });
 
-  const isPremium = subscriptionData?.isPremium ?? false;
+  const isPremium = subscriptionData?.is_active ?? false;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -149,7 +149,7 @@ export function TripListScreen(): React.ReactElement {
                   <TripCard
                     trip={item}
                     completed={isCompleted}
-                    remainingMiles={summaryData?.milesRemaining}
+                    remainingMiles={summaryData?.miles_remaining}
                     onMarkComplete={isCompleted ? undefined : () => markComplete(item.id)}
                     onPress={() =>
                       navigation.navigate('EditTrip', {

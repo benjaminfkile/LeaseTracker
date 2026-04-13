@@ -392,7 +392,7 @@ export function AddLeaseScreen(): React.ReactElement {
     queryFn: getLeases,
   });
 
-  const isPremium = subscription?.isPremium ?? false;
+  const isPremium = subscription?.is_active ?? false;
   const leaseCount = leases?.length ?? 0;
 
   const handleUpgrade = () => {

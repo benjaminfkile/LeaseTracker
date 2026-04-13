@@ -47,77 +47,108 @@ const mockUseQuery = useQuery as jest.Mock;
 
 const mockLease1: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 15000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry SE',
+  year: 2023,
+  make: 'Toyota',
+  model: 'Camry',
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 15000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 const mockLease2: Lease = {
   id: 'lease-2',
-  userId: 'user-1',
-  vehicleYear: 2024,
-  vehicleMake: 'Honda',
-  vehicleModel: 'Civic',
-  startDate: '2024-01-01',
-  endDate: '2027-01-01',
-  totalMiles: 45000,
-  startingMileage: 0,
-  currentMileage: 8000,
-  monthlyMiles: 1250,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2024 Honda Civic',
+  year: 2024,
+  make: 'Honda',
+  model: 'Civic',
+  trim: null,
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2024-01-01',
+  lease_end_date: '2027-01-01',
+  total_miles_allowed: 45000,
+  miles_per_year: 15000,
+  starting_odometer: 0,
+  current_odometer: 8000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
 };
 
 const mockSummary1: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 15000,
-  milesRemaining: 21000,
-  daysRemaining: 365,
-  projectedMiles: 38000,
-  isOverPace: true,
+  miles_driven: 15000,
+  miles_remaining: 21000,
+  days_elapsed: 730,
+  days_remaining: 365,
+  lease_length_days: 1095,
+  expected_miles_to_date: 24000,
+  current_pace_per_month: 1000,
+  pace_status: 'ahead',
+  miles_over_under_pace: 2000,
+  projected_miles_at_end: 38000,
+  projected_overage: 2000,
+  projected_overage_cost: 500,
+  recommended_daily_miles: 58,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockSummary2: LeaseSummary = {
-  leaseId: 'lease-2',
-  vehicleLabel: '2024 Honda Civic',
-  startDate: '2024-01-01',
-  endDate: '2027-01-01',
-  totalMiles: 45000,
-  milesUsed: 8000,
-  milesRemaining: 37000,
-  daysRemaining: 730,
-  projectedMiles: 40000,
-  isOverPace: false,
+  miles_driven: 8000,
+  miles_remaining: 37000,
+  days_elapsed: 365,
+  days_remaining: 730,
+  lease_length_days: 1095,
+  expected_miles_to_date: 15000,
+  current_pace_per_month: 667,
+  pace_status: 'on_track',
+  miles_over_under_pace: 0,
+  projected_miles_at_end: 40000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 51,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockSubscriptionFree: SubscriptionStatus = {
-  isPremium: false,
-  tier: 'free',
-  expiresAt: null,
+  is_active: false,
+  expires_at: null,
   platform: null,
-  productId: null,
+  product_id: null,
 };
 
 const mockSubscriptionPremium: SubscriptionStatus = {
-  isPremium: true,
-  tier: 'premium',
-  expiresAt: null,
+  is_active: true,
+  expires_at: null,
   platform: 'ios',
-  productId: 'premium_monthly',
+  product_id: 'premium_monthly',
 };
 
 function setupQueryMocks({
@@ -434,7 +465,7 @@ describe('computePaceStatus', () => {
   it('returns on-track when not over pace', () => {
     const result = computePaceStatus({
       ...mockSummary2,
-      isOverPace: false,
+      pace_status: 'on_track',
     });
     expect(result).toBe('on-track');
   });
@@ -442,9 +473,8 @@ describe('computePaceStatus', () => {
   it('returns slightly-over when over pace but within 10%', () => {
     const result = computePaceStatus({
       ...mockSummary1,
-      isOverPace: true,
-      projectedMiles: 39000,
-      totalMiles: 36000,
+      pace_status: 'ahead',
+      projected_miles_at_end: 39000,
     });
     expect(result).toBe('slightly-over');
   });
@@ -452,18 +482,17 @@ describe('computePaceStatus', () => {
   it('returns over-pace when projected exceeds 110% of total', () => {
     const result = computePaceStatus({
       ...mockSummary1,
-      isOverPace: true,
-      projectedMiles: 40000,
-      totalMiles: 36000,
+      pace_status: 'ahead',
+      projected_miles_at_end: 40000,
+      projected_overage: 5000,
     });
     expect(result).toBe('over-pace');
   });
 
-  it('returns slightly-over when totalMiles is 0 and over pace', () => {
+  it('returns slightly-over when over pace', () => {
     const result = computePaceStatus({
       ...mockSummary1,
-      isOverPace: true,
-      totalMiles: 0,
+      pace_status: 'ahead',
     });
     expect(result).toBe('slightly-over');
   });

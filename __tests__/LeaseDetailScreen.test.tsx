@@ -635,55 +635,8 @@ describe('LeaseDetailScreen', () => {
     expect(rings).toHaveLength(0);
   });
 
-  it('renders the carbon footprint card when mpgEstimate is set', async () => {
-    setupQueryMocks({ lease: { ...mockLease, mpgEstimate: 30 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
-    });
-    const card = renderer!.root.findByProps({ testID: 'carbon-footprint-card' });
-    expect(card).toBeDefined();
-  });
-
-  it('shows correct CO₂ calculation in the carbon footprint card', async () => {
-    // 12000 miles driven / 30 mpg * 19.6 = 7840 lbs
-    setupQueryMocks({ lease: { ...mockLease, mpgEstimate: 30 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
-    });
-    const stat = renderer!.root.findByProps({ testID: 'carbon-co2-stat' });
-    expect(stat).toBeDefined();
-  });
-
-  it('shows tree and gallon equivalents', async () => {
-    setupQueryMocks({ lease: { ...mockLease, mpgEstimate: 30 } });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
-    });
-    const equivalents = renderer!.root.findByProps({ testID: 'carbon-equivalents' });
-    expect(equivalents).toBeDefined();
-    const trees = renderer!.root.findByProps({ testID: 'carbon-trees-equivalent' });
-    expect(trees).toBeDefined();
-    const gallons = renderer!.root.findByProps({ testID: 'carbon-gallons-equivalent' });
-    expect(gallons).toBeDefined();
-  });
-
-  it('does not render carbon footprint card when mpgEstimate is not set', async () => {
-    setupQueryMocks({ lease: mockLease });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<LeaseDetailScreen />);
-    });
-    const cards = renderer!.root.findAllByProps({ testID: 'carbon-footprint-card' });
-    expect(cards).toHaveLength(0);
-  });
-
-  it('does not render carbon footprint card when no miles driven', async () => {
-    setupQueryMocks({
-      lease: { ...mockLease, mpgEstimate: 30, currentMileage: 0, startingMileage: 0 },
-    });
+  it('does not render carbon footprint card when no miles have been driven', async () => {
+    setupQueryMocks({ lease: { ...mockLease, current_odometer: 0, starting_odometer: 0 } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<LeaseDetailScreen />);

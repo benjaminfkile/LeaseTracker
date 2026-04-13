@@ -61,7 +61,7 @@ import { EditLeaseScreen } from '../src/screens/leases/EditLeaseScreen';
 
 const mockUseMutation = useMutation as jest.Mock;
 const mockUseQuery = useQuery as jest.Mock;
-const mockUseAuthStore = useAuthStore as jest.Mock;
+const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
 
 const MOCK_LEASE = {
   id: 'lease-123',
