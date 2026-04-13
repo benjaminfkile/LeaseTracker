@@ -42,45 +42,58 @@ import {
   getLeaseSummary,
   getMileageHistory,
 } from '../src/api/leaseApi';
-import type { Lease, LeaseSummary, MileageHistory, CreateLeaseInput, UpdateLeaseInput } from '../src/types/api';
+import type { Lease, LeaseSummary, MileageHistoryEntry, CreateLeaseInput, UpdateLeaseInput } from '../src/types/api';
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 10,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: 'My Camry Lease',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 10,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
 };
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 365,
-  projectedMiles: 13000,
-  isOverPace: true,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 365,
+  days_remaining: 365,
+  lease_length_days: 1096,
+  expected_miles_to_date: 11967,
+  current_pace_per_month: 1000,
+  pace_status: 'ahead',
+  miles_over_under_pace: 33,
+  projected_miles_at_end: 13000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 65.75,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
-const mockHistory: MileageHistory = {
-  leaseId: 'lease-1',
-  entries: [
-    { date: '2023-02-01', mileage: 1000, projectedMileage: 1000 },
-    { date: '2023-03-01', mileage: 2100, projectedMileage: 2000 },
-  ],
-};
+const mockHistoryEntries: MileageHistoryEntry[] = [
+  { month: '2023-02', miles_driven: 1000, expected_miles: 1000 },
+  { month: '2023-03', miles_driven: 1100, expected_miles: 1000 },
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -140,15 +153,17 @@ describe('getLease', () => {
 
 describe('createLease', () => {
   const input: CreateLeaseInput = {
-    vehicleYear: 2023,
-    vehicleMake: 'Toyota',
-    vehicleModel: 'Camry',
-    vehicleTrim: 'SE',
-    startDate: '2023-01-01',
-    endDate: '2026-01-01',
-    totalMiles: 36000,
-    startingMileage: 10,
-    monthlyMiles: 1000,
+    display_name: 'My Camry Lease',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    trim: 'SE',
+    lease_start_date: '2023-01-01',
+    lease_end_date: '2026-01-01',
+    total_miles_allowed: 36000,
+    miles_per_year: 12000,
+    starting_odometer: 10,
+    overage_cost_per_mile: 0.25,
   };
 
   it('returns the created lease on success', async () => {
@@ -160,14 +175,14 @@ describe('createLease', () => {
     expect(result).toEqual(mockLease);
   });
 
-  it('works without optional vehicleTrim', async () => {
-    const inputWithoutTrim: CreateLeaseInput = { ...input, vehicleTrim: undefined };
-    (client.post as jest.Mock).mockResolvedValue({ data: { ...mockLease, vehicleTrim: undefined } });
+  it('works without optional trim', async () => {
+    const inputWithoutTrim: CreateLeaseInput = { ...input, trim: undefined };
+    (client.post as jest.Mock).mockResolvedValue({ data: { ...mockLease, trim: undefined } });
 
     const result = await createLease(inputWithoutTrim);
 
     expect(client.post).toHaveBeenCalledWith('/api/leases', inputWithoutTrim);
-    expect(result.vehicleTrim).toBeUndefined();
+    expect(result.trim).toBeUndefined();
   });
 
   it('throws a normalized ApiError on failure', async () => {
@@ -182,8 +197,8 @@ describe('createLease', () => {
 // ─── updateLease ─────────────────────────────────────────────────────────────
 
 describe('updateLease', () => {
-  const patch: UpdateLeaseInput = { vehicleModel: 'Corolla', totalMiles: 40000 };
-  const updatedLease: Lease = { ...mockLease, vehicleModel: 'Corolla', totalMiles: 40000 };
+  const patch: UpdateLeaseInput = { model: 'Corolla', total_miles_allowed: 40000 };
+  const updatedLease: Lease = { ...mockLease, model: 'Corolla', total_miles_allowed: 40000 };
 
   it('returns the updated lease on success', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: updatedLease });
@@ -257,22 +272,21 @@ describe('getLeaseSummary', () => {
 // ─── getMileageHistory ────────────────────────────────────────────────────────
 
 describe('getMileageHistory', () => {
-  it('returns MileageHistory on success', async () => {
-    (client.get as jest.Mock).mockResolvedValue({ data: mockHistory });
+  it('returns MileageHistoryEntry[] on success', async () => {
+    (client.get as jest.Mock).mockResolvedValue({ data: mockHistoryEntries });
 
     const result = await getMileageHistory('lease-1');
 
     expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/mileage-history');
-    expect(result).toEqual(mockHistory);
+    expect(result).toEqual(mockHistoryEntries);
   });
 
-  it('returns MileageHistory with an empty entries array', async () => {
-    const emptyHistory: MileageHistory = { leaseId: 'lease-1', entries: [] };
-    (client.get as jest.Mock).mockResolvedValue({ data: emptyHistory });
+  it('returns an empty array when no history exists', async () => {
+    (client.get as jest.Mock).mockResolvedValue({ data: [] });
 
     const result = await getMileageHistory('lease-1');
 
-    expect(result.entries).toHaveLength(0);
+    expect(result).toHaveLength(0);
   });
 
   it('throws a normalized ApiError on failure', async () => {
