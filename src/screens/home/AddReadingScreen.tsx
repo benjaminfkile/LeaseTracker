@@ -32,12 +32,12 @@ import type { HomeStackNavigationProp, HomeStackParamList } from '../../navigati
 // ---------- Schema ----------
 
 const addReadingSchema = z.object({
-  mileage: z
+  odometer: z
     .string()
     .min(1, 'Mileage is required')
     .regex(/^\d+$/, 'Enter a valid mileage'),
-  readingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
-  note: z.string(),
+  reading_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
+  notes: z.string(),
 });
 
 type AddReadingFormData = z.infer<typeof addReadingSchema>;
@@ -155,7 +155,7 @@ export function AddReadingScreen(): React.ReactElement {
   });
 
   const { mutate: saveReading, isPending } = useMutation({
-    mutationFn: (data: { mileage: number; readingDate: string; note?: string }) =>
+    mutationFn: (data: { odometer: number; reading_date: string; notes?: string }) =>
       addReading(leaseId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['readings', leaseId] });
@@ -176,15 +176,15 @@ export function AddReadingScreen(): React.ReactElement {
   } = useForm<AddReadingFormData>({
     resolver: zodResolver(addReadingSchema),
     defaultValues: {
-      mileage: '',
-      readingDate: today,
-      note: '',
+      odometer: '',
+      reading_date: today,
+      notes: '',
     },
   });
 
-  const { field: mileageField } = useController({ control, name: 'mileage' });
-  const { field: readingDateField } = useController({ control, name: 'readingDate' });
-  const { field: noteField } = useController({ control, name: 'note' });
+  const { field: mileageField } = useController({ control, name: 'odometer' });
+  const { field: readingDateField } = useController({ control, name: 'reading_date' });
+  const { field: noteField } = useController({ control, name: 'notes' });
 
   // Pre-fill mileage when returning from OCR camera screen
   useEffect(() => {
@@ -195,22 +195,22 @@ export function AddReadingScreen(): React.ReactElement {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params.initialMileage]);
 
-  const watchedMileage = watch('mileage');
+  const watchedMileage = watch('odometer');
   const parsedNewMileage = watchedMileage.length > 0 ? parseInt(watchedMileage, 10) : null;
   const currentMileage = lease?.currentMileage ?? 0;
 
   const onSubmit = (data: AddReadingFormData) => {
-    const mileageNum = parseInt(data.mileage, 10);
+    const mileageNum = parseInt(data.odometer, 10);
     if (mileageNum <= currentMileage) {
-      setError('mileage', {
+      setError('odometer', {
         message: `Reading must be above current odometer (${currentMileage.toLocaleString()} mi)`,
       });
       return;
     }
     saveReading({
-      mileage: mileageNum,
-      readingDate: data.readingDate,
-      note: data.note.trim() !== '' ? data.note.trim() : undefined,
+      odometer: mileageNum,
+      reading_date: data.reading_date,
+      notes: data.notes.trim() !== '' ? data.notes.trim() : undefined,
     });
   };
 
@@ -243,7 +243,7 @@ export function AddReadingScreen(): React.ReactElement {
           <OdometerInput
             value={mileageField.value}
             onChange={mileageField.onChange}
-            errorMessage={errors.mileage?.message}
+            errorMessage={errors.odometer?.message}
             testID="odometer-input"
           />
 
