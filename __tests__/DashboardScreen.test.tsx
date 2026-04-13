@@ -64,6 +64,7 @@ jest.mock('@tanstack/react-query', () => ({
 jest.mock('../src/api/leaseApi', () => ({
   getLeases: jest.fn(),
   getLeaseSummary: jest.fn(),
+  getLeaseMembers: jest.fn(),
 }));
 jest.mock('../src/api/tripsApi', () => ({
   getTrips: jest.fn(),
@@ -82,32 +83,48 @@ const mockUseQuery = useQuery as jest.Mock;
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 365,
-  projectedMiles: 14400,
-  isOverPace: false,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 730,
+  days_remaining: 365,
+  lease_length_days: 1095,
+  expected_miles_to_date: 24000,
+  current_pace_per_month: 1000,
+  pace_status: 'ahead',
+  miles_over_under_pace: -12000,
+  projected_miles_at_end: 14400,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 66,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 const mockTrip: SavedTrip = {
@@ -273,8 +290,18 @@ describe('DashboardScreen', () => {
     expect(badge).toBeDefined();
   });
 
-  it('renders On Track badge when not over pace', async () => {
-    setupQueryMocks({ summary: { ...mockSummary, isOverPace: false } });
+  it('renders Ahead badge when ahead of pace', async () => {
+    setupQueryMocks({ summary: { ...mockSummary, pace_status: 'ahead' } });
+    let renderer: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(<DashboardScreen />);
+    });
+    const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
+    expect(label.props.children).toBe('Ahead');
+  });
+
+  it('renders On Track badge when on track', async () => {
+    setupQueryMocks({ summary: { ...mockSummary, pace_status: 'on_track' } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<DashboardScreen />);
@@ -283,38 +310,14 @@ describe('DashboardScreen', () => {
     expect(label.props.children).toBe('On Track');
   });
 
-  it('renders Slightly Over badge when slightly over pace', async () => {
-    setupQueryMocks({
-      summary: {
-        ...mockSummary,
-        isOverPace: true,
-        projectedMiles: 38000,
-        totalMiles: 36000,
-      },
-    });
+  it('renders Behind badge when behind pace', async () => {
+    setupQueryMocks({ summary: { ...mockSummary, pace_status: 'behind' } });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(<DashboardScreen />);
     });
     const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
-    expect(label.props.children).toBe('Slightly Over');
-  });
-
-  it('renders Over Pace badge when significantly over pace', async () => {
-    setupQueryMocks({
-      summary: {
-        ...mockSummary,
-        isOverPace: true,
-        projectedMiles: 42000,
-        totalMiles: 36000,
-      },
-    });
-    let renderer: ReactTestRenderer.ReactTestRenderer;
-    await ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<DashboardScreen />);
-    });
-    const label = renderer!.root.findByProps({ testID: 'pace-status-badge-label' });
-    expect(label.props.children).toBe('Over Pace');
+    expect(label.props.children).toBe('Behind');
   });
 
   it('renders the pace callout when daysRemaining > 0', async () => {
@@ -398,8 +401,8 @@ describe('DashboardScreen', () => {
     const secondLease: Lease = {
       ...mockLease,
       id: 'lease-2',
-      vehicleMake: 'Honda',
-      vehicleModel: 'Civic',
+      make: 'Honda',
+      model: 'Civic',
     };
     setupQueryMocks({ leases: [mockLease, secondLease] });
     let renderer: ReactTestRenderer.ReactTestRenderer;
