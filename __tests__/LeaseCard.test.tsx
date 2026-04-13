@@ -34,19 +34,30 @@ const FAKE_NOW = new Date('2024-06-15T00:00:00Z');
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry SE',
+  year: 2023,
+  make: 'Toyota',
+  model: 'Camry',
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 describe('LeaseCard', () => {
@@ -79,7 +90,7 @@ describe('LeaseCard', () => {
   });
 
   it('renders the vehicle label without trim when vehicleTrim is absent', async () => {
-    const leaseNoTrim: Lease = { ...mockLease, vehicleTrim: undefined };
+    const leaseNoTrim: Lease = { ...mockLease, trim: null };
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
@@ -101,15 +112,15 @@ describe('LeaseCard', () => {
     expect(mileage.props.children).toBe('12,000 / 36,000 mi');
   });
 
-  it('renders the monthly miles stat', async () => {
+  it('renders the yearly miles stat', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
         <LeaseCard lease={mockLease} onArchive={jest.fn()} />,
       );
     });
-    const monthly = renderer!.root.findByProps({ testID: 'lease-card-monthly' });
-    expect(monthly.props.children).toBe('1,000 mi/mo');
+    const yearly = renderer!.root.findByProps({ testID: 'lease-card-yearly' });
+    expect(yearly.props.children).toBe('12,000 mi/yr');
   });
 
   it('renders with a custom testID', async () => {
@@ -199,12 +210,12 @@ describe('LeaseCard', () => {
     // First child is the filled portion; flex should equal milesUsed/totalMiles
     const fillStyle = bar.props.children[0].props.style;
     const flatStyle = Array.isArray(fillStyle) ? Object.assign({}, ...fillStyle) : fillStyle;
-    const expected = (mockLease.currentMileage - mockLease.startingMileage) / mockLease.totalMiles;
+    const expected = (mockLease.current_odometer! - mockLease.starting_odometer) / mockLease.total_miles_allowed;
     expect(flatStyle.flex).toBeCloseTo(expected, 5);
   });
 
   it('progress bar fill is capped at 1 when miles exceed total', async () => {
-    const overLease: Lease = { ...mockLease, currentMileage: 40000 };
+    const overLease: Lease = { ...mockLease, current_odometer: 40000 };
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
@@ -240,13 +251,13 @@ describe('LeaseCard', () => {
     const chip = renderer!.root.findByProps({ testID: 'lease-card-days-left' });
     const textEl = chip.findByType(require('react-native').Text);
     const expectedDays = Math.ceil(
-      (new Date(mockLease.endDate).getTime() - FAKE_NOW.getTime()) / MS_PER_DAY,
+      (new Date(mockLease.lease_end_date).getTime() - FAKE_NOW.getTime()) / MS_PER_DAY,
     );
     expect(textEl.props.children).toBe(`${expectedDays} days left`);
   });
 
   it('days-left chip shows 0 when lease is expired', async () => {
-    const expiredLease: Lease = { ...mockLease, endDate: '2020-01-01' };
+    const expiredLease: Lease = { ...mockLease, lease_end_date: '2020-01-01' };
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
@@ -271,8 +282,8 @@ describe('LeaseCard', () => {
     expect(chip).toBeDefined();
   });
 
-  it('pace chip shows On Track when miles used is below expected', async () => {
-    // mockLease: 12,000 used out of 36,000 total; ~530/1096 elapsed → expected ~17,000+ → on-track
+  it('pace chip shows Under Pace when miles used is below expected', async () => {
+    // mockLease: 12,000 used out of 36,000 total; ~530/1096 elapsed → expected ~17,000+ → behind
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
@@ -281,19 +292,19 @@ describe('LeaseCard', () => {
     });
     const chip = renderer!.root.findByProps({ testID: 'lease-card-pace-chip' });
     const textEl = chip.findByType(require('react-native').Text);
-    expect(textEl.props.children).toBe('On Track');
+    expect(textEl.props.children).toBe('Under Pace');
   });
 
-  it('pace chip shows Slightly Over when miles are slightly above expected', async () => {
+  it('pace chip shows Over Pace when miles are slightly above expected', async () => {
     // Use a lease where elapsed is 50% but miles used is just above 50% of total
     const slightlyOverLease: Lease = {
       ...mockLease,
-      startDate: '2024-01-01',
-      endDate: '2025-01-01',
-      totalMiles: 12000,
-      startingMileage: 0,
-      // Fake now = 2024-06-15; elapsed ≈ 165/365 → expected ≈ 5425 mi; 5500 is >5425 but <1.1×5425=5968
-      currentMileage: 5500,
+      lease_start_date: '2024-01-01',
+      lease_end_date: '2025-01-01',
+      total_miles_allowed: 12000,
+      starting_odometer: 0,
+      // Fake now = 2024-06-15; elapsed ≈ 165/365 → expected ≈ 5425 mi; 5500 is >5425
+      current_odometer: 5500,
     };
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
@@ -303,18 +314,18 @@ describe('LeaseCard', () => {
     });
     const chip = renderer!.root.findByProps({ testID: 'lease-card-pace-chip' });
     const textEl = chip.findByType(require('react-native').Text);
-    expect(textEl.props.children).toBe('Slightly Over');
+    expect(textEl.props.children).toBe('Over Pace');
   });
 
   it('pace chip shows Over Pace when miles are more than 10% above expected', async () => {
-    // elapsed ≈ 165/365 → expected ≈ 5425; 7000 > 1.1×5425=5968 → over-pace
+    // elapsed ≈ 165/365 → expected ≈ 5425; 7000 > 5425 → ahead
     const overPaceLease: Lease = {
       ...mockLease,
-      startDate: '2024-01-01',
-      endDate: '2025-01-01',
-      totalMiles: 12000,
-      startingMileage: 0,
-      currentMileage: 7000,
+      lease_start_date: '2024-01-01',
+      lease_end_date: '2025-01-01',
+      total_miles_allowed: 12000,
+      starting_odometer: 0,
+      current_odometer: 7000,
     };
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
