@@ -272,7 +272,7 @@ describe('AddReadingScreen', () => {
     });
 
     expect(mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ mileage: 13000 }),
+      expect.objectContaining({ odometer: 13000 }),
     );
   });
 
