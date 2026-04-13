@@ -1,14 +1,13 @@
 import client, { normalizeError } from './client';
 import type {
   OdometerReading,
-  PaginationParams,
   CreateReadingInput,
   UpdateReadingInput,
 } from '../types/api';
 
 export async function getReadings(
   leaseId: string,
-  params?: PaginationParams,
+  params?: { limit?: number; before?: string },
 ): Promise<OdometerReading[]> {
   try {
     const response = await client.get<OdometerReading[]>(`/api/leases/${leaseId}/readings`, {
