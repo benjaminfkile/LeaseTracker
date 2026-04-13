@@ -5,32 +5,41 @@ import type { SavedTrip } from '../src/types/api';
 
 const mockTrip: SavedTrip = {
   id: 'trip-1',
-  leaseId: 'lease-1',
-  distance: 250,
-  tripDate: '2026-05-10',
-  note: 'Road trip to Denver',
-  createdAt: '2026-05-01T00:00:00Z',
-  updatedAt: '2026-05-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Road trip to Denver',
+  estimated_miles: 250,
+  trip_date: '2026-05-10',
+  notes: 'Some notes',
+  is_completed: false,
+  created_at: '2026-05-01T00:00:00Z',
+  updated_at: '2026-05-01T00:00:00Z',
 };
 
-const mockTripNoNote: SavedTrip = {
+const mockTripNoName: SavedTrip = {
   id: 'trip-2',
-  leaseId: 'lease-1',
-  distance: 120,
-  tripDate: '2026-06-15',
-  note: '',
-  createdAt: '2026-06-01T00:00:00Z',
-  updatedAt: '2026-06-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: '',
+  estimated_miles: 120,
+  trip_date: '2026-06-15',
+  notes: null,
+  is_completed: false,
+  created_at: '2026-06-01T00:00:00Z',
+  updated_at: '2026-06-01T00:00:00Z',
 };
 
 const mockTripLargeDistance: SavedTrip = {
   id: 'trip-3',
-  leaseId: 'lease-1',
-  distance: 1500,
-  tripDate: '2026-03-20',
-  note: 'Long drive',
-  createdAt: '2026-03-01T00:00:00Z',
-  updatedAt: '2026-03-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Long drive',
+  estimated_miles: 1500,
+  trip_date: '2026-03-20',
+  notes: null,
+  is_completed: false,
+  created_at: '2026-03-01T00:00:00Z',
+  updated_at: '2026-03-01T00:00:00Z',
 };
 
 describe('TripCard', () => {
@@ -61,7 +70,7 @@ describe('TripCard', () => {
   });
 
   describe('trip name', () => {
-    it('renders the trip name from note when present', async () => {
+    it('renders the trip name when present', async () => {
       let renderer: ReactTestRenderer.ReactTestRenderer;
       await ReactTestRenderer.act(() => {
         renderer = ReactTestRenderer.create(<TripCard trip={mockTrip} />);
@@ -70,32 +79,22 @@ describe('TripCard', () => {
       expect(name.props.children).toBe('Road trip to Denver');
     });
 
-    it('renders "Trip" as default name when note is empty', async () => {
+    it('renders "Trip" as default name when name is empty', async () => {
       let renderer: ReactTestRenderer.ReactTestRenderer;
       await ReactTestRenderer.act(() => {
-        renderer = ReactTestRenderer.create(<TripCard trip={mockTripNoNote} />);
+        renderer = ReactTestRenderer.create(<TripCard trip={mockTripNoName} />);
       });
       const name = renderer!.root.findByProps({ testID: 'trip-name-trip-2' });
       expect(name.props.children).toBe('Trip');
     });
 
-    it('renders "Trip" as default name when note is whitespace only', async () => {
-      const tripWhitespace: SavedTrip = { ...mockTrip, id: 'trip-ws', note: '   ' };
+    it('renders "Trip" as default name when name is whitespace only', async () => {
+      const tripWhitespace: SavedTrip = { ...mockTrip, id: 'trip-ws', name: '   ' };
       let renderer: ReactTestRenderer.ReactTestRenderer;
       await ReactTestRenderer.act(() => {
         renderer = ReactTestRenderer.create(<TripCard trip={tripWhitespace} />);
       });
       const name = renderer!.root.findByProps({ testID: 'trip-name-trip-ws' });
-      expect(name.props.children).toBe('Trip');
-    });
-
-    it('renders "Trip" as default name when note is undefined', async () => {
-      const tripUndefinedNote: SavedTrip = { ...mockTrip, id: 'trip-undef', note: undefined };
-      let renderer: ReactTestRenderer.ReactTestRenderer;
-      await ReactTestRenderer.act(() => {
-        renderer = ReactTestRenderer.create(<TripCard trip={tripUndefinedNote} />);
-      });
-      const name = renderer!.root.findByProps({ testID: 'trip-name-trip-undef' });
       expect(name.props.children).toBe('Trip');
     });
   });
@@ -111,7 +110,7 @@ describe('TripCard', () => {
     });
 
     it('renders a date from a different month correctly', async () => {
-      const juneTrip: SavedTrip = { ...mockTrip, id: 'trip-jun', tripDate: '2026-06-15' };
+      const juneTrip: SavedTrip = { ...mockTrip, id: 'trip-jun', trip_date: '2026-06-15' };
       let renderer: ReactTestRenderer.ReactTestRenderer;
       await ReactTestRenderer.act(() => {
         renderer = ReactTestRenderer.create(<TripCard trip={juneTrip} />);
