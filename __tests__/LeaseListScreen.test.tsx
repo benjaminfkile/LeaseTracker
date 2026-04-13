@@ -65,19 +65,30 @@ const mockUseMutation = useMutation as jest.Mock;
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 0,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry',
+  year: 2023,
+  make: 'Toyota',
+  model: 'Camry',
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 0,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
 };
 
 function setupMocks({
@@ -175,7 +186,7 @@ describe('LeaseListScreen', () => {
   });
 
   it('renders a LeaseCard for each lease', async () => {
-    const secondLease: Lease = { ...mockLease, id: 'lease-2', vehicleModel: 'Corolla' };
+    const secondLease: Lease = { ...mockLease, id: 'lease-2', model: 'Corolla' };
     setupMocks({ leases: [mockLease, secondLease] });
     let renderer: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
