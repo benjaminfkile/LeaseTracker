@@ -40,10 +40,9 @@ import type { User, UpdateUserInput } from '../src/types/api';
 const mockUser: User = {
   id: 'user-1',
   email: 'test@example.com',
-  firstName: 'John',
-  lastName: 'Doe',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-06-01T00:00:00Z',
+  display_name: 'John Doe',
+  subscription_tier: 'free',
+  subscription_expires_at: null,
 };
 
 beforeEach(() => {
@@ -74,8 +73,8 @@ describe('getMe', () => {
 // ─── updateMe ────────────────────────────────────────────────────────────────
 
 describe('updateMe', () => {
-  const patch: UpdateUserInput = { firstName: 'Jane' };
-  const updatedUser: User = { ...mockUser, firstName: 'Jane' };
+  const patch: UpdateUserInput = { display_name: 'Jane Doe' };
+  const updatedUser: User = { ...mockUser, display_name: 'Jane Doe' };
 
   it('returns the updated user on success', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: updatedUser });

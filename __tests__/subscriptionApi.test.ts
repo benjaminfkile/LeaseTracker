@@ -41,27 +41,24 @@ import {
 import type { SubscriptionStatus } from '../src/types/api';
 
 const mockPremiumIos: SubscriptionStatus = {
-  isPremium: true,
-  tier: 'premium',
-  expiresAt: '2025-01-01T00:00:00Z',
+  is_active: true,
+  expires_at: '2025-01-01T00:00:00Z',
   platform: 'ios',
-  productId: 'com.benkile.leasetracker.premium.monthly',
+  product_id: 'com.benkile.leasetracker.premium.monthly',
 };
 
 const mockPremiumAndroid: SubscriptionStatus = {
-  isPremium: true,
-  tier: 'premium',
-  expiresAt: '2025-06-01T00:00:00Z',
+  is_active: true,
+  expires_at: '2025-06-01T00:00:00Z',
   platform: 'android',
-  productId: 'com.benkile.leasetracker.premium.annual',
+  product_id: 'com.benkile.leasetracker.premium.annual',
 };
 
 const mockFree: SubscriptionStatus = {
-  isPremium: false,
-  tier: 'free',
-  expiresAt: null,
+  is_active: false,
+  expires_at: null,
   platform: null,
-  productId: null,
+  product_id: null,
 };
 
 beforeEach(() => {
@@ -74,10 +71,11 @@ describe('verifyApplePurchase', () => {
   it('returns subscription status on success', async () => {
     (client.post as jest.Mock).mockResolvedValue({ data: mockPremiumIos });
 
-    const result = await verifyApplePurchase('receipt-data-abc');
+    const result = await verifyApplePurchase('receipt-data-abc', 'com.benkile.leasetracker.premium.monthly');
 
     expect(client.post).toHaveBeenCalledWith('/api/subscriptions/apple/verify', {
-      receiptData: 'receipt-data-abc',
+      receipt_data: 'receipt-data-abc',
+      product_id: 'com.benkile.leasetracker.premium.monthly',
     });
     expect(result).toEqual(mockPremiumIos);
   });
@@ -85,10 +83,11 @@ describe('verifyApplePurchase', () => {
   it('returns free status when receipt is invalid', async () => {
     (client.post as jest.Mock).mockResolvedValue({ data: mockFree });
 
-    const result = await verifyApplePurchase('invalid-receipt');
+    const result = await verifyApplePurchase('invalid-receipt', 'com.benkile.leasetracker.premium.monthly');
 
     expect(client.post).toHaveBeenCalledWith('/api/subscriptions/apple/verify', {
-      receiptData: 'invalid-receipt',
+      receipt_data: 'invalid-receipt',
+      product_id: 'com.benkile.leasetracker.premium.monthly',
     });
     expect(result).toEqual(mockFree);
   });
@@ -97,7 +96,7 @@ describe('verifyApplePurchase', () => {
     const error = new Error('Network Error');
     (client.post as jest.Mock).mockRejectedValue(error);
 
-    await expect(verifyApplePurchase('receipt-data-abc')).rejects.toBeInstanceOf(ApiError);
+    await expect(verifyApplePurchase('receipt-data-abc', 'com.benkile.leasetracker.premium.monthly')).rejects.toBeInstanceOf(ApiError);
     expect(normalizeError).toHaveBeenCalledWith(error);
   });
 });
@@ -114,8 +113,8 @@ describe('verifyGooglePurchase', () => {
     );
 
     expect(client.post).toHaveBeenCalledWith('/api/subscriptions/google/verify', {
-      productId: 'com.benkile.leasetracker.premium.annual',
-      purchaseToken: 'purchase-token-xyz',
+      purchase_token: 'purchase-token-xyz',
+      product_id: 'com.benkile.leasetracker.premium.annual',
     });
     expect(result).toEqual(mockPremiumAndroid);
   });
@@ -126,8 +125,8 @@ describe('verifyGooglePurchase', () => {
     const result = await verifyGooglePurchase('com.benkile.leasetracker.premium.monthly', 'bad-token');
 
     expect(client.post).toHaveBeenCalledWith('/api/subscriptions/google/verify', {
-      productId: 'com.benkile.leasetracker.premium.monthly',
-      purchaseToken: 'bad-token',
+      purchase_token: 'bad-token',
+      product_id: 'com.benkile.leasetracker.premium.monthly',
     });
     expect(result).toEqual(mockFree);
   });
