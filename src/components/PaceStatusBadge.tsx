@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../theme';
 
-export type PaceStatus = 'on-track' | 'slightly-over' | 'over-pace';
+export type PaceStatus = 'ahead' | 'on_track' | 'behind';
 
 export type PaceStatusBadgeProps = {
   status: PaceStatus;
@@ -12,9 +12,9 @@ const STATUS_CONFIG: Record<
   PaceStatus,
   { label: string; icon: string; colorKey: 'success' | 'warning' | 'error' }
 > = {
-  'on-track': { label: 'On Track', icon: '✓', colorKey: 'success' },
-  'slightly-over': { label: 'Slightly Over', icon: '!', colorKey: 'warning' },
-  'over-pace': { label: 'Over Pace', icon: '⚠', colorKey: 'error' },
+  ahead: { label: 'Over Pace', icon: '⚠', colorKey: 'error' },
+  on_track: { label: 'On Track', icon: '✓', colorKey: 'success' },
+  behind: { label: 'Under Pace', icon: '✓', colorKey: 'success' },
 };
 
 export function PaceStatusBadge({
