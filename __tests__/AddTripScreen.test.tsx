@@ -43,16 +43,21 @@ const mockUseMutation = useMutation as jest.Mock;
 const mockUseLeasesStore = useLeasesStore as unknown as jest.Mock;
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 900,
-  projectedMiles: 30000,
-  isOverPace: false,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 365,
+  days_remaining: 900,
+  lease_length_days: 1095,
+  expected_miles_to_date: 12000,
+  current_pace_per_month: 1000,
+  pace_status: 'on_track',
+  miles_over_under_pace: 0,
+  projected_miles_at_end: 30000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 27,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
 type StoreState = {
@@ -282,7 +287,7 @@ describe('AddTripScreen', () => {
     });
 
     expect(mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ distance: 300, note: 'Weekend getaway' }),
+      expect.objectContaining({ estimated_miles: 300, name: 'Weekend getaway' }),
     );
   });
 

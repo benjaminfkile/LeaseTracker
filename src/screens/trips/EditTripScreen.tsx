@@ -32,15 +32,16 @@ import type { TripsStackNavigationProp, TripsStackParamList } from '../../naviga
 // ---------- Schema ----------
 
 const editTripSchema = z.object({
-  tripName: z.string().min(1, 'Trip name is required'),
-  distance: z
+  name: z.string().min(1, 'Trip name is required'),
+  estimated_miles: z
     .string()
     .min(1, 'Estimated miles is required')
     .refine(val => {
       const n = parseFloat(val);
       return !isNaN(n) && n > 0;
     }, 'Estimated miles must be greater than 0'),
-  tripDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
+  trip_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
+  notes: z.string().optional(),
 });
 
 type EditTripFormData = z.infer<typeof editTripSchema>;
@@ -263,37 +264,40 @@ export function EditTripScreen(): React.ReactElement {
   } = useForm<EditTripFormData>({
     resolver: zodResolver(editTripSchema),
     defaultValues: {
-      tripName: '',
-      distance: '',
-      tripDate: dayjs().format('YYYY-MM-DD'),
+      name: '',
+      estimated_miles: '',
+      trip_date: dayjs().format('YYYY-MM-DD'),
+      notes: '',
     },
   });
 
   useEffect(() => {
     if (trip) {
       reset({
-        tripName: trip.note ?? '',
-        distance: String(trip.distance),
-        tripDate: trip.tripDate,
+        name: trip.name,
+        estimated_miles: String(trip.estimated_miles),
+        trip_date: trip.trip_date ?? '',
+        notes: trip.notes ?? '',
       });
       setCompleted(isFromCompleted);
     }
   }, [trip, isFromCompleted, reset]);
 
-  const { field: tripNameField } = useController({ control, name: 'tripName' });
-  const { field: distanceField } = useController({ control, name: 'distance' });
-  const { field: tripDateField } = useController({ control, name: 'tripDate' });
+  const { field: nameField } = useController({ control, name: 'name' });
+  const { field: estimatedMilesField } = useController({ control, name: 'estimated_miles' });
+  const { field: tripDateField } = useController({ control, name: 'trip_date' });
 
-  const watchedDistance = watch('distance');
+  const watchedDistance = watch('estimated_miles');
   const parsedDistance =
     watchedDistance.length > 0 ? parseFloat(watchedDistance) : null;
 
   const { mutate: saveTrip, isPending: isSaving } = useMutation({
     mutationFn: (data: {
-      distance: number;
-      tripDate: string;
-      note: string;
-      completed: boolean;
+      name: string;
+      estimated_miles: number;
+      trip_date: string;
+      notes?: string;
+      is_completed: boolean;
     }) => updateTrip(leaseId, tripId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['trips', leaseId] });
@@ -322,10 +326,11 @@ export function EditTripScreen(): React.ReactElement {
 
   const onSubmit = (data: EditTripFormData) => {
     saveTrip({
-      distance: parseFloat(data.distance),
-      tripDate: data.tripDate,
-      note: data.tripName.trim(),
-      completed,
+      name: data.name.trim(),
+      estimated_miles: parseFloat(data.estimated_miles),
+      trip_date: data.trip_date,
+      notes: data.notes,
+      is_completed: completed,
     });
   };
 
@@ -385,21 +390,21 @@ export function EditTripScreen(): React.ReactElement {
 
           <Input
             label="Trip Name"
-            value={tripNameField.value}
-            onChangeText={tripNameField.onChange}
+            value={nameField.value}
+            onChangeText={nameField.onChange}
             placeholder="e.g. Road trip to Denver"
-            errorMessage={errors.tripName?.message}
+            errorMessage={errors.name?.message}
             testID="trip-name-input"
           />
 
           <View style={styles.field}>
             <Input
               label="Estimated Miles"
-              value={distanceField.value}
-              onChangeText={distanceField.onChange}
+              value={estimatedMilesField.value}
+              onChangeText={estimatedMilesField.onChange}
               placeholder="e.g. 250"
               keyboardType="decimal-pad"
-              errorMessage={errors.distance?.message}
+              errorMessage={errors.estimated_miles?.message}
               testID="distance-input"
             />
           </View>
@@ -415,8 +420,8 @@ export function EditTripScreen(): React.ReactElement {
 
           <View style={styles.field}>
             <TripImpactPreview
-              milesRemaining={summaryData?.milesRemaining}
-              originalDistance={trip?.distance ?? null}
+              milesRemaining={summaryData?.miles_remaining}
+              originalDistance={trip?.estimated_miles ?? null}
               enteredDistance={parsedDistance}
               testID="trip-impact-preview"
             />
