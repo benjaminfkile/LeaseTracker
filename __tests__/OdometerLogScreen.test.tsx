@@ -66,26 +66,35 @@ const mockUseMutation = useMutation as jest.Mock;
 
 const mockReading1: OdometerReading = {
   id: 'reading-1',
-  leaseId: 'lease-1',
-  mileage: 10000,
-  readingDate: '2026-03-01',
-  createdAt: '2026-03-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 10000,
+  reading_date: '2026-03-01',
+  notes: null,
+  source: 'manual',
+  created_at: '2026-03-01T00:00:00Z',
 };
 
 const mockReading2: OdometerReading = {
   id: 'reading-2',
-  leaseId: 'lease-1',
-  mileage: 10500,
-  readingDate: '2026-03-15',
-  createdAt: '2026-03-15T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 10500,
+  reading_date: '2026-03-15',
+  notes: null,
+  source: 'manual',
+  created_at: '2026-03-15T00:00:00Z',
 };
 
 const mockReading3: OdometerReading = {
   id: 'reading-3',
-  leaseId: 'lease-1',
-  mileage: 11200,
-  readingDate: '2026-04-01',
-  createdAt: '2026-04-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 11200,
+  reading_date: '2026-04-01',
+  notes: null,
+  source: 'manual',
+  created_at: '2026-04-01T00:00:00Z',
 };
 
 function setupMocks({
