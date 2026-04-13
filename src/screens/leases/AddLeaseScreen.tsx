@@ -36,8 +36,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 const addLeaseSchema = z.object({
   // Step 1 — Vehicle
-  displayName: z.string().min(1, 'Display name is required'),
-  vehicleYear: z
+  display_name: z.string().min(1, 'Display name is required'),
+  year: z
     .string()
     .min(1, 'Year is required')
     .refine(
@@ -47,46 +47,46 @@ const addLeaseSchema = z.object({
       },
       { message: `Year must be between 1990 and ${CURRENT_YEAR + 2}` },
     ),
-  vehicleMake: z.string().min(1, 'Make is required'),
-  vehicleModel: z.string().min(1, 'Model is required'),
-  vehicleTrim: z.string(),
-  vehicleColor: z.string(),
+  make: z.string().min(1, 'Make is required'),
+  model: z.string().min(1, 'Model is required'),
+  trim: z.string(),
+  color: z.string(),
   vin: z
     .string()
     .refine(v => !v || v.length === 17, 'VIN must be exactly 17 characters'),
-  licensePlate: z.string(),
+  license_plate: z.string(),
 
   // Step 2 — Lease Terms
-  startDate: z
+  lease_start_date: z
     .string()
     .min(1, 'Start date is required')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-  endDate: z
+  lease_end_date: z
     .string()
     .min(1, 'End date is required')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-  milesPerYear: z
+  miles_per_year: z
     .string()
     .min(1, 'Miles per year is required')
     .refine(v => {
       const n = parseInt(v, 10);
       return !isNaN(n) && n > 0;
     }, 'Must be a positive number'),
-  totalMiles: z
+  total_miles_allowed: z
     .string()
     .min(1, 'Total miles is required')
     .refine(v => {
       const n = parseInt(v, 10);
       return !isNaN(n) && n > 0;
     }, 'Must be a positive number'),
-  startingOdometer: z
+  starting_odometer: z
     .string()
     .min(1, 'Starting odometer is required')
     .refine(v => {
       const n = parseInt(v, 10);
       return !isNaN(n) && n >= 0;
     }, 'Must be 0 or greater'),
-  overageCostPerMile: z
+  overage_cost_per_mile: z
     .string()
     .min(1, 'Overage cost is required')
     .refine(v => {
@@ -95,11 +95,11 @@ const addLeaseSchema = z.object({
     }, 'Must be 0 or greater'),
 
   // Step 3 — Optional Details (all optional, no required constraint)
-  monthlyPayment: z.string(),
-  dealerName: z.string(),
-  dealerPhone: z.string(),
-  contractNumber: z.string(),
-  mpgEstimate: z.string(),
+  monthly_payment: z.string(),
+  dealer_name: z.string(),
+  dealer_phone: z.string(),
+  contract_number: z.string(),
+  mpg_estimate: z.string(),
   notes: z.string(),
 });
 
@@ -107,14 +107,14 @@ type AddLeaseFormData = z.infer<typeof addLeaseSchema>;
 
 // Fields to trigger validation for when advancing each step
 const STEP_TRIGGER_FIELDS: Record<number, (keyof AddLeaseFormData)[]> = {
-  1: ['displayName', 'vehicleYear', 'vehicleMake', 'vehicleModel', 'vin'],
+  1: ['display_name', 'year', 'make', 'model', 'vin'],
   2: [
-    'startDate',
-    'endDate',
-    'milesPerYear',
-    'totalMiles',
-    'startingOdometer',
-    'overageCostPerMile',
+    'lease_start_date',
+    'lease_end_date',
+    'miles_per_year',
+    'total_miles_allowed',
+    'starting_odometer',
+    'overage_cost_per_mile',
   ],
   3: [],
 };
@@ -418,48 +418,48 @@ export function AddLeaseScreen(): React.ReactElement {
   } = useForm<AddLeaseFormData>({
     resolver: zodResolver(addLeaseSchema),
     defaultValues: {
-      displayName: '',
-      vehicleYear: '',
-      vehicleMake: '',
-      vehicleModel: '',
-      vehicleTrim: '',
-      vehicleColor: '',
+      display_name: '',
+      year: '',
+      make: '',
+      model: '',
+      trim: '',
+      color: '',
       vin: '',
-      licensePlate: '',
-      startDate: '',
-      endDate: '',
-      milesPerYear: '',
-      totalMiles: '',
-      startingOdometer: '',
-      overageCostPerMile: '',
-      monthlyPayment: '',
-      dealerName: '',
-      dealerPhone: '',
-      contractNumber: '',
-      mpgEstimate: '',
+      license_plate: '',
+      lease_start_date: '',
+      lease_end_date: '',
+      miles_per_year: '',
+      total_miles_allowed: '',
+      starting_odometer: '',
+      overage_cost_per_mile: '',
+      monthly_payment: '',
+      dealer_name: '',
+      dealer_phone: '',
+      contract_number: '',
+      mpg_estimate: '',
       notes: '',
     },
   });
 
-  // Auto-calculate totalMiles when startDate, endDate, or milesPerYear changes
-  const startDate = watch('startDate');
-  const endDate = watch('endDate');
-  const milesPerYear = watch('milesPerYear');
+  // Auto-calculate total_miles_allowed when dates or miles_per_year changes
+  const leaseStartDate = watch('lease_start_date');
+  const leaseEndDate = watch('lease_end_date');
+  const milesPerYear = watch('miles_per_year');
 
   useEffect(() => {
-    if (startDate && endDate && milesPerYear) {
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
+    if (leaseStartDate && leaseEndDate && milesPerYear) {
+      const start = dayjs(leaseStartDate);
+      const end = dayjs(leaseEndDate);
       if (end.isAfter(start)) {
         const years = end.diff(start, 'year', true);
         const milesPerYearNum = parseInt(milesPerYear, 10);
         if (!isNaN(milesPerYearNum) && milesPerYearNum > 0) {
           const calculated = Math.round(years * milesPerYearNum);
-          setValue('totalMiles', String(calculated), { shouldValidate: false });
+          setValue('total_miles_allowed', String(calculated), { shouldValidate: false });
         }
       }
     }
-  }, [startDate, endDate, milesPerYear, setValue]);
+  }, [leaseStartDate, leaseEndDate, milesPerYear, setValue]);
 
   const { mutate: submitLease, isPending } = useMutation({
     mutationFn: createLease,
@@ -480,7 +480,7 @@ export function AddLeaseScreen(): React.ReactElement {
     const valid = await trigger(fields as (keyof AddLeaseFormData)[]);
 
     if (currentStep === 2 && valid) {
-      const { startDate: sd, endDate: ed } = getValues();
+      const { lease_start_date: sd, lease_end_date: ed } = getValues();
       if (sd && ed && ed <= sd) {
         setDateOrderError('End date must be after start date');
         return;
@@ -502,22 +502,27 @@ export function AddLeaseScreen(): React.ReactElement {
   };
 
   const onSubmit = (data: AddLeaseFormData) => {
-    const milesPerYearNum = parseInt(data.milesPerYear, 10);
-    // Fields not yet in CreateLeaseInput (displayName, vehicleColor, vin, licensePlate,
-    // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
-    // notes) are collected for future API support and shown in the review.
-    const mpg = parseFloat(data.mpgEstimate);
+    const monthlyPayment = parseFloat(data.monthly_payment);
     submitLease({
-      vehicleYear: parseInt(data.vehicleYear, 10),
-      vehicleMake: data.vehicleMake,
-      vehicleModel: data.vehicleModel,
-      vehicleTrim: data.vehicleTrim || undefined,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      totalMiles: parseInt(data.totalMiles, 10),
-      startingMileage: parseInt(data.startingOdometer, 10),
-      monthlyMiles: Math.round(milesPerYearNum / 12),
-      mpgEstimate: !isNaN(mpg) && mpg > 0 ? mpg : undefined,
+      display_name: data.display_name,
+      year: parseInt(data.year, 10),
+      make: data.make || undefined,
+      model: data.model || undefined,
+      trim: data.trim || undefined,
+      color: data.color || undefined,
+      vin: data.vin || undefined,
+      license_plate: data.license_plate || undefined,
+      lease_start_date: data.lease_start_date,
+      lease_end_date: data.lease_end_date,
+      total_miles_allowed: parseInt(data.total_miles_allowed, 10),
+      miles_per_year: parseInt(data.miles_per_year, 10),
+      starting_odometer: parseInt(data.starting_odometer, 10) || undefined,
+      overage_cost_per_mile: parseFloat(data.overage_cost_per_mile),
+      monthly_payment: !isNaN(monthlyPayment) && monthlyPayment > 0 ? monthlyPayment : undefined,
+      dealer_name: data.dealer_name || undefined,
+      dealer_phone: data.dealer_phone || undefined,
+      contract_number: data.contract_number || undefined,
+      notes: data.notes || undefined,
     });
   };
 
@@ -566,7 +571,7 @@ export function AddLeaseScreen(): React.ReactElement {
 
               <Controller
                 control={control}
-                name="displayName"
+                name="display_name"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Display Name *"
@@ -574,7 +579,7 @@ export function AddLeaseScreen(): React.ReactElement {
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    errorMessage={errors.displayName?.message}
+                    errorMessage={errors.display_name?.message}
                     testID="input-display-name"
                   />
                 )}
@@ -583,7 +588,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="vehicleYear"
+                  name="year"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Year *"
@@ -593,7 +598,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.vehicleYear?.message}
+                      errorMessage={errors.year?.message}
                       testID="input-vehicle-year"
                     />
                   )}
@@ -603,7 +608,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="vehicleMake"
+                  name="make"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Make *"
@@ -612,7 +617,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.vehicleMake?.message}
+                      errorMessage={errors.make?.message}
                       testID="input-vehicle-make"
                     />
                   )}
@@ -622,7 +627,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="vehicleModel"
+                  name="model"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Model *"
@@ -631,7 +636,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.vehicleModel?.message}
+                      errorMessage={errors.model?.message}
                       testID="input-vehicle-model"
                     />
                   )}
@@ -641,7 +646,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="vehicleTrim"
+                  name="trim"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Trim"
@@ -659,7 +664,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="vehicleColor"
+                  name="color"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Color"
@@ -699,7 +704,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="licensePlate"
+                  name="license_plate"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="License Plate"
@@ -728,13 +733,13 @@ export function AddLeaseScreen(): React.ReactElement {
 
               <Controller
                 control={control}
-                name="startDate"
+                name="lease_start_date"
                 render={({ field: { onChange, value } }) => (
                   <DateField
                     label="Lease Start Date *"
                     value={value}
                     onChange={onChange}
-                    errorMessage={errors.startDate?.message}
+                    errorMessage={errors.lease_start_date?.message}
                     testID="date-field-start"
                   />
                 )}
@@ -743,18 +748,18 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="endDate"
+                  name="lease_end_date"
                   render={({ field: { onChange, value } }) => (
                     <DateField
                       label="Lease End Date *"
                       value={value}
                       onChange={onChange}
                       errorMessage={
-                        errors.endDate?.message ?? dateOrderError ?? undefined
+                        errors.lease_end_date?.message ?? dateOrderError ?? undefined
                       }
                       minimumDate={
-                        startDate
-                          ? dayjs(startDate).add(1, 'day').toDate()
+                        leaseStartDate
+                          ? dayjs(leaseStartDate).add(1, 'day').toDate()
                           : undefined
                       }
                       testID="date-field-end"
@@ -766,16 +771,16 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="milesPerYear"
+                  name="miles_per_year"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      label="Miles per Year *"
+                      label="Miles per year allowed *"
                       placeholder="e.g. 12000"
                       keyboardType="number-pad"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.milesPerYear?.message}
+                      errorMessage={errors.miles_per_year?.message}
                       testID="input-miles-per-year"
                     />
                   )}
@@ -785,7 +790,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="totalMiles"
+                  name="total_miles_allowed"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Total Miles Allowed *"
@@ -794,7 +799,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.totalMiles?.message}
+                      errorMessage={errors.total_miles_allowed?.message}
                       helperText="Auto-calculated from dates × miles/year"
                       testID="input-total-miles"
                     />
@@ -805,7 +810,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="startingOdometer"
+                  name="starting_odometer"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Starting Odometer *"
@@ -814,7 +819,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.startingOdometer?.message}
+                      errorMessage={errors.starting_odometer?.message}
                       testID="input-starting-odometer"
                     />
                   )}
@@ -824,7 +829,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="overageCostPerMile"
+                  name="overage_cost_per_mile"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Overage Cost per Mile *"
@@ -833,7 +838,7 @@ export function AddLeaseScreen(): React.ReactElement {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      errorMessage={errors.overageCostPerMile?.message}
+                      errorMessage={errors.overage_cost_per_mile?.message}
                       helperText="Cost charged per mile over the allowed limit"
                       testID="input-overage-cost"
                     />
@@ -861,7 +866,7 @@ export function AddLeaseScreen(): React.ReactElement {
 
               <Controller
                 control={control}
-                name="monthlyPayment"
+                name="monthly_payment"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Monthly Payment ($)"
@@ -878,7 +883,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="dealerName"
+                  name="dealer_name"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Dealer Name"
@@ -896,7 +901,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="dealerPhone"
+                  name="dealer_phone"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Dealer Phone"
@@ -914,7 +919,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="contractNumber"
+                  name="contract_number"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="Contract Number"
@@ -932,7 +937,7 @@ export function AddLeaseScreen(): React.ReactElement {
               <View style={styles.fieldSpacing}>
                 <Controller
                   control={control}
-                  name="mpgEstimate"
+                  name="mpg_estimate"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       label="MPG Estimate"
@@ -994,45 +999,45 @@ export function AddLeaseScreen(): React.ReactElement {
                 </Text>
                 <ReviewRow
                   label="Display Name"
-                  value={reviewValues.displayName}
+                  value={reviewValues.display_name}
                   testID="review-display-name"
                 />
                 <ReviewRow
                   label="Year"
-                  value={reviewValues.vehicleYear}
+                  value={reviewValues.year}
                   testID="review-vehicle-year"
                 />
                 <ReviewRow
                   label="Make"
-                  value={reviewValues.vehicleMake}
+                  value={reviewValues.make}
                   testID="review-vehicle-make"
                 />
                 <ReviewRow
                   label="Model"
-                  value={reviewValues.vehicleModel}
+                  value={reviewValues.model}
                   testID="review-vehicle-model"
                 />
-                {!!reviewValues.vehicleTrim && (
+                {!!reviewValues.trim && (
                   <ReviewRow
                     label="Trim"
-                    value={reviewValues.vehicleTrim}
+                    value={reviewValues.trim}
                     testID="review-vehicle-trim"
                   />
                 )}
-                {!!reviewValues.vehicleColor && (
+                {!!reviewValues.color && (
                   <ReviewRow
                     label="Color"
-                    value={reviewValues.vehicleColor}
+                    value={reviewValues.color}
                     testID="review-vehicle-color"
                   />
                 )}
                 {!!reviewValues.vin && (
                   <ReviewRow label="VIN" value={reviewValues.vin} testID="review-vin" />
                 )}
-                {!!reviewValues.licensePlate && (
+                {!!reviewValues.license_plate && (
                   <ReviewRow
                     label="License Plate"
-                    value={reviewValues.licensePlate}
+                    value={reviewValues.license_plate}
                     testID="review-license-plate"
                   />
                 )}
@@ -1047,41 +1052,41 @@ export function AddLeaseScreen(): React.ReactElement {
                 </Text>
                 <ReviewRow
                   label="Start Date"
-                  value={reviewValues.startDate}
+                  value={reviewValues.lease_start_date}
                   testID="review-start-date"
                 />
                 <ReviewRow
                   label="End Date"
-                  value={reviewValues.endDate}
+                  value={reviewValues.lease_end_date}
                   testID="review-end-date"
                 />
                 <ReviewRow
                   label="Miles / Year"
-                  value={reviewValues.milesPerYear}
+                  value={reviewValues.miles_per_year}
                   testID="review-miles-per-year"
                 />
                 <ReviewRow
                   label="Total Miles"
-                  value={reviewValues.totalMiles}
+                  value={reviewValues.total_miles_allowed}
                   testID="review-total-miles"
                 />
                 <ReviewRow
                   label="Starting Odometer"
-                  value={reviewValues.startingOdometer}
+                  value={reviewValues.starting_odometer}
                   testID="review-starting-odometer"
                 />
                 <ReviewRow
                   label="Overage $/Mile"
-                  value={`$${reviewValues.overageCostPerMile}`}
+                  value={`$${reviewValues.overage_cost_per_mile}`}
                   testID="review-overage-cost"
                 />
               </Card>
 
-              {(!!reviewValues.monthlyPayment ||
-                !!reviewValues.dealerName ||
-                !!reviewValues.dealerPhone ||
-                !!reviewValues.contractNumber ||
-                !!reviewValues.mpgEstimate ||
+              {(!!reviewValues.monthly_payment ||
+                !!reviewValues.dealer_name ||
+                !!reviewValues.dealer_phone ||
+                !!reviewValues.contract_number ||
+                !!reviewValues.mpg_estimate ||
                 !!reviewValues.notes) && (
                 <Card style={styles.reviewCard} testID="review-card-optional">
                   <Text
@@ -1093,38 +1098,38 @@ export function AddLeaseScreen(): React.ReactElement {
                   >
                     Optional Details
                   </Text>
-                  {!!reviewValues.monthlyPayment && (
+                  {!!reviewValues.monthly_payment && (
                     <ReviewRow
                       label="Monthly Payment"
-                      value={`$${reviewValues.monthlyPayment}`}
+                      value={`$${reviewValues.monthly_payment}`}
                       testID="review-monthly-payment"
                     />
                   )}
-                  {!!reviewValues.dealerName && (
+                  {!!reviewValues.dealer_name && (
                     <ReviewRow
                       label="Dealer Name"
-                      value={reviewValues.dealerName}
+                      value={reviewValues.dealer_name}
                       testID="review-dealer-name"
                     />
                   )}
-                  {!!reviewValues.dealerPhone && (
+                  {!!reviewValues.dealer_phone && (
                     <ReviewRow
                       label="Dealer Phone"
-                      value={reviewValues.dealerPhone}
+                      value={reviewValues.dealer_phone}
                       testID="review-dealer-phone"
                     />
                   )}
-                  {!!reviewValues.contractNumber && (
+                  {!!reviewValues.contract_number && (
                     <ReviewRow
                       label="Contract #"
-                      value={reviewValues.contractNumber}
+                      value={reviewValues.contract_number}
                       testID="review-contract-number"
                     />
                   )}
-                  {!!reviewValues.mpgEstimate && (
+                  {!!reviewValues.mpg_estimate && (
                     <ReviewRow
                       label="MPG Estimate"
-                      value={reviewValues.mpgEstimate}
+                      value={reviewValues.mpg_estimate}
                       testID="review-mpg"
                     />
                   )}
