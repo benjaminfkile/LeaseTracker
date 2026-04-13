@@ -54,21 +54,24 @@ export function getLeaseYearWindow(
 }
 
 /**
- * Returns the mileage at (or just before) a given date from the history entries.
- * Assumes entries are sorted by date ascending.
+ * Returns the cumulative miles driven up to and including the given month.
+ * Entries have { month: 'YYYY-MM', miles_driven: number } where miles_driven is the monthly delta.
+ * Assumes entries are sorted by month ascending.
  */
 export function getMileageAtDate(
   entries: MileageHistoryEntry[],
   date: Date,
 ): number | undefined {
-  const timestamp = date.getTime();
-  let result: number | undefined;
+  const targetMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  let sum = 0;
+  let found = false;
   for (const entry of entries) {
-    if (parseLocalDate(entry.date).getTime() <= timestamp) {
-      result = entry.mileage;
+    if (entry.month <= targetMonth) {
+      sum += entry.miles_driven;
+      found = true;
     }
   }
-  return result;
+  return found ? sum : undefined;
 }
 
 /**
@@ -79,13 +82,13 @@ export function getMileageAtDate(
  * daily rate (suitable for the Dashboard where history is not loaded).
  */
 export function computeThisYearStats(
-  lease: { startDate: string; endDate: string; monthlyMiles: number },
-  summary: { milesUsed: number; daysRemaining: number; totalMiles: number },
+  lease: { lease_start_date: string; lease_end_date: string; miles_per_year: number },
+  summary: { miles_driven: number; days_remaining: number },
   mileageHistory?: MileageHistoryEntry[],
 ): ThisYearStats {
   const today = new Date();
-  const startDate = parseLocalDate(lease.startDate);
-  const endDate = parseLocalDate(lease.endDate);
+  const startDate = parseLocalDate(lease.lease_start_date);
+  const endDate = parseLocalDate(lease.lease_end_date);
 
   const { anniversary, nextAnniversary } = getLeaseYearWindow(startDate, endDate, today);
 
@@ -103,12 +106,12 @@ export function computeThisYearStats(
   );
 
   // Annual allowance prorated to this lease-year window length
-  const totalMilesThisYear = Math.round(lease.monthlyMiles * 12 * (totalDaysThisYear / 365));
+  const totalMilesThisYear = Math.round(lease.miles_per_year * (totalDaysThisYear / 365));
 
   let milesUsedThisYear: number;
   if (mileageHistory != null && mileageHistory.length > 0) {
     const mileageAtAnniversary = getMileageAtDate(mileageHistory, anniversary) ?? 0;
-    const latestMileage = mileageHistory[mileageHistory.length - 1].mileage;
+    const latestMileage = getMileageAtDate(mileageHistory, today) ?? 0;
     milesUsedThisYear = Math.max(0, latestMileage - mileageAtAnniversary);
   } else {
     // Approximate from the overall daily rate
@@ -116,8 +119,8 @@ export function computeThisYearStats(
       1,
       (endDate.getTime() - startDate.getTime()) / MS_PER_DAY,
     );
-    const daysElapsedLease = Math.max(1, totalDaysLease - summary.daysRemaining);
-    const dailyRate = summary.milesUsed / daysElapsedLease;
+    const daysElapsedLease = Math.max(1, totalDaysLease - summary.days_remaining);
+    const dailyRate = summary.miles_driven / daysElapsedLease;
     milesUsedThisYear = Math.round(dailyRate * daysElapsedThisYear);
   }
 
