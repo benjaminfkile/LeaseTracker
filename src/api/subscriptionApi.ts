@@ -1,10 +1,14 @@
 import client, { normalizeError } from './client';
 import type { SubscriptionStatus } from '../types/api';
 
-export async function verifyApplePurchase(receiptData: string): Promise<SubscriptionStatus> {
+export async function verifyApplePurchase(
+  receiptData: string,
+  productId: string,
+): Promise<SubscriptionStatus> {
   try {
     const response = await client.post<SubscriptionStatus>('/api/subscriptions/apple/verify', {
-      receiptData,
+      receipt_data: receiptData,
+      product_id: productId,
     });
     return response.data;
   } catch (error) {
@@ -18,8 +22,8 @@ export async function verifyGooglePurchase(
 ): Promise<SubscriptionStatus> {
   try {
     const response = await client.post<SubscriptionStatus>('/api/subscriptions/google/verify', {
-      productId,
-      purchaseToken,
+      purchase_token: purchaseToken,
+      product_id: productId,
     });
     return response.data;
   } catch (error) {
