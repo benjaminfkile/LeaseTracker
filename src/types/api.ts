@@ -37,16 +37,21 @@ export type Lease = {
 };
 
 export type LeaseSummary = {
-  leaseId: string;
-  vehicleLabel: string;
-  startDate: string;
-  endDate: string;
-  totalMiles: number;
-  milesUsed: number;
-  milesRemaining: number;
-  daysRemaining: number;
-  projectedMiles: number;
-  isOverPace: boolean;
+  miles_driven: number;
+  miles_remaining: number;
+  days_elapsed: number;
+  days_remaining: number;
+  lease_length_days: number;
+  expected_miles_to_date: number;
+  current_pace_per_month: number;
+  pace_status: 'ahead' | 'on_track' | 'behind';
+  miles_over_under_pace: number;
+  projected_miles_at_end: number;
+  projected_overage: number;
+  projected_overage_cost: number;
+  recommended_daily_miles: number;
+  reserved_trip_miles: number;
+  is_premium: boolean;
 };
 
 export type OdometerReading = {
@@ -114,15 +119,12 @@ export type SubscriptionStatus = {
 };
 
 export type MileageHistoryEntry = {
-  date: string;
-  mileage: number;
-  projectedMileage: number;
+  month: string;
+  miles_driven: number;
+  expected_miles: number;
 };
 
-export type MileageHistory = {
-  leaseId: string;
-  entries: MileageHistoryEntry[];
-};
+export type MileageHistory = MileageHistoryEntry[];
 
 export type CreateLeaseInput = {
   display_name: string;

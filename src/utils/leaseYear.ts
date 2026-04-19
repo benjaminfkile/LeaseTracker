@@ -54,8 +54,9 @@ export function getLeaseYearWindow(
 }
 
 /**
- * Returns the mileage at (or just before) a given date from the history entries.
- * Assumes entries are sorted by date ascending.
+ * Returns the cumulative miles driven at (or just before) a given date from the monthly history.
+ * Assumes entries are sorted by month ascending. Entries have monthly deltas (miles_driven per month),
+ * so this sums up all months on or before the given date.
  */
 export function getMileageAtDate(
   entries: MileageHistoryEntry[],
@@ -63,9 +64,12 @@ export function getMileageAtDate(
 ): number | undefined {
   const timestamp = date.getTime();
   let result: number | undefined;
+  let cumulative = 0;
   for (const entry of entries) {
-    if (parseLocalDate(entry.date).getTime() <= timestamp) {
-      result = entry.mileage;
+    const entryDate = parseLocalDate(`${entry.month}-01`);
+    if (entryDate.getTime() <= timestamp) {
+      cumulative += entry.miles_driven;
+      result = cumulative;
     }
   }
   return result;
@@ -80,7 +84,7 @@ export function getMileageAtDate(
  */
 export function computeThisYearStats(
   lease: { lease_start_date: string; lease_end_date: string; miles_per_year: number },
-  summary: { milesUsed: number; daysRemaining: number; totalMiles: number },
+  summary: { miles_driven: number; days_remaining: number },
   mileageHistory?: MileageHistoryEntry[],
 ): ThisYearStats {
   const today = new Date();
@@ -108,16 +112,16 @@ export function computeThisYearStats(
   let milesUsedThisYear: number;
   if (mileageHistory != null && mileageHistory.length > 0) {
     const mileageAtAnniversary = getMileageAtDate(mileageHistory, anniversary) ?? 0;
-    const latestMileage = mileageHistory[mileageHistory.length - 1].mileage;
-    milesUsedThisYear = Math.max(0, latestMileage - mileageAtAnniversary);
+    const totalCumulative = mileageHistory.reduce((sum, e) => sum + e.miles_driven, 0);
+    milesUsedThisYear = Math.max(0, totalCumulative - mileageAtAnniversary);
   } else {
     // Approximate from the overall daily rate
     const totalDaysLease = Math.max(
       1,
       (endDate.getTime() - startDate.getTime()) / MS_PER_DAY,
     );
-    const daysElapsedLease = Math.max(1, totalDaysLease - summary.daysRemaining);
-    const dailyRate = summary.milesUsed / daysElapsedLease;
+    const daysElapsedLease = Math.max(1, totalDaysLease - summary.days_remaining);
+    const dailyRate = summary.miles_driven / daysElapsedLease;
     milesUsedThisYear = Math.round(dailyRate * daysElapsedThisYear);
   }
 

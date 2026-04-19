@@ -120,8 +120,8 @@ export function BuybackAnalysisScreen(): React.ReactElement {
     );
   }
 
-  const projectedOverage = summary != null
-    ? Math.max(0, summary.projectedMiles - summary.totalMiles)
+  const projectedOverage = summary != null && lease != null
+    ? Math.max(0, summary.projected_miles_at_end - lease.total_miles_allowed)
     : 0;
 
   const buybackRate = parseFloat(buybackRateInput) || 0;

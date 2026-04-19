@@ -17,11 +17,6 @@ type MonthlyBar = {
   frontColor: string;
 };
 
-function buildMonthKey(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
 function formatBarLabel(monthKey: string): string {
   const [year, month] = monthKey.split('-');
   const d = new Date(Number(year), Number(month) - 1, 1);
@@ -33,38 +28,23 @@ export function computeMonthlyBars(
   mode: 'full-lease' | 'this-year',
   primaryColor: string,
 ): MonthlyBar[] {
+  const currentYear = String(new Date().getFullYear());
   const filtered =
     mode === 'this-year'
-      ? entries.filter(e => new Date(e.date).getFullYear() === new Date().getFullYear())
+      ? entries.filter(e => e.month.startsWith(currentYear))
       : entries;
 
   if (filtered.length === 0) {
     return [];
   }
 
-  // Group by month — take the last entry's mileage per month
-  const byMonth = new Map<string, number>();
-  for (const entry of filtered) {
-    const key = buildMonthKey(entry.date);
-    byMonth.set(key, entry.mileage);
-  }
+  const sorted = [...filtered].sort((a, b) => a.month.localeCompare(b.month));
 
-  const sortedKeys = Array.from(byMonth.keys()).sort();
-
-  const bars: MonthlyBar[] = [];
-  for (let i = 0; i < sortedKeys.length; i++) {
-    const key = sortedKeys[i];
-    const endMileage = byMonth.get(key) ?? 0;
-    const prevMileage = i > 0 ? (byMonth.get(sortedKeys[i - 1]) ?? 0) : 0;
-    const miles = Math.max(0, endMileage - prevMileage);
-    bars.push({
-      value: miles,
-      label: formatBarLabel(key),
-      frontColor: primaryColor,
-    });
-  }
-
-  return bars;
+  return sorted.map(entry => ({
+    value: entry.miles_driven,
+    label: formatBarLabel(entry.month),
+    frontColor: primaryColor,
+  }));
 }
 
 export function MonthlyMileageChart({

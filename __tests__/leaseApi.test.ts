@@ -74,25 +74,27 @@ const mockLease: Lease = {
 };
 
 const mockSummary: LeaseSummary = {
-  leaseId: 'lease-1',
-  vehicleLabel: '2023 Toyota Camry SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  milesUsed: 12000,
-  milesRemaining: 24000,
-  daysRemaining: 365,
-  projectedMiles: 13000,
-  isOverPace: true,
+  miles_driven: 12000,
+  miles_remaining: 24000,
+  days_elapsed: 365,
+  days_remaining: 365,
+  lease_length_days: 730,
+  expected_miles_to_date: 11500,
+  current_pace_per_month: 1050,
+  pace_status: 'ahead',
+  miles_over_under_pace: 500,
+  projected_miles_at_end: 13000,
+  projected_overage: 0,
+  projected_overage_cost: 0,
+  recommended_daily_miles: 33,
+  reserved_trip_miles: 0,
+  is_premium: false,
 };
 
-const mockHistory: MileageHistory = {
-  leaseId: 'lease-1',
-  entries: [
-    { date: '2023-02-01', mileage: 1000, projectedMileage: 1000 },
-    { date: '2023-03-01', mileage: 2100, projectedMileage: 2000 },
-  ],
-};
+const mockHistory: MileageHistory = [
+  { month: '2023-02', miles_driven: 1000, expected_miles: 1000 },
+  { month: '2023-03', miles_driven: 2100, expected_miles: 2000 },
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -280,13 +282,13 @@ describe('getMileageHistory', () => {
     expect(result).toEqual(mockHistory);
   });
 
-  it('returns MileageHistory with an empty entries array', async () => {
-    const emptyHistory: MileageHistory = { leaseId: 'lease-1', entries: [] };
+  it('returns MileageHistory with an empty array', async () => {
+    const emptyHistory: MileageHistory = [];
     (client.get as jest.Mock).mockResolvedValue({ data: emptyHistory });
 
     const result = await getMileageHistory('lease-1');
 
-    expect(result.entries).toHaveLength(0);
+    expect(result).toHaveLength(0);
   });
 
   it('throws a normalized ApiError on failure', async () => {

@@ -138,7 +138,9 @@ export function LeaseEndOptionsScreen(): React.ReactElement {
   }
 
   const projectedOverage =
-    summary != null ? Math.max(0, summary.projectedMiles - summary.totalMiles) : 0;
+    summary != null && lease != null
+      ? Math.max(0, summary.projected_miles_at_end - lease.total_miles_allowed)
+      : 0;
 
   const buyOutAmount = parseFloat(buyOutInput) || 0;
   const newMonthlyPayment = parseFloat(monthlyInput) || 0;

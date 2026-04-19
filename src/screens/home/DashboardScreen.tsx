@@ -98,15 +98,16 @@ export function DashboardScreen(): React.ReactElement {
   // Push latest summary to the iOS home-screen widget via shared UserDefaults.
   useEffect(() => {
     if (summary == null || selectedLease == null) return;
-    const isOver = summary.isOverPace;
+    const totalMiles = selectedLease.total_miles_allowed;
+    const isOver = summary.pace_status === 'ahead';
     const isWayOver =
-      summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1;
+      totalMiles > 0 && summary.projected_miles_at_end / totalMiles > 1.1;
     const status = isOver ? (isWayOver ? 'over-pace' : 'slightly-over') : 'on-track';
     updateWidgetData({
-      milesRemaining: summary.milesRemaining,
-      daysRemaining: summary.daysRemaining,
+      milesRemaining: summary.miles_remaining,
+      daysRemaining: summary.days_remaining,
       paceStatus: status,
-      vehicleLabel: summary.vehicleLabel,
+      vehicleLabel: selectedLease.display_name,
     });
   }, [summary, selectedLease]);
 
@@ -114,20 +115,21 @@ export function DashboardScreen(): React.ReactElement {
   const displayMilesRemaining =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesRemainingThisYear
-      : (summary?.milesRemaining ?? 0);
+      : (summary?.miles_remaining ?? 0);
   const displayDaysRemaining =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.daysRemainingThisYear
-      : (summary?.daysRemaining ?? 0);
+      : (summary?.days_remaining ?? 0);
   const displayTotalMiles =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.totalMilesThisYear
-      : (summary?.totalMiles ?? 0);
+      : (selectedLease?.total_miles_allowed ?? 0);
   const displayMilesUsed =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.milesUsedThisYear
-      : (summary?.milesUsed ?? 0);
+      : (summary?.miles_driven ?? 0);
 
+  const leaseTotalMiles = selectedLease?.total_miles_allowed ?? 0;
   const paceStatus: PaceStatus =
     mode === 'this-year' && thisYearStats != null
       ? thisYearStats.isOverPaceThisYear
@@ -136,8 +138,8 @@ export function DashboardScreen(): React.ReactElement {
           ? 'over-pace'
           : 'slightly-over'
         : 'on-track'
-      : summary?.isOverPace === true
-        ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
+      : summary?.pace_status === 'ahead'
+        ? leaseTotalMiles > 0 && summary.projected_miles_at_end / leaseTotalMiles > 1.1
           ? 'over-pace'
           : 'slightly-over'
         : 'on-track';
@@ -145,8 +147,8 @@ export function DashboardScreen(): React.ReactElement {
   const recommendedPace =
     mode === 'this-year' && thisYearStats != null && thisYearStats.daysRemainingThisYear > 0
       ? Math.ceil(thisYearStats.milesRemainingThisYear / thisYearStats.daysRemainingThisYear)
-      : summary != null && summary.daysRemaining > 0
-        ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
+      : summary != null && summary.days_remaining > 0
+        ? Math.ceil(summary.miles_remaining / summary.days_remaining)
         : 0;
 
   if (leasesLoading || summaryLoading) {

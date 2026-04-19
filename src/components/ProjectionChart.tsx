@@ -17,15 +17,16 @@ function filterEntries(
   mode: 'full-lease' | 'this-year',
 ): MileageHistoryEntry[] {
   if (mode === 'this-year') {
-    const currentYear = new Date().getFullYear();
-    return entries.filter(e => new Date(e.date).getFullYear() === currentYear);
+    const currentYear = String(new Date().getFullYear());
+    return entries.filter(e => e.month.startsWith(currentYear));
   }
   return entries;
 }
 
-function formatMonthLabel(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.toLocaleString('default', { month: 'short' })} '${String(d.getFullYear()).slice(2)}`;
+function formatMonthLabel(monthStr: string): string {
+  const [year, month] = monthStr.split('-');
+  const d = new Date(Number(year), Number(month) - 1, 1);
+  return `${d.toLocaleString('default', { month: 'short' })} '${year.slice(2)}`;
 }
 
 type ChartDataPoint = {
@@ -42,9 +43,9 @@ function buildActualData(filtered: MileageHistoryEntry[], hasProjection: boolean
     } else if (hasProjection && i === filtered.length - 1) {
       label = 'Today';
     } else if (i % Math.ceil(filtered.length / 4) === 0) {
-      label = formatMonthLabel(e.date);
+      label = formatMonthLabel(e.month);
     }
-    return { value: e.mileage, label, dataPointText: '' };
+    return { value: e.miles_driven, label, dataPointText: '' };
   });
 }
 
@@ -72,23 +73,23 @@ export function ProjectionChart({
   }
 
   const hasProjection = lease != null && summary != null && filtered.length > 0;
-  const projectionColor = summary?.isOverPace === true ? theme.colors.error : theme.colors.success;
+  const projectionColor =
+    summary?.pace_status === 'ahead' ? theme.colors.error : theme.colors.success;
 
   const actualData = buildActualData(filtered, hasProjection);
   const expectedData: ChartDataPoint[] = filtered.map(e => ({
-    value: e.projectedMileage,
+    value: e.expected_miles,
     label: '',
     dataPointText: '',
   }));
 
   let projectedData: ChartDataPoint[] | undefined;
-  if (hasProjection && summary != null) {
-    const { totalMiles, projectedMiles } = summary;
-    const lastMileage = filtered[filtered.length - 1].mileage;
-    // Extend actual and expected to the lease-end "End" marker
+  if (hasProjection && summary != null && lease != null) {
+    const totalMiles = lease.total_miles_allowed;
+    const projectedMiles = summary.projected_miles_at_end;
+    const lastMileage = filtered[filtered.length - 1].miles_driven;
     actualData.push({ value: lastMileage, label: 'End', dataPointText: '' });
     expectedData.push({ value: totalMiles, label: '', dataPointText: '' });
-    // Projected series: reuse actual values for historical points, then diverges to projected end
     projectedData = [
       ...actualData.slice(0, filtered.length).map(p => ({ ...p, label: '' })),
       { value: projectedMiles, label: '', dataPointText: '' },
