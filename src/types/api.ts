@@ -105,11 +105,10 @@ export type InviteMemberInput = {
 };
 
 export type SubscriptionStatus = {
-  isPremium: boolean;
-  tier: 'free' | 'premium';
-  expiresAt: string | null;
-  platform: 'ios' | 'android' | null;
-  productId: string | null;
+  is_active: boolean;
+  expires_at: string | null;
+  product_id: string | null;
+  platform: string | null;
 };
 
 export type MileageHistoryEntry = {

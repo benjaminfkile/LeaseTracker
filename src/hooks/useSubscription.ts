@@ -30,8 +30,8 @@ export function useSubscription() {
   }, [queryClient]);
 
   return {
-    isPremium: data?.isPremium ?? false,
-    expiresAt: data?.expiresAt ?? null,
+    isPremium: data?.is_active ?? false,
+    expiresAt: data?.expires_at ?? null,
     isLoading,
   };
 }
