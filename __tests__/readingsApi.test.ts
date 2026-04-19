@@ -43,24 +43,29 @@ import type {
   OdometerReading,
   CreateReadingInput,
   UpdateReadingInput,
-  PaginationParams,
+  ReadingParams,
 } from '../src/types/api';
 
 const mockReading: OdometerReading = {
   id: 'reading-1',
-  leaseId: 'lease-1',
-  mileage: 15000,
-  readingDate: '2024-03-01',
-  note: 'Monthly check',
-  createdAt: '2024-03-01T10:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 15000,
+  reading_date: '2024-03-01',
+  notes: 'Monthly check',
+  source: 'manual',
+  created_at: '2024-03-01T10:00:00Z',
 };
 
 const mockReading2: OdometerReading = {
   id: 'reading-2',
-  leaseId: 'lease-1',
-  mileage: 16000,
-  readingDate: '2024-04-01',
-  createdAt: '2024-04-01T10:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  odometer: 16000,
+  reading_date: '2024-04-01',
+  notes: null,
+  source: 'manual',
+  created_at: '2024-04-01T10:00:00Z',
 };
 
 beforeEach(() => {
@@ -89,7 +94,7 @@ describe('getReadings', () => {
 
   it('passes pagination params to the request', async () => {
     (client.get as jest.Mock).mockResolvedValue({ data: [mockReading] });
-    const params: PaginationParams = { page: 2, limit: 10 };
+    const params: ReadingParams = { limit: 10, before: '2024-04-01' };
 
     const result = await getReadings('lease-1', params);
 
@@ -97,9 +102,9 @@ describe('getReadings', () => {
     expect(result).toEqual([mockReading]);
   });
 
-  it('works with only page param provided', async () => {
+  it('works with only before param provided', async () => {
     (client.get as jest.Mock).mockResolvedValue({ data: [mockReading] });
-    const params: PaginationParams = { page: 1 };
+    const params: ReadingParams = { before: '2024-04-01' };
 
     await getReadings('lease-1', params);
 
@@ -108,7 +113,7 @@ describe('getReadings', () => {
 
   it('works with only limit param provided', async () => {
     (client.get as jest.Mock).mockResolvedValue({ data: [mockReading] });
-    const params: PaginationParams = { limit: 5 };
+    const params: ReadingParams = { limit: 5 };
 
     await getReadings('lease-1', params);
 
@@ -128,9 +133,9 @@ describe('getReadings', () => {
 
 describe('addReading', () => {
   const input: CreateReadingInput = {
-    mileage: 15000,
-    readingDate: '2024-03-01',
-    note: 'Monthly check',
+    odometer: 15000,
+    reading_date: '2024-03-01',
+    notes: 'Monthly check',
   };
 
   it('returns the created reading on success', async () => {
@@ -142,15 +147,15 @@ describe('addReading', () => {
     expect(result).toEqual(mockReading);
   });
 
-  it('works without optional note', async () => {
-    const inputWithoutNote: CreateReadingInput = { mileage: 15000, readingDate: '2024-03-01' };
-    const readingWithoutNote: OdometerReading = { ...mockReading, note: undefined };
-    (client.post as jest.Mock).mockResolvedValue({ data: readingWithoutNote });
+  it('works without optional notes', async () => {
+    const inputWithoutNotes: CreateReadingInput = { odometer: 15000, reading_date: '2024-03-01' };
+    const readingWithoutNotes: OdometerReading = { ...mockReading, notes: null };
+    (client.post as jest.Mock).mockResolvedValue({ data: readingWithoutNotes });
 
-    const result = await addReading('lease-1', inputWithoutNote);
+    const result = await addReading('lease-1', inputWithoutNotes);
 
-    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/readings', inputWithoutNote);
-    expect(result.note).toBeUndefined();
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/readings', inputWithoutNotes);
+    expect(result.notes).toBeNull();
   });
 
   it('throws a normalized ApiError on failure', async () => {
@@ -165,8 +170,8 @@ describe('addReading', () => {
 // ─── updateReading ───────────────────────────────────────────────────────────
 
 describe('updateReading', () => {
-  const patch: UpdateReadingInput = { mileage: 15500, note: 'Corrected mileage' };
-  const updatedReading: OdometerReading = { ...mockReading, mileage: 15500, note: 'Corrected mileage' };
+  const patch: UpdateReadingInput = { odometer: 15500, notes: 'Corrected mileage' };
+  const updatedReading: OdometerReading = { ...mockReading, odometer: 15500, notes: 'Corrected mileage' };
 
   it('returns the updated reading on success', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: updatedReading });

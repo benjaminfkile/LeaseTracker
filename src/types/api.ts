@@ -56,12 +56,13 @@ export type LeaseSummary = {
 
 export type OdometerReading = {
   id: string;
-  leaseId: string;
-  mileage: number;
-  readingDate: string;
-  note?: string;
-  loggedByName?: string;
-  createdAt: string;
+  lease_id: string;
+  user_id: string;
+  odometer: number;
+  reading_date: string;
+  notes: string | null;
+  source: string;
+  created_at: string;
 };
 
 export type SavedTrip = {
@@ -152,15 +153,16 @@ export type CreateLeaseInput = {
 
 export type UpdateLeaseInput = Partial<CreateLeaseInput>;
 
-export type PaginationParams = {
-  page?: number;
+export type ReadingParams = {
   limit?: number;
+  before?: string;
 };
 
 export type CreateReadingInput = {
-  mileage: number;
-  readingDate: string;
-  note?: string;
+  odometer: number;
+  reading_date: string;
+  notes?: string;
+  source?: string;
 };
 
 export type UpdateReadingInput = Partial<CreateReadingInput>;

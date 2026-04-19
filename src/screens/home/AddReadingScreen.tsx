@@ -155,7 +155,7 @@ export function AddReadingScreen(): React.ReactElement {
   });
 
   const { mutate: saveReading, isPending } = useMutation({
-    mutationFn: (data: { mileage: number; readingDate: string; note?: string }) =>
+    mutationFn: (data: { odometer: number; reading_date: string; notes?: string }) =>
       addReading(leaseId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['readings', leaseId] });
@@ -208,9 +208,9 @@ export function AddReadingScreen(): React.ReactElement {
       return;
     }
     saveReading({
-      mileage: mileageNum,
-      readingDate: data.readingDate,
-      note: data.note.trim() !== '' ? data.note.trim() : undefined,
+      odometer: mileageNum,
+      reading_date: data.readingDate,
+      notes: data.note.trim() !== '' ? data.note.trim() : undefined,
     });
   };
 
