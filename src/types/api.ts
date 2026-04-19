@@ -80,22 +80,13 @@ export type SavedTrip = {
 
 export type AlertConfig = {
   id: string;
-  leaseId: string;
-  overPaceThresholdPercent: number;
-  projectedOverageThresholdMiles: number;
-  notifyEmail: boolean;
-  notifyPush: boolean;
-  approachingLimitEnabled: boolean;
-  approachingLimitPercent: number;
-  overPaceEnabled: boolean;
-  leaseEndEnabled: boolean;
-  leaseEndDays: number;
-  savedTripEnabled: boolean;
-  mileageBuybackEnabled: boolean;
-  mileageBuybackThresholdDollars: number;
-  weeklySummaryEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  lease_id: string;
+  user_id: string;
+  alert_type: 'miles_threshold' | 'over_pace' | 'days_remaining';
+  threshold_value: number | null;
+  is_enabled: boolean;
+  last_sent_at: string | null;
+  created_at: string;
 };
 
 export type LeaseMember = {
@@ -186,23 +177,16 @@ export type UpdateTripInput = {
   is_completed?: boolean;
 };
 
-export type UpdateAlertConfigInput = Partial<
-  Pick<
-    AlertConfig,
-    | 'overPaceThresholdPercent'
-    | 'projectedOverageThresholdMiles'
-    | 'notifyEmail'
-    | 'notifyPush'
-    | 'approachingLimitEnabled'
-    | 'approachingLimitPercent'
-    | 'overPaceEnabled'
-    | 'leaseEndEnabled'
-    | 'leaseEndDays'
-    | 'savedTripEnabled'
-    | 'mileageBuybackEnabled'
-    | 'mileageBuybackThresholdDollars'
-    | 'weeklySummaryEnabled'
-  >
->;
+export type CreateAlertConfigInput = {
+  alert_type: 'miles_threshold' | 'over_pace' | 'days_remaining';
+  threshold_value?: number;
+  is_enabled?: boolean;
+};
+
+export type UpdateAlertConfigInput = {
+  alert_type?: 'miles_threshold' | 'over_pace' | 'days_remaining';
+  threshold_value?: number | null;
+  is_enabled?: boolean;
+};
 
 export type UpdateUserInput = Partial<Pick<User, 'firstName' | 'lastName'>>;

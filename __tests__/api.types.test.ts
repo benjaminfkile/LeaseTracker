@@ -198,26 +198,49 @@ describe('API types', () => {
     it('accepts a valid AlertConfig object', () => {
       const config: AlertConfig = {
         id: 'alert-1',
-        leaseId: 'lease-1',
-        overPaceThresholdPercent: 10,
-        projectedOverageThresholdMiles: 500,
-        notifyEmail: true,
-        notifyPush: false,
-        approachingLimitEnabled: false,
-        approachingLimitPercent: 80,
-        overPaceEnabled: false,
-        leaseEndEnabled: false,
-        leaseEndDays: 30,
-        savedTripEnabled: false,
-        mileageBuybackEnabled: false,
-        mileageBuybackThresholdDollars: 50,
-        weeklySummaryEnabled: false,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        alert_type: 'miles_threshold',
+        threshold_value: 80,
+        is_enabled: true,
+        last_sent_at: null,
+        created_at: '2024-01-01T00:00:00Z',
       };
-      expect(config.overPaceThresholdPercent).toBe(10);
-      expect(config.notifyEmail).toBe(true);
-      expect(config.notifyPush).toBe(false);
+      expect(config.alert_type).toBe('miles_threshold');
+      expect(config.threshold_value).toBe(80);
+      expect(config.is_enabled).toBe(true);
+      expect(config.last_sent_at).toBeNull();
+    });
+
+    it('accepts an over_pace AlertConfig with null threshold_value', () => {
+      const config: AlertConfig = {
+        id: 'alert-2',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        alert_type: 'over_pace',
+        threshold_value: null,
+        is_enabled: false,
+        last_sent_at: null,
+        created_at: '2024-01-01T00:00:00Z',
+      };
+      expect(config.alert_type).toBe('over_pace');
+      expect(config.threshold_value).toBeNull();
+      expect(config.is_enabled).toBe(false);
+    });
+
+    it('accepts a days_remaining AlertConfig with a last_sent_at timestamp', () => {
+      const config: AlertConfig = {
+        id: 'alert-3',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        alert_type: 'days_remaining',
+        threshold_value: 30,
+        is_enabled: true,
+        last_sent_at: '2024-06-01T00:00:00Z',
+        created_at: '2024-01-01T00:00:00Z',
+      };
+      expect(config.alert_type).toBe('days_remaining');
+      expect(config.last_sent_at).toBe('2024-06-01T00:00:00Z');
     });
   });
 
