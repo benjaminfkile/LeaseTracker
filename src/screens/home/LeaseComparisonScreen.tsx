@@ -20,11 +20,11 @@ import type { Lease, LeaseSummary } from '../../types/api';
 
 export type PaceStatus = 'on-track' | 'slightly-over' | 'over-pace';
 
-export function computePaceStatus(summary: LeaseSummary): PaceStatus {
-  if (!summary.isOverPace) {
+export function computePaceStatus(summary: LeaseSummary, totalMiles: number): PaceStatus {
+  if (summary.pace_status !== 'ahead') {
     return 'on-track';
   }
-  if (summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1) {
+  if (totalMiles > 0 && summary.projected_miles_at_end / totalMiles > 1.1) {
     return 'over-pace';
   }
   return 'slightly-over';
@@ -332,15 +332,15 @@ function ComparisonCard({ lease, summary, onPress }: ComparisonCardProps): React
   const theme = useTheme();
   const label = formatVehicleLabel(lease);
 
-  const paceStatus = summary != null ? computePaceStatus(summary) : null;
+  const paceStatus = summary != null ? computePaceStatus(summary, lease.total_miles_allowed) : null;
   const paceConfig = paceStatus != null ? STATUS_CONFIG[paceStatus] : null;
   const paceColor = paceConfig != null ? theme.colors[paceConfig.colorKey] : theme.colors.textSecondary;
 
-  const milesRemaining = summary?.milesRemaining ?? 0;
-  const daysRemaining = summary?.daysRemaining ?? 0;
+  const milesRemaining = summary?.miles_remaining ?? 0;
+  const daysRemaining = summary?.days_remaining ?? 0;
   const progress =
-    summary != null && summary.totalMiles > 0
-      ? Math.min(summary.milesUsed / summary.totalMiles, 1)
+    summary != null && lease.total_miles_allowed > 0
+      ? Math.min(summary.miles_driven / lease.total_miles_allowed, 1)
       : 0;
 
   const progressColor =

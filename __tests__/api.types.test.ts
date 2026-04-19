@@ -105,20 +105,24 @@ describe('API types', () => {
   describe('LeaseSummary', () => {
     it('accepts a valid LeaseSummary object', () => {
       const summary: LeaseSummary = {
-        leaseId: 'lease-1',
-        vehicleLabel: '2023 Toyota Camry',
-        startDate: '2023-01-01',
-        endDate: '2026-01-01',
-        totalMiles: 36000,
-        milesUsed: 12000,
-        milesRemaining: 24000,
-        daysRemaining: 365,
-        projectedMiles: 13000,
-        isOverPace: true,
+        miles_driven: 12000,
+        miles_remaining: 24000,
+        days_elapsed: 365,
+        days_remaining: 365,
+        lease_length_days: 730,
+        expected_miles_to_date: 11500,
+        current_pace_per_month: 1050,
+        pace_status: 'ahead',
+        miles_over_under_pace: 500,
+        projected_miles_at_end: 13000,
+        projected_overage: 0,
+        projected_overage_cost: 0,
+        recommended_daily_miles: 33,
+        reserved_trip_miles: 0,
+        is_premium: false,
       };
-      expect(summary.leaseId).toBe('lease-1');
-      expect(summary.isOverPace).toBe(true);
-      expect(summary.milesUsed + summary.milesRemaining).toBe(summary.totalMiles);
+      expect(summary.pace_status).toBe('ahead');
+      expect(summary.miles_driven + summary.miles_remaining).toBe(36000);
     });
   });
 
@@ -273,36 +277,29 @@ describe('API types', () => {
   describe('MileageHistoryEntry', () => {
     it('accepts a valid MileageHistoryEntry', () => {
       const entry: MileageHistoryEntry = {
-        date: '2024-03-01',
-        mileage: 12000,
-        projectedMileage: 11500,
+        month: '2024-03',
+        miles_driven: 12000,
+        expected_miles: 11500,
       };
-      expect(entry.mileage).toBe(12000);
-      expect(entry.projectedMileage).toBe(11500);
+      expect(entry.miles_driven).toBe(12000);
+      expect(entry.expected_miles).toBe(11500);
     });
   });
 
   describe('MileageHistory', () => {
     it('accepts a MileageHistory with multiple entries', () => {
-      const history: MileageHistory = {
-        leaseId: 'lease-1',
-        entries: [
-          { date: '2024-01-01', mileage: 5000, projectedMileage: 5000 },
-          { date: '2024-02-01', mileage: 6200, projectedMileage: 6000 },
-          { date: '2024-03-01', mileage: 7500, projectedMileage: 7000 },
-        ],
-      };
-      expect(history.leaseId).toBe('lease-1');
-      expect(history.entries).toHaveLength(3);
-      expect(history.entries[0].date).toBe('2024-01-01');
+      const history: MileageHistory = [
+        { month: '2024-01', miles_driven: 5000, expected_miles: 5000 },
+        { month: '2024-02', miles_driven: 6200, expected_miles: 6000 },
+        { month: '2024-03', miles_driven: 7500, expected_miles: 7000 },
+      ];
+      expect(history).toHaveLength(3);
+      expect(history[0].month).toBe('2024-01');
     });
 
-    it('accepts a MileageHistory with an empty entries array', () => {
-      const history: MileageHistory = {
-        leaseId: 'lease-2',
-        entries: [],
-      };
-      expect(history.entries).toHaveLength(0);
+    it('accepts a MileageHistory with an empty array', () => {
+      const history: MileageHistory = [];
+      expect(history).toHaveLength(0);
     });
   });
 });

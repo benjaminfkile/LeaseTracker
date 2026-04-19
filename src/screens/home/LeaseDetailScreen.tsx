@@ -120,16 +120,17 @@ export function LeaseDetailScreen(): React.ReactElement {
 
   const sharedMembers = members?.filter(m => m.role !== 'owner') ?? [];
 
+  const leaseTotalMiles = lease?.total_miles_allowed ?? 0;
   const paceStatus: PaceStatus =
-    summary?.isOverPace === true
-      ? summary.totalMiles > 0 && summary.projectedMiles / summary.totalMiles > 1.1
+    summary?.pace_status === 'ahead'
+      ? leaseTotalMiles > 0 && summary.projected_miles_at_end / leaseTotalMiles > 1.1
         ? 'over-pace'
         : 'slightly-over'
       : 'on-track';
 
   const recommendedPace =
-    summary != null && summary.daysRemaining > 0
-      ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
+    summary != null && summary.days_remaining > 0
+      ? Math.ceil(summary.miles_remaining / summary.days_remaining)
       : 0;
 
   const vehicleLabel = lease ? lease.display_name : 'Lease Detail';
@@ -179,11 +180,11 @@ export function LeaseDetailScreen(): React.ReactElement {
         testID="lease-detail-scroll"
       >
         {/* Mileage progress ring */}
-        {summary != null && (
+        {summary != null && lease != null && (
           <View style={styles.ringContainer} testID="lease-detail-ring-container">
             <MileageProgressRing
-              totalMiles={summary.totalMiles}
-              usedMiles={summary.milesUsed}
+              totalMiles={lease.total_miles_allowed}
+              usedMiles={summary.miles_driven}
             />
           </View>
         )}
@@ -198,14 +199,14 @@ export function LeaseDetailScreen(): React.ReactElement {
         >
           <StatCard
             label="Miles Remaining"
-            value={summary?.milesRemaining ?? 0}
+            value={summary?.miles_remaining ?? 0}
             unit="mi"
             testID="stat-miles-remaining"
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
             label="Days Left"
-            value={summary?.daysRemaining ?? 0}
+            value={summary?.days_remaining ?? 0}
             unit="days"
             testID="stat-days-left"
           />
