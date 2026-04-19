@@ -46,19 +46,31 @@ import type { Lease, LeaseSummary, MileageHistory, CreateLeaseInput, UpdateLease
 
 const mockLease: Lease = {
   id: 'lease-1',
-  userId: 'user-1',
-  vehicleYear: 2023,
-  vehicleMake: 'Toyota',
-  vehicleModel: 'Camry',
-  vehicleTrim: 'SE',
-  startDate: '2023-01-01',
-  endDate: '2026-01-01',
-  totalMiles: 36000,
-  startingMileage: 10,
-  currentMileage: 12000,
-  monthlyMiles: 1000,
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  user_id: 'user-1',
+  display_name: '2023 Toyota Camry',
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2023,
+  trim: 'SE',
+  color: null,
+  vin: null,
+  license_plate: null,
+  lease_start_date: '2023-01-01',
+  lease_end_date: '2026-01-01',
+  total_miles_allowed: 36000,
+  miles_per_year: 12000,
+  starting_odometer: 10,
+  current_odometer: 12000,
+  overage_cost_per_mile: '0.25',
+  monthly_payment: null,
+  dealer_name: null,
+  dealer_phone: null,
+  contract_number: null,
+  notes: null,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
+  role: 'owner',
 };
 
 const mockSummary: LeaseSummary = {
@@ -140,15 +152,17 @@ describe('getLease', () => {
 
 describe('createLease', () => {
   const input: CreateLeaseInput = {
-    vehicleYear: 2023,
-    vehicleMake: 'Toyota',
-    vehicleModel: 'Camry',
-    vehicleTrim: 'SE',
-    startDate: '2023-01-01',
-    endDate: '2026-01-01',
-    totalMiles: 36000,
-    startingMileage: 10,
-    monthlyMiles: 1000,
+    display_name: '2023 Toyota Camry',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    trim: 'SE',
+    lease_start_date: '2023-01-01',
+    lease_end_date: '2026-01-01',
+    total_miles_allowed: 36000,
+    miles_per_year: 12000,
+    starting_odometer: 10,
+    overage_cost_per_mile: 0.25,
   };
 
   it('returns the created lease on success', async () => {
@@ -160,14 +174,14 @@ describe('createLease', () => {
     expect(result).toEqual(mockLease);
   });
 
-  it('works without optional vehicleTrim', async () => {
-    const inputWithoutTrim: CreateLeaseInput = { ...input, vehicleTrim: undefined };
-    (client.post as jest.Mock).mockResolvedValue({ data: { ...mockLease, vehicleTrim: undefined } });
+  it('works without optional trim', async () => {
+    const inputWithoutTrim: CreateLeaseInput = { ...input, trim: undefined };
+    (client.post as jest.Mock).mockResolvedValue({ data: { ...mockLease, trim: null } });
 
     const result = await createLease(inputWithoutTrim);
 
     expect(client.post).toHaveBeenCalledWith('/api/leases', inputWithoutTrim);
-    expect(result.vehicleTrim).toBeUndefined();
+    expect(result.trim).toBeNull();
   });
 
   it('throws a normalized ApiError on failure', async () => {
@@ -182,8 +196,8 @@ describe('createLease', () => {
 // ─── updateLease ─────────────────────────────────────────────────────────────
 
 describe('updateLease', () => {
-  const patch: UpdateLeaseInput = { vehicleModel: 'Corolla', totalMiles: 40000 };
-  const updatedLease: Lease = { ...mockLease, vehicleModel: 'Corolla', totalMiles: 40000 };
+  const patch: UpdateLeaseInput = { model: 'Corolla', total_miles_allowed: 40000 };
+  const updatedLease: Lease = { ...mockLease, model: 'Corolla', total_miles_allowed: 40000 };
 
   it('returns the updated lease on success', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: updatedLease });

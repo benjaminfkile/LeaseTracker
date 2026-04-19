@@ -154,10 +154,7 @@ export function LeaseEndOptionsScreen(): React.ReactElement {
     newLeaseTerm,
   });
 
-  const vehicleLabel =
-    lease != null
-      ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${lease.vehicleTrim != null ? ` ${lease.vehicleTrim}` : ''}`
-      : '';
+  const vehicleLabel = lease != null ? lease.display_name : '';
 
   const cheapest = allInputsProvided ? result.cheapest : null;
 

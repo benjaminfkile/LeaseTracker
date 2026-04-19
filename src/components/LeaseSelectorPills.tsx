@@ -30,7 +30,7 @@ export function LeaseSelectorPills({
     >
       {leases.map(lease => {
         const isSelected = lease.id === selectedId;
-        const label = `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
+        const label = lease.display_name;
 
         return (
           <TouchableOpacity

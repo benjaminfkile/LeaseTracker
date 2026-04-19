@@ -79,13 +79,13 @@ export function getMileageAtDate(
  * daily rate (suitable for the Dashboard where history is not loaded).
  */
 export function computeThisYearStats(
-  lease: { startDate: string; endDate: string; monthlyMiles: number },
+  lease: { lease_start_date: string; lease_end_date: string; miles_per_year: number },
   summary: { milesUsed: number; daysRemaining: number; totalMiles: number },
   mileageHistory?: MileageHistoryEntry[],
 ): ThisYearStats {
   const today = new Date();
-  const startDate = parseLocalDate(lease.startDate);
-  const endDate = parseLocalDate(lease.endDate);
+  const startDate = parseLocalDate(lease.lease_start_date);
+  const endDate = parseLocalDate(lease.lease_end_date);
 
   const { anniversary, nextAnniversary } = getLeaseYearWindow(startDate, endDate, today);
 
@@ -103,7 +103,7 @@ export function computeThisYearStats(
   );
 
   // Annual allowance prorated to this lease-year window length
-  const totalMilesThisYear = Math.round(lease.monthlyMiles * 12 * (totalDaysThisYear / 365));
+  const totalMilesThisYear = Math.round(lease.miles_per_year * (totalDaysThisYear / 365));
 
   let milesUsedThisYear: number;
   if (mileageHistory != null && mileageHistory.length > 0) {

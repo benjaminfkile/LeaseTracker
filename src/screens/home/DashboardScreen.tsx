@@ -331,8 +331,8 @@ export function DashboardScreen(): React.ReactElement {
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
-            label="Monthly Miles"
-            value={selectedLease?.monthlyMiles ?? 0}
+            label="Yearly Miles"
+            value={selectedLease?.miles_per_year ?? 0}
             unit="mi"
             testID="stat-monthly-miles"
           />

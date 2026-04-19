@@ -9,20 +9,31 @@ export type User = {
 
 export type Lease = {
   id: string;
-  userId: string;
-  vehicleYear: number;
-  vehicleMake: string;
-  vehicleModel: string;
-  vehicleTrim?: string;
-  startDate: string;
-  endDate: string;
-  totalMiles: number;
-  startingMileage: number;
-  currentMileage: number;
-  monthlyMiles: number;
-  mpgEstimate?: number;
-  createdAt: string;
-  updatedAt: string;
+  user_id: string;
+  display_name: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  trim: string | null;
+  color: string | null;
+  vin: string | null;
+  license_plate: string | null;
+  lease_start_date: string;
+  lease_end_date: string;
+  total_miles_allowed: number;
+  miles_per_year: number;
+  starting_odometer: number;
+  current_odometer: number | null;
+  overage_cost_per_mile: string;
+  monthly_payment: string | null;
+  dealer_name: string | null;
+  dealer_phone: string | null;
+  contract_number: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  role: 'owner' | 'editor' | 'viewer';
 };
 
 export type LeaseSummary = {
@@ -114,16 +125,27 @@ export type MileageHistory = {
 };
 
 export type CreateLeaseInput = {
-  vehicleYear: number;
-  vehicleMake: string;
-  vehicleModel: string;
-  vehicleTrim?: string;
-  startDate: string;
-  endDate: string;
-  totalMiles: number;
-  startingMileage: number;
-  monthlyMiles: number;
-  mpgEstimate?: number;
+  display_name: string;
+  lease_start_date: string;
+  lease_end_date: string;
+  total_miles_allowed: number;
+  miles_per_year: number;
+  overage_cost_per_mile: number;
+  make?: string;
+  model?: string;
+  year?: number;
+  trim?: string;
+  color?: string;
+  vin?: string;
+  license_plate?: string;
+  starting_odometer?: number;
+  current_odometer?: number;
+  monthly_payment?: number;
+  dealer_name?: string;
+  dealer_phone?: string;
+  contract_number?: string;
+  notes?: string;
+  is_active?: boolean;
 };
 
 export type UpdateLeaseInput = Partial<CreateLeaseInput>;

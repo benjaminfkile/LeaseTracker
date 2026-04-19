@@ -445,26 +445,26 @@ export function EditLeaseScreen(): React.ReactElement {
   useEffect(() => {
     if (lease) {
       reset({
-        displayName: `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`,
-        vehicleYear: String(lease.vehicleYear),
-        vehicleMake: lease.vehicleMake,
-        vehicleModel: lease.vehicleModel,
-        vehicleTrim: lease.vehicleTrim ?? '',
-        vehicleColor: '',
-        vin: '',
-        licensePlate: '',
-        startDate: lease.startDate,
-        endDate: lease.endDate,
-        milesPerYear: String(lease.monthlyMiles * 12),
-        totalMiles: String(lease.totalMiles),
-        startingOdometer: String(lease.startingMileage),
-        overageCostPerMile: '',
-        monthlyPayment: '',
-        dealerName: '',
-        dealerPhone: '',
-        contractNumber: '',
-        mpgEstimate: lease.mpgEstimate != null ? String(lease.mpgEstimate) : '',
-        notes: '',
+        displayName: lease.display_name,
+        vehicleYear: lease.year != null ? String(lease.year) : '',
+        vehicleMake: lease.make ?? '',
+        vehicleModel: lease.model ?? '',
+        vehicleTrim: lease.trim ?? '',
+        vehicleColor: lease.color ?? '',
+        vin: lease.vin ?? '',
+        licensePlate: lease.license_plate ?? '',
+        startDate: lease.lease_start_date,
+        endDate: lease.lease_end_date,
+        milesPerYear: String(lease.miles_per_year),
+        totalMiles: String(lease.total_miles_allowed),
+        startingOdometer: String(lease.starting_odometer),
+        overageCostPerMile: lease.overage_cost_per_mile,
+        monthlyPayment: lease.monthly_payment ?? '',
+        dealerName: lease.dealer_name ?? '',
+        dealerPhone: lease.dealer_phone ?? '',
+        contractNumber: lease.contract_number ?? '',
+        mpgEstimate: '',
+        notes: lease.notes ?? '',
       });
     }
   }, [lease, reset]);
@@ -530,7 +530,7 @@ export function EditLeaseScreen(): React.ReactElement {
     );
   };
 
-  const isOwner = Boolean(lease && currentUser && lease.userId === currentUser.sub);
+  const isOwner = Boolean(lease && currentUser && lease.user_id === currentUser.sub);
   const viewerMembers = members.filter(m => m.role === 'viewer');
   const showTransferOwnership = isOwner && viewerMembers.length > 0;
 
@@ -587,19 +587,27 @@ export function EditLeaseScreen(): React.ReactElement {
   };
 
   const onSubmit = (data: EditLeaseFormData) => {
-    const milesPerYearNum = parseInt(data.milesPerYear, 10);
-    const mpg = parseFloat(data.mpgEstimate);
+    const monthlyPaymentNum = parseFloat(data.monthlyPayment);
     submitUpdate({
-      vehicleYear: parseInt(data.vehicleYear, 10),
-      vehicleMake: data.vehicleMake,
-      vehicleModel: data.vehicleModel,
-      vehicleTrim: data.vehicleTrim || undefined,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      totalMiles: parseInt(data.totalMiles, 10),
-      startingMileage: parseInt(data.startingOdometer, 10),
-      monthlyMiles: Math.round(milesPerYearNum / 12),
-      mpgEstimate: !isNaN(mpg) && mpg > 0 ? mpg : undefined,
+      display_name: data.displayName,
+      year: parseInt(data.vehicleYear, 10),
+      make: data.vehicleMake,
+      model: data.vehicleModel,
+      trim: data.vehicleTrim || undefined,
+      color: data.vehicleColor || undefined,
+      vin: data.vin || undefined,
+      license_plate: data.licensePlate || undefined,
+      lease_start_date: data.startDate,
+      lease_end_date: data.endDate,
+      total_miles_allowed: parseInt(data.totalMiles, 10),
+      miles_per_year: parseInt(data.milesPerYear, 10),
+      starting_odometer: parseInt(data.startingOdometer, 10),
+      overage_cost_per_mile: parseFloat(data.overageCostPerMile),
+      monthly_payment: !isNaN(monthlyPaymentNum) && monthlyPaymentNum > 0 ? monthlyPaymentNum : undefined,
+      dealer_name: data.dealerName || undefined,
+      dealer_phone: data.dealerPhone || undefined,
+      contract_number: data.contractNumber || undefined,
+      notes: data.notes || undefined,
     });
   };
 
