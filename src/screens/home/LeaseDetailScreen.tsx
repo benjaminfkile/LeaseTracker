@@ -132,9 +132,7 @@ export function LeaseDetailScreen(): React.ReactElement {
       ? Math.ceil(summary.milesRemaining / summary.daysRemaining)
       : 0;
 
-  const vehicleLabel = lease
-    ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${lease.vehicleTrim ? ` ${lease.vehicleTrim}` : ''}`
-    : 'Lease Detail';
+  const vehicleLabel = lease ? lease.display_name : 'Lease Detail';
 
   if (leaseLoading || summaryLoading) {
     return (
@@ -213,8 +211,8 @@ export function LeaseDetailScreen(): React.ReactElement {
           />
           <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
           <StatCard
-            label="Monthly Miles"
-            value={lease?.monthlyMiles ?? 0}
+            label="Yearly Miles"
+            value={lease?.miles_per_year ?? 0}
             unit="mi"
             testID="stat-monthly-miles"
           />
@@ -432,22 +430,22 @@ export function LeaseDetailScreen(): React.ReactElement {
               />
               <LeaseInfoRow
                 label="Start Date"
-                value={lease.startDate}
+                value={lease.lease_start_date}
                 testID="lease-info-start-date"
               />
               <LeaseInfoRow
                 label="End Date"
-                value={lease.endDate}
+                value={lease.lease_end_date}
                 testID="lease-info-end-date"
               />
               <LeaseInfoRow
                 label="Total Miles"
-                value={`${lease.totalMiles.toLocaleString()} mi`}
+                value={`${lease.total_miles_allowed.toLocaleString()} mi`}
                 testID="lease-info-total-miles"
               />
               <LeaseInfoRow
                 label="Starting Odometer"
-                value={`${lease.startingMileage.toLocaleString()} mi`}
+                value={`${lease.starting_odometer.toLocaleString()} mi`}
                 testID="lease-info-starting-odometer"
               />
             </View>

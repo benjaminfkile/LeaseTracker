@@ -283,7 +283,7 @@ export function SettingsScreen(): React.ReactElement {
               testID="settings-default-lease"
             >
               {leases.map(lease => {
-                const label = `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}`;
+                const label = lease.display_name;
                 const isSelected = activeLeaseId === lease.id;
                 return (
                   <TouchableOpacity

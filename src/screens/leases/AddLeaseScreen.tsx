@@ -502,22 +502,27 @@ export function AddLeaseScreen(): React.ReactElement {
   };
 
   const onSubmit = (data: AddLeaseFormData) => {
-    const milesPerYearNum = parseInt(data.milesPerYear, 10);
-    // Fields not yet in CreateLeaseInput (displayName, vehicleColor, vin, licensePlate,
-    // overageCostPerMile, monthlyPayment, dealerName, dealerPhone, contractNumber,
-    // notes) are collected for future API support and shown in the review.
-    const mpg = parseFloat(data.mpgEstimate);
+    const monthlyPaymentNum = parseFloat(data.monthlyPayment);
     submitLease({
-      vehicleYear: parseInt(data.vehicleYear, 10),
-      vehicleMake: data.vehicleMake,
-      vehicleModel: data.vehicleModel,
-      vehicleTrim: data.vehicleTrim || undefined,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      totalMiles: parseInt(data.totalMiles, 10),
-      startingMileage: parseInt(data.startingOdometer, 10),
-      monthlyMiles: Math.round(milesPerYearNum / 12),
-      mpgEstimate: !isNaN(mpg) && mpg > 0 ? mpg : undefined,
+      display_name: data.displayName,
+      year: parseInt(data.vehicleYear, 10),
+      make: data.vehicleMake,
+      model: data.vehicleModel,
+      trim: data.vehicleTrim || undefined,
+      color: data.vehicleColor || undefined,
+      vin: data.vin || undefined,
+      license_plate: data.licensePlate || undefined,
+      lease_start_date: data.startDate,
+      lease_end_date: data.endDate,
+      total_miles_allowed: parseInt(data.totalMiles, 10),
+      miles_per_year: parseInt(data.milesPerYear, 10),
+      starting_odometer: parseInt(data.startingOdometer, 10),
+      overage_cost_per_mile: parseFloat(data.overageCostPerMile),
+      monthly_payment: !isNaN(monthlyPaymentNum) && monthlyPaymentNum > 0 ? monthlyPaymentNum : undefined,
+      dealer_name: data.dealerName || undefined,
+      dealer_phone: data.dealerPhone || undefined,
+      contract_number: data.contractNumber || undefined,
+      notes: data.notes || undefined,
     });
   };
 

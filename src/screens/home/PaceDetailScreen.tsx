@@ -33,8 +33,8 @@ export function computeDaysForwardBehind(
   lease: Lease,
   summary: LeaseSummary,
 ): { days: number; isAhead: boolean } {
-  const start = new Date(lease.startDate).getTime();
-  const end = new Date(lease.endDate).getTime();
+  const start = new Date(lease.lease_start_date).getTime();
+  const end = new Date(lease.lease_end_date).getTime();
   const totalDays = Math.max(1, (end - start) / MS_PER_DAY);
   const daysElapsed = Math.max(0, totalDays - summary.daysRemaining);
   const expectedMiles = (daysElapsed / totalDays) * summary.totalMiles;
@@ -274,7 +274,7 @@ export function PaceDetailScreen(): React.ReactElement {
             <MonthlyMileageChart
               entries={entries}
               mode={mode}
-              monthlyAllowance={lease?.monthlyMiles}
+              monthlyAllowance={lease != null ? Math.round(lease.miles_per_year / 12) : undefined}
               testID="monthly-mileage-chart"
             />
           </View>

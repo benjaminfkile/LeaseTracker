@@ -131,9 +131,7 @@ export function BuybackAnalysisScreen(): React.ReactElement {
     overageCostPerMile: DEFAULT_OVERAGE_COST_PER_MILE,
   });
 
-  const vehicleLabel = lease != null
-    ? `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${lease.vehicleTrim != null ? ` ${lease.vehicleTrim}` : ''}`
-    : '';
+  const vehicleLabel = lease != null ? lease.display_name : '';
 
   return (
     <PremiumGate isPremium={isPremium} onUpgrade={handleUpgrade}>

@@ -40,8 +40,7 @@ const STATUS_CONFIG: Record<
 };
 
 function formatVehicleLabel(lease: Lease): string {
-  const trim = lease.vehicleTrim != null ? ` ${lease.vehicleTrim}` : '';
-  return `${lease.vehicleYear} ${lease.vehicleMake} ${lease.vehicleModel}${trim}`;
+  return lease.display_name;
 }
 
 export function LeaseComparisonScreen(): React.ReactElement {
@@ -207,7 +206,7 @@ export function LeaseComparisonScreen(): React.ReactElement {
                     style={[styles.tableHeaderText, { color: theme.colors.textSecondary }]}
                     numberOfLines={1}
                   >
-                    {`${lease.vehicleYear} ${lease.vehicleModel}`}
+                    {lease.display_name}
                   </Text>
                 </View>
               ))}

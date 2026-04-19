@@ -35,43 +35,70 @@ describe('API types', () => {
     it('accepts a valid Lease object with all required fields', () => {
       const lease: Lease = {
         id: 'lease-1',
-        userId: 'user-1',
-        vehicleYear: 2023,
-        vehicleMake: 'Toyota',
-        vehicleModel: 'Camry',
-        startDate: '2023-01-01',
-        endDate: '2026-01-01',
-        totalMiles: 36000,
-        startingMileage: 5,
-        currentMileage: 12000,
-        monthlyMiles: 1000,
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
+        user_id: 'user-1',
+        display_name: '2023 Toyota Camry',
+        make: 'Toyota',
+        model: 'Camry',
+        year: 2023,
+        trim: null,
+        color: null,
+        vin: null,
+        license_plate: null,
+        lease_start_date: '2023-01-01',
+        lease_end_date: '2026-01-01',
+        total_miles_allowed: 36000,
+        miles_per_year: 12000,
+        starting_odometer: 5,
+        current_odometer: 12000,
+        overage_cost_per_mile: '0.25',
+        monthly_payment: null,
+        dealer_name: null,
+        dealer_phone: null,
+        contract_number: null,
+        notes: null,
+        is_active: true,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        role: 'owner',
       };
       expect(lease.id).toBe('lease-1');
-      expect(lease.vehicleYear).toBe(2023);
-      expect(lease.totalMiles).toBe(36000);
-      expect(lease.vehicleTrim).toBeUndefined();
+      expect(lease.year).toBe(2023);
+      expect(lease.total_miles_allowed).toBe(36000);
+      expect(lease.trim).toBeNull();
     });
 
-    it('accepts a Lease with optional vehicleTrim', () => {
+    it('accepts a Lease with non-null optional fields and editor role', () => {
       const lease: Lease = {
         id: 'lease-2',
-        userId: 'user-1',
-        vehicleYear: 2024,
-        vehicleMake: 'Honda',
-        vehicleModel: 'Accord',
-        vehicleTrim: 'Sport',
-        startDate: '2024-01-01',
-        endDate: '2027-01-01',
-        totalMiles: 45000,
-        startingMileage: 10,
-        currentMileage: 5000,
-        monthlyMiles: 1250,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-06-01T00:00:00Z',
+        user_id: 'user-1',
+        display_name: '2024 Honda Accord Sport',
+        make: 'Honda',
+        model: 'Accord',
+        year: 2024,
+        trim: 'Sport',
+        color: 'Blue',
+        vin: '1HGCV1F30LA000000',
+        license_plate: 'ABC-123',
+        lease_start_date: '2024-01-01',
+        lease_end_date: '2027-01-01',
+        total_miles_allowed: 45000,
+        miles_per_year: 15000,
+        starting_odometer: 10,
+        current_odometer: 5000,
+        overage_cost_per_mile: '0.20',
+        monthly_payment: '349.99',
+        dealer_name: 'Honda of Anywhere',
+        dealer_phone: '555-1234',
+        contract_number: 'CN-001',
+        notes: 'Lease purchased online',
+        is_active: true,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-06-01T00:00:00Z',
+        role: 'editor',
       };
-      expect(lease.vehicleTrim).toBe('Sport');
+      expect(lease.trim).toBe('Sport');
+      expect(lease.role).toBe('editor');
+      expect(lease.monthly_payment).toBe('349.99');
     });
   });
 
