@@ -37,19 +37,17 @@ export function AccountScreen(): React.ReactElement {
 
   const email = profile?.email ?? user?.email ?? '';
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (profile) {
-      setFirstName(profile.firstName);
-      setLastName(profile.lastName);
+      setDisplayName(profile.display_name ?? '');
     }
   }, [profile]);
 
   const updateMutation = useMutation({
-    mutationFn: (data: { firstName: string; lastName: string }) => updateMe(data),
+    mutationFn: (data: { display_name: string }) => updateMe(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['me'] });
       setIsDirty(false);
@@ -60,24 +58,18 @@ export function AccountScreen(): React.ReactElement {
     },
   });
 
-  const handleFirstNameChange = (value: string) => {
-    setFirstName(value);
-    setIsDirty(true);
-  };
-
-  const handleLastNameChange = (value: string) => {
-    setLastName(value);
+  const handleDisplayNameChange = (value: string) => {
+    setDisplayName(value);
     setIsDirty(true);
   };
 
   const handleSave = () => {
-    const trimmedFirst = firstName.trim();
-    const trimmedLast = lastName.trim();
-    if (!trimmedFirst) {
-      Alert.alert('Validation', 'First name cannot be empty.');
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      Alert.alert('Validation', 'Display name cannot be empty.');
       return;
     }
-    updateMutation.mutate({ firstName: trimmedFirst, lastName: trimmedLast });
+    updateMutation.mutate({ display_name: trimmed });
   };
 
   const handleChangePassword = () => {
@@ -158,25 +150,14 @@ export function AccountScreen(): React.ReactElement {
               >
                 <View style={styles.cardContent}>
                   <Input
-                    label="First Name"
-                    placeholder="First name"
-                    value={firstName}
-                    onChangeText={handleFirstNameChange}
+                    label="Display Name"
+                    placeholder="Display name"
+                    value={displayName}
+                    onChangeText={handleDisplayNameChange}
                     autoCapitalize="words"
                     autoCorrect={false}
-                    testID="account-first-name-input"
+                    testID="account-display-name-input"
                   />
-                  <View style={styles.fieldSpacing}>
-                    <Input
-                      label="Last Name"
-                      placeholder="Last name"
-                      value={lastName}
-                      onChangeText={handleLastNameChange}
-                      autoCapitalize="words"
-                      autoCorrect={false}
-                      testID="account-last-name-input"
-                    />
-                  </View>
                   {isDirty && (
                     <View style={styles.saveButton}>
                       <Button
@@ -252,9 +233,6 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 16,
-  },
-  fieldSpacing: {
-    marginTop: 12,
   },
   flex: {
     flex: 1,

@@ -74,9 +74,7 @@ export function SettingsScreen(): React.ReactElement {
     },
   });
 
-  const displayName = profile
-    ? `${profile.firstName} ${profile.lastName}`.trim()
-    : user?.name ?? '';
+  const displayName = profile?.display_name ?? user?.name ?? '';
   const email = profile?.email ?? user?.email ?? '';
   const initial = displayName.charAt(0).toUpperCase() || email.charAt(0).toUpperCase() || '?';
 

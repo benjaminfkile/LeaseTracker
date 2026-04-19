@@ -17,17 +17,32 @@ describe('API types', () => {
       const user: User = {
         id: 'user-1',
         email: 'test@example.com',
-        firstName: 'Jane',
-        lastName: 'Doe',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-06-01T00:00:00Z',
+        display_name: 'Jane Doe',
+        subscription_tier: 'free',
+        subscription_expires_at: null,
       };
       expect(user.id).toBe('user-1');
       expect(user.email).toBe('test@example.com');
-      expect(user.firstName).toBe('Jane');
-      expect(user.lastName).toBe('Doe');
-      expect(typeof user.createdAt).toBe('string');
-      expect(typeof user.updatedAt).toBe('string');
+      expect(user.display_name).toBe('Jane Doe');
+      expect(user.subscription_tier).toBe('free');
+      expect(user.subscription_expires_at).toBeNull();
+      // @ts-expect-error firstName no longer exists on User
+      expect(user.firstName).toBeUndefined();
+      // @ts-expect-error lastName no longer exists on User
+      expect(user.lastName).toBeUndefined();
+    });
+
+    it('accepts a User with a premium subscription_tier and expiry', () => {
+      const user: User = {
+        id: 'user-2',
+        email: 'pro@example.com',
+        display_name: null,
+        subscription_tier: 'premium',
+        subscription_expires_at: '2026-12-31T23:59:59Z',
+      };
+      expect(user.display_name).toBeNull();
+      expect(user.subscription_tier).toBe('premium');
+      expect(user.subscription_expires_at).toBe('2026-12-31T23:59:59Z');
     });
   });
 

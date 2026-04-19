@@ -1,10 +1,9 @@
 export type User = {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  createdAt: string;
-  updatedAt: string;
+  display_name: string | null;
+  subscription_tier: string;
+  subscription_expires_at: string | null;
 };
 
 export type Lease = {
@@ -189,4 +188,6 @@ export type UpdateAlertConfigInput = {
   is_enabled?: boolean;
 };
 
-export type UpdateUserInput = Partial<Pick<User, 'firstName' | 'lastName'>>;
+export type UpdateUserInput = {
+  display_name?: string;
+};
