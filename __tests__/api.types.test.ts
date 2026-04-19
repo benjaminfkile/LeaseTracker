@@ -288,39 +288,39 @@ describe('API types', () => {
   describe('SubscriptionStatus', () => {
     it('accepts a premium iOS subscription', () => {
       const status: SubscriptionStatus = {
-        isPremium: true,
-        tier: 'premium',
-        expiresAt: '2025-12-31T23:59:59Z',
+        is_active: true,
+        expires_at: '2025-12-31T23:59:59Z',
         platform: 'ios',
-        productId: 'com.benkile.leasetracker.premium.monthly',
+        product_id: 'com.benkile.leasetracker.premium.monthly',
       };
-      expect(status.isPremium).toBe(true);
-      expect(status.tier).toBe('premium');
+      expect(status.is_active).toBe(true);
       expect(status.platform).toBe('ios');
+      expect(status.product_id).toBe('com.benkile.leasetracker.premium.monthly');
+      // @ts-expect-error isPremium no longer exists on SubscriptionStatus
+      expect(status.isPremium).toBeUndefined();
+      // @ts-expect-error tier no longer exists on SubscriptionStatus
+      expect(status.tier).toBeUndefined();
     });
 
-    it('accepts a free tier with null nullable fields', () => {
+    it('accepts a free status with null nullable fields', () => {
       const status: SubscriptionStatus = {
-        isPremium: false,
-        tier: 'free',
-        expiresAt: null,
+        is_active: false,
+        expires_at: null,
         platform: null,
-        productId: null,
+        product_id: null,
       };
-      expect(status.isPremium).toBe(false);
-      expect(status.tier).toBe('free');
-      expect(status.expiresAt).toBeNull();
+      expect(status.is_active).toBe(false);
+      expect(status.expires_at).toBeNull();
       expect(status.platform).toBeNull();
-      expect(status.productId).toBeNull();
+      expect(status.product_id).toBeNull();
     });
 
     it('accepts an android subscription', () => {
       const status: SubscriptionStatus = {
-        isPremium: true,
-        tier: 'premium',
-        expiresAt: '2025-06-30T23:59:59Z',
+        is_active: true,
+        expires_at: '2025-06-30T23:59:59Z',
         platform: 'android',
-        productId: 'com.benkile.leasetracker.premium.annual',
+        product_id: 'com.benkile.leasetracker.premium.annual',
       };
       expect(status.platform).toBe('android');
     });
