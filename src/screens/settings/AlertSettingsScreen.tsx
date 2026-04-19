@@ -14,30 +14,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import { getAlertConfig, updateAlertConfig } from '../../api/alertsApi';
+import { createAlert, getAlerts, updateAlert } from '../../api/alertsApi';
 import { Button } from '../../components/Button';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { LeaseSelectorPills } from '../../components/LeaseSelectorPills';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useLeasesStore } from '../../stores/leasesStore';
 import { useTheme } from '../../theme';
-import type { AlertConfig, UpdateAlertConfigInput } from '../../types/api';
+import type { AlertConfig } from '../../types/api';
 import type { SettingsStackNavigationProp } from '../../navigation/types';
 
 // ---------- Constants ----------
 
-const DEFAULT_APPROACHING_PERCENT = 80;
-const DEFAULT_LEASE_END_DAYS = 30;
-const DEFAULT_BUYBACK_THRESHOLD = 50;
+const DEFAULT_MILES_THRESHOLD_PERCENT = 80;
+const DEFAULT_DAYS_REMAINING = 30;
 const PERCENT_STEP = 5;
 const DAYS_STEP = 1;
-const DOLLARS_STEP = 10;
 const PERCENT_MIN = 1;
 const PERCENT_MAX = 100;
 const DAYS_MIN = 1;
 const DAYS_MAX = 365;
-const DOLLARS_MIN = 10;
-const DOLLARS_MAX = 500;
+
+type AlertType = 'miles_threshold' | 'over_pace' | 'days_remaining';
 
 // ---------- Helpers ----------
 
@@ -45,47 +43,53 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function configToFormState(config: AlertConfig): FormState {
-  return {
-    approachingLimitEnabled: config.approachingLimitEnabled,
-    approachingLimitPercent: config.approachingLimitPercent,
-    overPaceEnabled: config.overPaceEnabled,
-    leaseEndEnabled: config.leaseEndEnabled,
-    leaseEndDays: config.leaseEndDays,
-    savedTripEnabled: config.savedTripEnabled,
-    mileageBuybackEnabled: config.mileageBuybackEnabled,
-    mileageBuybackThresholdDollars: config.mileageBuybackThresholdDollars,
-    weeklySummaryEnabled: config.weeklySummaryEnabled,
-  };
-}
+type AlertFormEntry = {
+  id: string | null;
+  is_enabled: boolean;
+  threshold_value: number;
+};
+
+type FormState = {
+  miles_threshold: AlertFormEntry;
+  over_pace: AlertFormEntry;
+  days_remaining: AlertFormEntry;
+};
 
 function defaultFormState(): FormState {
   return {
-    approachingLimitEnabled: false,
-    approachingLimitPercent: DEFAULT_APPROACHING_PERCENT,
-    overPaceEnabled: false,
-    leaseEndEnabled: false,
-    leaseEndDays: DEFAULT_LEASE_END_DAYS,
-    savedTripEnabled: false,
-    mileageBuybackEnabled: false,
-    mileageBuybackThresholdDollars: DEFAULT_BUYBACK_THRESHOLD,
-    weeklySummaryEnabled: false,
+    miles_threshold: {
+      id: null,
+      is_enabled: false,
+      threshold_value: DEFAULT_MILES_THRESHOLD_PERCENT,
+    },
+    over_pace: {
+      id: null,
+      is_enabled: false,
+      threshold_value: 0,
+    },
+    days_remaining: {
+      id: null,
+      is_enabled: false,
+      threshold_value: DEFAULT_DAYS_REMAINING,
+    },
   };
 }
 
-// ---------- Types ----------
-
-type FormState = {
-  approachingLimitEnabled: boolean;
-  approachingLimitPercent: number;
-  overPaceEnabled: boolean;
-  leaseEndEnabled: boolean;
-  leaseEndDays: number;
-  savedTripEnabled: boolean;
-  mileageBuybackEnabled: boolean;
-  mileageBuybackThresholdDollars: number;
-  weeklySummaryEnabled: boolean;
-};
+function alertsToFormState(alerts: AlertConfig[]): FormState {
+  const state = defaultFormState();
+  for (const alert of alerts) {
+    const entry = state[alert.alert_type];
+    if (entry == null) {
+      continue;
+    }
+    entry.id = alert.id;
+    entry.is_enabled = alert.is_enabled;
+    if (alert.threshold_value != null) {
+      entry.threshold_value = alert.threshold_value;
+    }
+  }
+  return state;
+}
 
 // ---------- Stepper ----------
 
@@ -247,6 +251,26 @@ async function sendTestNotification(): Promise<void> {
   });
 }
 
+async function persistAlert(
+  leaseId: string,
+  alertType: AlertType,
+  entry: AlertFormEntry,
+  includeThreshold: boolean,
+): Promise<void> {
+  if (entry.id != null) {
+    await updateAlert(leaseId, entry.id, {
+      is_enabled: entry.is_enabled,
+      threshold_value: includeThreshold ? entry.threshold_value : null,
+    });
+    return;
+  }
+  await createAlert(leaseId, {
+    alert_type: alertType,
+    is_enabled: entry.is_enabled,
+    ...(includeThreshold ? { threshold_value: entry.threshold_value } : {}),
+  });
+}
+
 export function AlertSettingsScreen(): React.ReactElement {
   const theme = useTheme();
   const navigation = useNavigation<SettingsStackNavigationProp>();
@@ -261,25 +285,31 @@ export function AlertSettingsScreen(): React.ReactElement {
   const [isSendingTest, setIsSendingTest] = useState(false);
 
   const {
-    data: alertConfig,
+    data: alerts,
     isLoading,
     error,
   } = useQuery({
     queryKey: ['alert-config', selectedLeaseId],
-    queryFn: () => getAlertConfig(selectedLeaseId),
+    queryFn: () => getAlerts(selectedLeaseId),
     enabled: selectedLeaseId !== '',
   });
 
   useEffect(() => {
-    if (alertConfig != null) {
-      setForm(configToFormState(alertConfig));
+    if (alerts != null) {
+      setForm(alertsToFormState(alerts));
     } else {
       setForm(defaultFormState());
     }
-  }, [alertConfig]);
+  }, [alerts]);
 
   const { mutate: saveConfig, isPending: isSaving } = useMutation({
-    mutationFn: (data: UpdateAlertConfigInput) => updateAlertConfig(selectedLeaseId, data),
+    mutationFn: async (state: FormState) => {
+      await Promise.all([
+        persistAlert(selectedLeaseId, 'miles_threshold', state.miles_threshold, true),
+        persistAlert(selectedLeaseId, 'over_pace', state.over_pace, false),
+        persistAlert(selectedLeaseId, 'days_remaining', state.days_remaining, true),
+      ]);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['alert-config', selectedLeaseId] });
       Alert.alert('Saved', 'Alert settings have been saved.');
@@ -290,17 +320,7 @@ export function AlertSettingsScreen(): React.ReactElement {
   });
 
   const handleSave = () => {
-    saveConfig({
-      approachingLimitEnabled: form.approachingLimitEnabled,
-      approachingLimitPercent: form.approachingLimitPercent,
-      overPaceEnabled: form.overPaceEnabled,
-      leaseEndEnabled: form.leaseEndEnabled,
-      leaseEndDays: form.leaseEndDays,
-      savedTripEnabled: form.savedTripEnabled,
-      mileageBuybackEnabled: form.mileageBuybackEnabled,
-      mileageBuybackThresholdDollars: form.mileageBuybackThresholdDollars,
-      weeklySummaryEnabled: form.weeklySummaryEnabled,
-    });
+    saveConfig(form);
   };
 
   const handleTestNotification = () => {
@@ -377,61 +397,70 @@ export function AlertSettingsScreen(): React.ReactElement {
                   {'ALERT TYPES'}
                 </Text>
 
-                {/* Approaching mileage limit */}
+                {/* Approaching mileage limit (miles_threshold) */}
                 <View
                   style={[
                     styles.card,
                     { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
                   ]}
-                  testID="approaching-limit-card"
+                  testID="miles-threshold-card"
                 >
                   <ToggleRow
                     label="Approaching mileage limit"
-                    value={form.approachingLimitEnabled}
+                    value={form.miles_threshold.is_enabled}
                     onValueChange={v =>
-                      setForm(prev => ({ ...prev, approachingLimitEnabled: v }))
+                      setForm(prev => ({
+                        ...prev,
+                        miles_threshold: { ...prev.miles_threshold, is_enabled: v },
+                      }))
                     }
-                    testID="approaching-limit-toggle"
+                    testID="miles-threshold-toggle"
                   />
-                  {form.approachingLimitEnabled && (
-                    <View testID="approaching-limit-stepper-container">
+                  {form.miles_threshold.is_enabled && (
+                    <View testID="miles-threshold-stepper-container">
                       <Text
                         style={[styles.stepperLabel, { color: theme.colors.textSecondary }]}
                       >
                         {"Notify when I've used this % of my mileage allowance:"}
                       </Text>
                       <Stepper
-                        value={form.approachingLimitPercent}
+                        value={form.miles_threshold.threshold_value}
                         onDecrement={() =>
                           setForm(prev => ({
                             ...prev,
-                            approachingLimitPercent: clamp(
-                              prev.approachingLimitPercent - PERCENT_STEP,
-                              PERCENT_MIN,
-                              PERCENT_MAX,
-                            ),
+                            miles_threshold: {
+                              ...prev.miles_threshold,
+                              threshold_value: clamp(
+                                prev.miles_threshold.threshold_value - PERCENT_STEP,
+                                PERCENT_MIN,
+                                PERCENT_MAX,
+                              ),
+                            },
                           }))
                         }
                         onIncrement={() =>
                           setForm(prev => ({
                             ...prev,
-                            approachingLimitPercent: clamp(
-                              prev.approachingLimitPercent + PERCENT_STEP,
-                              PERCENT_MIN,
-                              PERCENT_MAX,
-                            ),
+                            miles_threshold: {
+                              ...prev.miles_threshold,
+                              threshold_value: clamp(
+                                prev.miles_threshold.threshold_value + PERCENT_STEP,
+                                PERCENT_MIN,
+                                PERCENT_MAX,
+                              ),
+                            },
                           }))
                         }
-                        minReached={form.approachingLimitPercent <= PERCENT_MIN}
-                        maxReached={form.approachingLimitPercent >= PERCENT_MAX}
+                        minReached={form.miles_threshold.threshold_value <= PERCENT_MIN}
+                        maxReached={form.miles_threshold.threshold_value >= PERCENT_MAX}
                         suffix="%"
-                        testID="approaching-limit-percent-stepper"
+                        testID="miles-threshold-stepper"
                       />
                     </View>
                   )}
                 </View>
 
-                {/* Over pace this month */}
+                {/* Over pace this month (over_pace) */}
                 <View
                   style={[
                     styles.card,
@@ -441,169 +470,78 @@ export function AlertSettingsScreen(): React.ReactElement {
                 >
                   <ToggleRow
                     label="Over pace this month"
-                    value={form.overPaceEnabled}
-                    onValueChange={v => setForm(prev => ({ ...prev, overPaceEnabled: v }))}
+                    value={form.over_pace.is_enabled}
+                    onValueChange={v =>
+                      setForm(prev => ({
+                        ...prev,
+                        over_pace: { ...prev.over_pace, is_enabled: v },
+                      }))
+                    }
                     testID="over-pace-toggle"
                   />
                 </View>
 
-                {/* Lease ends soon */}
+                {/* Lease ends soon (days_remaining) */}
                 <View
                   style={[
                     styles.card,
                     { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
                   ]}
-                  testID="lease-end-card"
+                  testID="days-remaining-card"
                 >
                   <ToggleRow
                     label="Lease ends soon"
-                    value={form.leaseEndEnabled}
-                    onValueChange={v => setForm(prev => ({ ...prev, leaseEndEnabled: v }))}
-                    testID="lease-end-toggle"
+                    value={form.days_remaining.is_enabled}
+                    onValueChange={v =>
+                      setForm(prev => ({
+                        ...prev,
+                        days_remaining: { ...prev.days_remaining, is_enabled: v },
+                      }))
+                    }
+                    testID="days-remaining-toggle"
                   />
-                  {form.leaseEndEnabled && (
-                    <View testID="lease-end-stepper-container">
+                  {form.days_remaining.is_enabled && (
+                    <View testID="days-remaining-stepper-container">
                       <Text
                         style={[styles.stepperLabel, { color: theme.colors.textSecondary }]}
                       >
                         {'Notify me this many days before my lease ends:'}
                       </Text>
                       <Stepper
-                        value={form.leaseEndDays}
+                        value={form.days_remaining.threshold_value}
                         onDecrement={() =>
                           setForm(prev => ({
                             ...prev,
-                            leaseEndDays: clamp(
-                              prev.leaseEndDays - DAYS_STEP,
-                              DAYS_MIN,
-                              DAYS_MAX,
-                            ),
+                            days_remaining: {
+                              ...prev.days_remaining,
+                              threshold_value: clamp(
+                                prev.days_remaining.threshold_value - DAYS_STEP,
+                                DAYS_MIN,
+                                DAYS_MAX,
+                              ),
+                            },
                           }))
                         }
                         onIncrement={() =>
                           setForm(prev => ({
                             ...prev,
-                            leaseEndDays: clamp(
-                              prev.leaseEndDays + DAYS_STEP,
-                              DAYS_MIN,
-                              DAYS_MAX,
-                            ),
+                            days_remaining: {
+                              ...prev.days_remaining,
+                              threshold_value: clamp(
+                                prev.days_remaining.threshold_value + DAYS_STEP,
+                                DAYS_MIN,
+                                DAYS_MAX,
+                              ),
+                            },
                           }))
                         }
-                        minReached={form.leaseEndDays <= DAYS_MIN}
-                        maxReached={form.leaseEndDays >= DAYS_MAX}
+                        minReached={form.days_remaining.threshold_value <= DAYS_MIN}
+                        maxReached={form.days_remaining.threshold_value >= DAYS_MAX}
                         suffix=" days"
-                        testID="lease-end-days-stepper"
+                        testID="days-remaining-stepper"
                       />
                     </View>
                   )}
-                </View>
-
-                {/* Saved trip coming up */}
-                <View
-                  style={[
-                    styles.card,
-                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-                  ]}
-                  testID="saved-trip-card"
-                >
-                  <ToggleRow
-                    label="Saved trip coming up"
-                    value={form.savedTripEnabled}
-                    onValueChange={v => setForm(prev => ({ ...prev, savedTripEnabled: v }))}
-                    testID="saved-trip-toggle"
-                  />
-                  <Text
-                    style={[styles.cardNote, { color: theme.colors.textSecondary }]}
-                    testID="saved-trip-note"
-                  >
-                    {'Notifies you 3 days before a saved trip date.'}
-                  </Text>
-                </View>
-
-                {/* Mileage buy-back alert */}
-                <View
-                  style={[
-                    styles.card,
-                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-                  ]}
-                  testID="mileage-buyback-card"
-                >
-                  <ToggleRow
-                    label="Mileage buy-back alert"
-                    value={form.mileageBuybackEnabled}
-                    onValueChange={v =>
-                      setForm(prev => ({ ...prev, mileageBuybackEnabled: v }))
-                    }
-                    testID="mileage-buyback-toggle"
-                  />
-                  <Text
-                    style={[styles.cardNote, { color: theme.colors.textSecondary }]}
-                    testID="mileage-buyback-note"
-                  >
-                    {'Alerts you when projected overage cost exceeds the threshold so you can consider buying miles early.'}
-                  </Text>
-                  {form.mileageBuybackEnabled && (
-                    <View testID="mileage-buyback-stepper-container">
-                      <Text
-                        style={[styles.stepperLabel, { color: theme.colors.textSecondary }]}
-                      >
-                        {'Notify when projected overage cost exceeds:'}
-                      </Text>
-                      <Stepper
-                        value={form.mileageBuybackThresholdDollars}
-                        onDecrement={() =>
-                          setForm(prev => ({
-                            ...prev,
-                            mileageBuybackThresholdDollars: clamp(
-                              prev.mileageBuybackThresholdDollars - DOLLARS_STEP,
-                              DOLLARS_MIN,
-                              DOLLARS_MAX,
-                            ),
-                          }))
-                        }
-                        onIncrement={() =>
-                          setForm(prev => ({
-                            ...prev,
-                            mileageBuybackThresholdDollars: clamp(
-                              prev.mileageBuybackThresholdDollars + DOLLARS_STEP,
-                              DOLLARS_MIN,
-                              DOLLARS_MAX,
-                            ),
-                          }))
-                        }
-                        minReached={form.mileageBuybackThresholdDollars <= DOLLARS_MIN}
-                        maxReached={form.mileageBuybackThresholdDollars >= DOLLARS_MAX}
-                        prefix="$"
-                        suffix=""
-                        testID="mileage-buyback-threshold-stepper"
-                      />
-                    </View>
-                  )}
-                </View>
-
-                {/* Weekly mileage summary */}
-                <View
-                  style={[
-                    styles.card,
-                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-                  ]}
-                  testID="weekly-summary-card"
-                >
-                  <ToggleRow
-                    label={'"How am I doing?" weekly summary'}
-                    value={form.weeklySummaryEnabled}
-                    onValueChange={v =>
-                      setForm(prev => ({ ...prev, weeklySummaryEnabled: v }))
-                    }
-                    testID="weekly-summary-toggle"
-                  />
-                  <Text
-                    style={[styles.cardNote, { color: theme.colors.textSecondary }]}
-                    testID="weekly-summary-note"
-                  >
-                    {'Every Monday morning: a push notification with your previous week\u2019s mileage and pace status.'}
-                  </Text>
                 </View>
 
                 {/* Test notification (dev only) */}
@@ -720,4 +658,3 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 });
-

@@ -33,90 +33,111 @@ jest.mock('../src/api/client', () => {
 });
 
 import client, { ApiError, normalizeError } from '../src/api/client';
-import { getAlertConfig, updateAlertConfig } from '../src/api/alertsApi';
-import type { AlertConfig, UpdateAlertConfigInput } from '../src/types/api';
+import { getAlerts, createAlert, updateAlert } from '../src/api/alertsApi';
+import type {
+  AlertConfig,
+  CreateAlertConfigInput,
+  UpdateAlertConfigInput,
+} from '../src/types/api';
 
 const mockAlertConfig: AlertConfig = {
   id: 'alert-1',
-  leaseId: 'lease-1',
-  overPaceThresholdPercent: 10,
-  projectedOverageThresholdMiles: 500,
-  notifyEmail: true,
-  notifyPush: false,
-  approachingLimitEnabled: false,
-  approachingLimitPercent: 80,
-  overPaceEnabled: false,
-  leaseEndEnabled: false,
-  leaseEndDays: 30,
-  savedTripEnabled: false,
-  mileageBuybackEnabled: false,
-  mileageBuybackThresholdDollars: 50,
-  weeklySummaryEnabled: false,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  alert_type: 'over_pace',
+  threshold_value: null,
+  is_enabled: false,
+  last_sent_at: null,
+  created_at: '2024-01-01T00:00:00Z',
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// ─── getAlertConfig ──────────────────────────────────────────────────────────
+// ─── getAlerts ───────────────────────────────────────────────────────────────
 
-describe('getAlertConfig', () => {
-  it('returns the alert config for a lease on success', async () => {
-    (client.get as jest.Mock).mockResolvedValue({ data: mockAlertConfig });
+describe('getAlerts', () => {
+  it('returns the alert configs for a lease on success', async () => {
+    (client.get as jest.Mock).mockResolvedValue({ data: [mockAlertConfig] });
 
-    const result = await getAlertConfig('lease-1');
+    const result = await getAlerts('lease-1');
 
     expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/alerts');
-    expect(result).toEqual(mockAlertConfig);
+    expect(result).toEqual([mockAlertConfig]);
+  });
+
+  it('returns an empty array when no alerts exist', async () => {
+    (client.get as jest.Mock).mockResolvedValue({ data: [] });
+
+    const result = await getAlerts('lease-1');
+
+    expect(client.get).toHaveBeenCalledWith('/api/leases/lease-1/alerts');
+    expect(result).toEqual([]);
   });
 
   it('throws a normalized ApiError on failure', async () => {
     const error = new Error('Network Error');
     (client.get as jest.Mock).mockRejectedValue(error);
 
-    await expect(getAlertConfig('lease-1')).rejects.toBeInstanceOf(ApiError);
+    await expect(getAlerts('lease-1')).rejects.toBeInstanceOf(ApiError);
     expect(normalizeError).toHaveBeenCalledWith(error);
   });
 });
 
-// ─── updateAlertConfig ───────────────────────────────────────────────────────
+// ─── createAlert ─────────────────────────────────────────────────────────────
 
-describe('updateAlertConfig', () => {
-  it('returns the updated alert config on success', async () => {
-    const patch: UpdateAlertConfigInput = { notifyPush: true };
-    const updatedConfig: AlertConfig = { ...mockAlertConfig, notifyPush: true };
-    (client.put as jest.Mock).mockResolvedValue({ data: updatedConfig });
+describe('createAlert', () => {
+  it('returns the created alert on success', async () => {
+    const input: CreateAlertConfigInput = {
+      alert_type: 'miles_threshold',
+      threshold_value: 80,
+    };
+    const created: AlertConfig = {
+      ...mockAlertConfig,
+      id: 'alert-2',
+      alert_type: 'miles_threshold',
+      threshold_value: 80,
+    };
+    (client.post as jest.Mock).mockResolvedValue({ data: created });
 
-    const result = await updateAlertConfig('lease-1', patch);
+    const result = await createAlert('lease-1', input);
 
-    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', patch);
-    expect(result).toEqual(updatedConfig);
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/alerts', input);
+    expect(result).toEqual(created);
   });
 
-  it('accepts a full update payload', async () => {
-    const patch: UpdateAlertConfigInput = {
-      overPaceThresholdPercent: 15,
-      projectedOverageThresholdMiles: 300,
-      notifyEmail: false,
-      notifyPush: true,
-    };
-    const updatedConfig: AlertConfig = { ...mockAlertConfig, ...patch };
-    (client.put as jest.Mock).mockResolvedValue({ data: updatedConfig });
+  it('throws a normalized ApiError on failure', async () => {
+    const error = new Error('Validation Error');
+    (client.post as jest.Mock).mockRejectedValue(error);
 
-    const result = await updateAlertConfig('lease-1', patch);
+    await expect(
+      createAlert('lease-1', { alert_type: 'miles_threshold', threshold_value: 80 }),
+    ).rejects.toBeInstanceOf(ApiError);
+    expect(normalizeError).toHaveBeenCalledWith(error);
+  });
+});
 
-    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', patch);
-    expect(result).toEqual(updatedConfig);
+// ─── updateAlert ─────────────────────────────────────────────────────────────
+
+describe('updateAlert', () => {
+  it('returns the updated alert on success', async () => {
+    const patch: UpdateAlertConfigInput = { is_enabled: true };
+    const updated: AlertConfig = { ...mockAlertConfig, is_enabled: true };
+    (client.put as jest.Mock).mockResolvedValue({ data: updated });
+
+    const result = await updateAlert('lease-1', 'alert-1', patch);
+
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts/alert-1', patch);
+    expect(result).toEqual(updated);
   });
 
   it('accepts an empty patch object', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: mockAlertConfig });
 
-    const result = await updateAlertConfig('lease-1', {});
+    const result = await updateAlert('lease-1', 'alert-1', {});
 
-    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts', {});
+    expect(client.put).toHaveBeenCalledWith('/api/leases/lease-1/alerts/alert-1', {});
     expect(result).toEqual(mockAlertConfig);
   });
 
@@ -124,9 +145,9 @@ describe('updateAlertConfig', () => {
     const error = new Error('Server Error');
     (client.put as jest.Mock).mockRejectedValue(error);
 
-    await expect(updateAlertConfig('lease-1', { notifyEmail: true })).rejects.toBeInstanceOf(
-      ApiError,
-    );
+    await expect(
+      updateAlert('lease-1', 'alert-1', { is_enabled: true }),
+    ).rejects.toBeInstanceOf(ApiError);
     expect(normalizeError).toHaveBeenCalledWith(error);
   });
 });
