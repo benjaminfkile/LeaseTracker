@@ -48,17 +48,17 @@ function formatReadingDate(dateStr: string): string {
 
 export function buildSections(readings: OdometerReading[]): ReadingSection[] {
   const sorted = [...readings].sort(
-    (a, b) => new Date(a.readingDate).getTime() - new Date(b.readingDate).getTime(),
+    (a, b) => new Date(a.reading_date).getTime() - new Date(b.reading_date).getTime(),
   );
 
   const enriched: EnrichedReading[] = sorted.map((r, i) => ({
     ...r,
-    delta: i === 0 ? null : r.mileage - sorted[i - 1].mileage,
+    delta: i === 0 ? null : r.odometer - sorted[i - 1].odometer,
   }));
 
   const monthMap = new Map<string, EnrichedReading[]>();
   for (const r of enriched) {
-    const key = formatMonthYear(r.readingDate);
+    const key = formatMonthYear(r.reading_date);
     if (!monthMap.has(key)) {
       monthMap.set(key, []);
     }
@@ -134,13 +134,13 @@ function ReadingRow({ reading, onDelete }: ReadingRowProps): React.ReactElement 
             style={[styles.readingDate, { color: theme.colors.textSecondary }]}
             testID={`reading-date-${reading.id}`}
           >
-            {formatReadingDate(reading.readingDate)}
+            {formatReadingDate(reading.reading_date)}
           </Text>
           <Text
             style={[styles.readingMileage, { color: theme.colors.textPrimary }]}
             testID={`reading-mileage-${reading.id}`}
           >
-            {`${reading.mileage.toLocaleString()} mi`}
+            {`${reading.odometer.toLocaleString()} mi`}
           </Text>
         </View>
         <View style={styles.rowRight}>
@@ -152,21 +152,12 @@ function ReadingRow({ reading, onDelete }: ReadingRowProps): React.ReactElement 
               {`${reading.delta >= 0 ? '+' : ''}${reading.delta.toLocaleString()} mi`}
             </Text>
           )}
-          {reading.loggedByName != null && (
-            <Text
-              style={[styles.loggedBy, { color: theme.colors.textSecondary }]}
-              testID={`reading-logged-by-${reading.id}`}
-              numberOfLines={1}
-            >
-              {`Logged by ${reading.loggedByName}`}
-            </Text>
-          )}
           <View
             style={[styles.sourceBadge, { backgroundColor: theme.colors.border }]}
             testID={`reading-source-${reading.id}`}
           >
             <Text style={[styles.sourceBadgeText, { color: theme.colors.textSecondary }]}>
-              Manual
+              {reading.source === 'manual' ? 'Manual' : reading.source}
             </Text>
           </View>
         </View>
@@ -314,10 +305,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
-  },
-  loggedBy: {
-    fontSize: 11,
-    marginBottom: 2,
   },
   loader: {
     flex: 1,

@@ -130,25 +130,30 @@ describe('API types', () => {
     it('accepts a valid OdometerReading with all fields', () => {
       const reading: OdometerReading = {
         id: 'reading-1',
-        leaseId: 'lease-1',
-        mileage: 12500,
-        readingDate: '2024-03-15',
-        note: 'Monthly reading',
-        createdAt: '2024-03-15T10:00:00Z',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        odometer: 12500,
+        reading_date: '2024-03-15',
+        notes: 'Monthly reading',
+        source: 'manual',
+        created_at: '2024-03-15T10:00:00Z',
       };
-      expect(reading.mileage).toBe(12500);
-      expect(reading.note).toBe('Monthly reading');
+      expect(reading.odometer).toBe(12500);
+      expect(reading.notes).toBe('Monthly reading');
     });
 
-    it('accepts an OdometerReading without optional note', () => {
+    it('accepts an OdometerReading with null notes', () => {
       const reading: OdometerReading = {
         id: 'reading-2',
-        leaseId: 'lease-1',
-        mileage: 13000,
-        readingDate: '2024-04-15',
-        createdAt: '2024-04-15T10:00:00Z',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        odometer: 13000,
+        reading_date: '2024-04-15',
+        notes: null,
+        source: 'manual',
+        created_at: '2024-04-15T10:00:00Z',
       };
-      expect(reading.note).toBeUndefined();
+      expect(reading.notes).toBeNull();
     });
   });
 
