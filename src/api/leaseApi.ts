@@ -103,10 +103,9 @@ export async function removeLeaseMember(
   }
 }
 
-export async function acceptLeaseInvite(leaseId: string): Promise<LeaseMember> {
+export async function acceptLeaseInvite(leaseId: string): Promise<void> {
   try {
-    const response = await client.post<LeaseMember>(`/api/leases/${leaseId}/accept-invite`);
-    return response.data;
+    await client.post(`/api/leases/${leaseId}/members/accept`);
   } catch (error) {
     throw normalizeError(error);
   }

@@ -263,25 +263,39 @@ describe('API types', () => {
     it('accepts a member with owner role', () => {
       const member: LeaseMember = {
         id: 'member-1',
-        leaseId: 'lease-1',
-        userId: 'user-1',
-        email: 'owner@example.com',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
         role: 'owner',
-        createdAt: '2024-01-01T00:00:00Z',
+        invited_by: null,
+        accepted_at: '2024-01-01T00:00:00Z',
+        created_at: '2024-01-01T00:00:00Z',
+        display_name: 'Owner User',
+        email: 'owner@example.com',
       };
       expect(member.role).toBe('owner');
+      expect(member.lease_id).toBe('lease-1');
+      expect(member.user_id).toBe('user-1');
+      expect(member.display_name).toBe('Owner User');
+      expect(member.invited_by).toBeNull();
     });
 
     it('accepts a member with viewer role', () => {
       const member: LeaseMember = {
         id: 'member-2',
-        leaseId: 'lease-1',
-        userId: 'user-2',
-        email: 'viewer@example.com',
+        lease_id: 'lease-1',
+        user_id: 'user-2',
         role: 'viewer',
-        createdAt: '2024-01-01T00:00:00Z',
+        invited_by: 'user-1',
+        accepted_at: null,
+        created_at: '2024-01-01T00:00:00Z',
+        display_name: null,
+        email: 'viewer@example.com',
       };
       expect(member.role).toBe('viewer');
+      expect(member.invited_by).toBe('user-1');
+      expect(member.accepted_at).toBeNull();
+      expect(member.display_name).toBeNull();
+      expect(member.email).toBe('viewer@example.com');
     });
   });
 

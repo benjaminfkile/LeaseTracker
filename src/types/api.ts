@@ -90,13 +90,14 @@ export type AlertConfig = {
 
 export type LeaseMember = {
   id: string;
-  leaseId: string;
-  userId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
+  lease_id: string;
+  user_id: string;
   role: 'owner' | 'editor' | 'viewer';
-  createdAt: string;
+  invited_by: string | null;
+  accepted_at: string | null;
+  created_at: string;
+  display_name: string | null;
+  email: string;
 };
 
 export type InviteMemberInput = {
