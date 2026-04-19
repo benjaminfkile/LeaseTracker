@@ -36,12 +36,12 @@ export function TripCard({
   testID,
 }: TripCardProps): React.ReactElement {
   const theme = useTheme();
-  const name = trip.note?.trim() ? trip.note.trim() : 'Trip';
+  const name = trip.name.trim() ? trip.name.trim() : 'Trip';
 
   const impactText =
     remainingMiles !== undefined
-      ? `Uses ${trip.distance.toLocaleString()} of your ${remainingMiles.toLocaleString()} remaining miles`
-      : `\u2212${trip.distance.toLocaleString()} mi from budget`;
+      ? `Uses ${trip.estimated_miles.toLocaleString()} of your ${remainingMiles.toLocaleString()} remaining miles`
+      : `\u2212${trip.estimated_miles.toLocaleString()} mi from budget`;
 
   const cardStyle = [
     styles.card,
@@ -68,7 +68,7 @@ export function TripCard({
           style={[styles.tripDate, { color: theme.colors.textSecondary }]}
           testID={`trip-date-${trip.id}`}
         >
-          {formatTripDate(trip.tripDate)}
+          {trip.trip_date != null ? formatTripDate(trip.trip_date) : ''}
         </Text>
         <Text
           style={[styles.tripImpact, { color: theme.colors.textSecondary }]}
@@ -98,7 +98,7 @@ export function TripCard({
           ]}
           testID={`trip-distance-${trip.id}`}
         >
-          {`${trip.distance.toLocaleString()} mi`}
+          {`${trip.estimated_miles.toLocaleString()} mi`}
         </Text>
         {completed && (
           <Text

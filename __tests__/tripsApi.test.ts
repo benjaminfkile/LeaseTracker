@@ -38,21 +38,28 @@ import type { SavedTrip, CreateTripInput, UpdateTripInput } from '../src/types/a
 
 const mockTrip1: SavedTrip = {
   id: 'trip-1',
-  leaseId: 'lease-1',
-  distance: 25.4,
-  tripDate: '2024-03-01',
-  note: 'Grocery run',
-  createdAt: '2024-03-01T10:00:00Z',
-  updatedAt: '2024-03-01T10:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Grocery run',
+  estimated_miles: 25.4,
+  trip_date: '2024-03-01',
+  notes: 'Grocery run',
+  is_completed: false,
+  created_at: '2024-03-01T10:00:00Z',
+  updated_at: '2024-03-01T10:00:00Z',
 };
 
 const mockTrip2: SavedTrip = {
   id: 'trip-2',
-  leaseId: 'lease-1',
-  distance: 10.2,
-  tripDate: '2024-03-05',
-  createdAt: '2024-03-05T08:00:00Z',
-  updatedAt: '2024-03-05T08:00:00Z',
+  lease_id: 'lease-1',
+  user_id: 'user-1',
+  name: 'Errand',
+  estimated_miles: 10.2,
+  trip_date: '2024-03-05',
+  notes: null,
+  is_completed: true,
+  created_at: '2024-03-05T08:00:00Z',
+  updated_at: '2024-03-05T08:00:00Z',
 };
 
 beforeEach(() => {
@@ -94,9 +101,10 @@ describe('getTrips', () => {
 
 describe('createTrip', () => {
   const input: CreateTripInput = {
-    distance: 25.4,
-    tripDate: '2024-03-01',
-    note: 'Grocery run',
+    name: 'Grocery run',
+    estimated_miles: 25.4,
+    trip_date: '2024-03-01',
+    notes: 'Grocery run',
   };
 
   it('returns the created trip on success', async () => {
@@ -108,15 +116,19 @@ describe('createTrip', () => {
     expect(result).toEqual(mockTrip1);
   });
 
-  it('works without optional note', async () => {
-    const inputWithoutNote: CreateTripInput = { distance: 10.2, tripDate: '2024-03-05' };
-    const tripWithoutNote: SavedTrip = { ...mockTrip2, note: undefined };
-    (client.post as jest.Mock).mockResolvedValue({ data: tripWithoutNote });
+  it('works without optional notes', async () => {
+    const inputWithoutNotes: CreateTripInput = {
+      name: 'Errand',
+      estimated_miles: 10.2,
+      trip_date: '2024-03-05',
+    };
+    const tripWithoutNotes: SavedTrip = { ...mockTrip2, notes: null };
+    (client.post as jest.Mock).mockResolvedValue({ data: tripWithoutNotes });
 
-    const result = await createTrip('lease-1', inputWithoutNote);
+    const result = await createTrip('lease-1', inputWithoutNotes);
 
-    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/trips', inputWithoutNote);
-    expect(result.note).toBeUndefined();
+    expect(client.post).toHaveBeenCalledWith('/api/leases/lease-1/trips', inputWithoutNotes);
+    expect(result.notes).toBeNull();
   });
 
   it('throws a normalized ApiError on failure', async () => {
@@ -131,8 +143,8 @@ describe('createTrip', () => {
 // ─── updateTrip ───────────────────────────────────────────────────────────────
 
 describe('updateTrip', () => {
-  const patch: UpdateTripInput = { distance: 30.0, note: 'Updated note' };
-  const updatedTrip: SavedTrip = { ...mockTrip1, distance: 30.0, note: 'Updated note' };
+  const patch: UpdateTripInput = { estimated_miles: 30.0, notes: 'Updated note' };
+  const updatedTrip: SavedTrip = { ...mockTrip1, estimated_miles: 30.0, notes: 'Updated note' };
 
   it('returns the updated trip on success', async () => {
     (client.put as jest.Mock).mockResolvedValue({ data: updatedTrip });

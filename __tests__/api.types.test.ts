@@ -161,27 +161,36 @@ describe('API types', () => {
     it('accepts a valid SavedTrip with all fields', () => {
       const trip: SavedTrip = {
         id: 'trip-1',
-        leaseId: 'lease-1',
-        distance: 150,
-        tripDate: '2024-03-20',
-        note: 'Road trip',
-        createdAt: '2024-03-20T08:00:00Z',
-        updatedAt: '2024-03-20T08:00:00Z',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        name: 'Road trip',
+        estimated_miles: 150,
+        trip_date: '2024-03-20',
+        notes: 'Road trip',
+        is_completed: false,
+        created_at: '2024-03-20T08:00:00Z',
+        updated_at: '2024-03-20T08:00:00Z',
       };
-      expect(trip.distance).toBe(150);
-      expect(trip.note).toBe('Road trip');
+      expect(trip.estimated_miles).toBe(150);
+      expect(trip.notes).toBe('Road trip');
     });
 
-    it('accepts a SavedTrip without optional note', () => {
+    it('accepts a SavedTrip with null trip_date and notes', () => {
       const trip: SavedTrip = {
         id: 'trip-2',
-        leaseId: 'lease-1',
-        distance: 25,
-        tripDate: '2024-04-01',
-        createdAt: '2024-04-01T09:00:00Z',
-        updatedAt: '2024-04-01T09:00:00Z',
+        lease_id: 'lease-1',
+        user_id: 'user-1',
+        name: 'Quick errand',
+        estimated_miles: 25,
+        trip_date: null,
+        notes: null,
+        is_completed: true,
+        created_at: '2024-04-01T09:00:00Z',
+        updated_at: '2024-04-01T09:00:00Z',
       };
-      expect(trip.note).toBeUndefined();
+      expect(trip.trip_date).toBeNull();
+      expect(trip.notes).toBeNull();
+      expect(trip.is_completed).toBe(true);
     });
   });
 

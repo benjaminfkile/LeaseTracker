@@ -67,12 +67,15 @@ export type OdometerReading = {
 
 export type SavedTrip = {
   id: string;
-  leaseId: string;
-  distance: number;
-  tripDate: string;
-  note?: string;
-  createdAt: string;
-  updatedAt: string;
+  lease_id: string;
+  user_id: string;
+  name: string;
+  estimated_miles: number;
+  trip_date: string | null;
+  notes: string | null;
+  is_completed: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AlertConfig = {
@@ -168,12 +171,20 @@ export type CreateReadingInput = {
 export type UpdateReadingInput = Partial<CreateReadingInput>;
 
 export type CreateTripInput = {
-  distance: number;
-  tripDate: string;
-  note?: string;
+  name: string;
+  estimated_miles: number;
+  trip_date?: string;
+  notes?: string;
+  is_completed?: boolean;
 };
 
-export type UpdateTripInput = Partial<CreateTripInput> & { completed?: boolean };
+export type UpdateTripInput = {
+  name?: string;
+  estimated_miles?: number;
+  trip_date?: string;
+  notes?: string;
+  is_completed?: boolean;
+};
 
 export type UpdateAlertConfigInput = Partial<
   Pick<

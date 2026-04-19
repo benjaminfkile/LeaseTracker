@@ -85,7 +85,7 @@ export function DashboardScreen(): React.ReactElement {
   const isPremium = subscription?.isPremium ?? false;
   const selectedLease = leases?.find(l => l.id === activeLeaseId);
   const activeTrips = tripsData?.active ?? [];
-  const reservedMiles = activeTrips.reduce((sum, t) => sum + t.distance, 0);
+  const reservedMiles = activeTrips.reduce((sum, t) => sum + t.estimated_miles, 0);
   const sharedCount = (members ?? []).filter(m => m.role !== 'owner').length;
 
   const thisYearStats = useMemo(() => {
