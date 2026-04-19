@@ -241,7 +241,7 @@ export function AddTripScreen(): React.ReactElement {
   });
 
   const { mutate: saveTrip, isPending } = useMutation({
-    mutationFn: (data: { distance: number; tripDate: string; note: string }) =>
+    mutationFn: (data: { name: string; estimated_miles: number; trip_date: string }) =>
       createTrip(leaseId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['trips', leaseId] });
@@ -280,9 +280,9 @@ export function AddTripScreen(): React.ReactElement {
 
   const onSubmit = (data: AddTripFormData) => {
     saveTrip({
-      distance: parseFloat(data.distance),
-      tripDate: data.tripDate,
-      note: data.tripName.trim(),
+      name: data.tripName.trim(),
+      estimated_miles: parseFloat(data.distance),
+      trip_date: data.tripDate,
     });
   };
 

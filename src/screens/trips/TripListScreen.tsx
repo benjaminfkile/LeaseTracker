@@ -65,7 +65,7 @@ export function TripListScreen(): React.ReactElement {
 
   const { mutate: markComplete } = useMutation({
     mutationFn: (tripId: string) =>
-      updateTrip(selectedLeaseId, tripId, { completed: true }),
+      updateTrip(selectedLeaseId, tripId, { is_completed: true }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['trips', selectedLeaseId] });
     },

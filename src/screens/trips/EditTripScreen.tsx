@@ -272,11 +272,11 @@ export function EditTripScreen(): React.ReactElement {
   useEffect(() => {
     if (trip) {
       reset({
-        tripName: trip.note ?? '',
-        distance: String(trip.distance),
-        tripDate: trip.tripDate,
+        tripName: trip.name,
+        distance: String(trip.estimated_miles),
+        tripDate: trip.trip_date ?? dayjs().format('YYYY-MM-DD'),
       });
-      setCompleted(isFromCompleted);
+      setCompleted(trip.is_completed);
     }
   }, [trip, isFromCompleted, reset]);
 
@@ -290,10 +290,10 @@ export function EditTripScreen(): React.ReactElement {
 
   const { mutate: saveTrip, isPending: isSaving } = useMutation({
     mutationFn: (data: {
-      distance: number;
-      tripDate: string;
-      note: string;
-      completed: boolean;
+      name: string;
+      estimated_miles: number;
+      trip_date: string;
+      is_completed: boolean;
     }) => updateTrip(leaseId, tripId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['trips', leaseId] });
@@ -322,10 +322,10 @@ export function EditTripScreen(): React.ReactElement {
 
   const onSubmit = (data: EditTripFormData) => {
     saveTrip({
-      distance: parseFloat(data.distance),
-      tripDate: data.tripDate,
-      note: data.tripName.trim(),
-      completed,
+      name: data.tripName.trim(),
+      estimated_miles: parseFloat(data.distance),
+      trip_date: data.tripDate,
+      is_completed: completed,
     });
   };
 
@@ -416,7 +416,7 @@ export function EditTripScreen(): React.ReactElement {
           <View style={styles.field}>
             <TripImpactPreview
               milesRemaining={summaryData?.milesRemaining}
-              originalDistance={trip?.distance ?? null}
+              originalDistance={trip?.estimated_miles ?? null}
               enteredDistance={parsedDistance}
               testID="trip-impact-preview"
             />
