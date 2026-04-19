@@ -38,8 +38,8 @@ type InviteFormData = z.infer<typeof inviteSchema>;
 type RoleOption = 'editor' | 'viewer';
 
 function getMemberDisplayName(member: LeaseMember): string {
-  if (member.firstName || member.lastName) {
-    return [member.firstName, member.lastName].filter(Boolean).join(' ');
+  if (member.display_name) {
+    return member.display_name;
   }
   return member.email;
 }
@@ -106,7 +106,7 @@ function MemberRow({ member, isOwner, onRemove }: MemberRowProps): React.ReactEl
             </Text>
           </View>
         </View>
-        {(member.firstName || member.lastName) && (
+        {member.display_name && (
           <Text
             style={[styles.memberEmail, { color: theme.colors.textSecondary }]}
             numberOfLines={1}
